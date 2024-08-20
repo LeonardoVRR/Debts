@@ -24,11 +24,6 @@ class criarConta : AppCompatActivity() {
     var visibilidadeNovaSenha = true
     var visibilidadeConfirmarSenha = true
 
-    //val novaSenha: EditText = findViewById(R.id.input_novaSenha)
-    //val confirmarNovaSenha: EditText = findViewById(R.id.input_confirmarSenha)
-    //val cpf = findViewById<EditText>(R.id.input_cpf)
-    //val email = findViewById<EditText>(R.id.input_email)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -38,59 +33,6 @@ class criarConta : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        //configurando a navegação para a tela de cadastrar conta
-        //telaCriarConta = ActivityCriarContaBinding.inflate(layoutInflater)
-        //setContentView(telaCriarConta.root)
-
-
-
-
-         //configurando o evento de click no botão cadastrar
-        /*
-        telaCriarConta.btnCriarConta.setOnClickListener {
-
-            //Log.v("valor Input", novaSenha.)
-
-            //val userInput = novaSenha.toString()
-            //Toast.makeText(this, "Entrada do usuário: ${userInput}   123", Toast.LENGTH_SHORT).show()
-
-            if (validarEmail.containsMatchIn(email.getText().toString()) == false) {
-                Toast.makeText(
-                    this,
-                    "Este email não é valido: ${email.text.toString()}",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-
-            //if (novaSenha.getText().toString() != confirmarNovaSenha.getText().toString()) {
-            //     Toast.makeText(this, "Confirmação de senha incorreta!", Toast.LENGTH_SHORT).show()
-            //}
-
-            if (cpf.getText().toString().length < 11) {
-                Toast.makeText(
-                    this,
-                    "Este CPF não é valido: ${cpf.text.toString()}",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-
-
-            if (validarEmail.containsMatchIn(email.getText().toString()) == true) {
-                val navegarCriarConta = Intent(this, cadastrar::class.java)
-                startActivity(navegarCriarConta)
-            }
-
-            //obs: Toast exibe uma mensagem no celular do usuario
-
-            else {
-                Log.v("Erro Criar Conta", "Não foi possivel criar sua conta!")
-
-            }
-
-
-        }
-        */
     }
 
     //configurando o botão de icone das senhas para mudarem quando forem clicados
@@ -153,7 +95,7 @@ class criarConta : AppCompatActivity() {
         else {
             //caso os campos senhas forem diferentes exibira uma mensagem alertam isso
             if (entradaSenha != entradaCofirmarSenha){
-                Toast.makeText(
+                Toast.makeText( //exibe uma mensagem caso as senhas não forem iguais
                     this,
                     "Confirmação de senha incorreta.",
                     Toast.LENGTH_SHORT
@@ -182,6 +124,9 @@ class criarConta : AppCompatActivity() {
                     "Conta Criada",
                     Toast.LENGTH_SHORT
                 ).show()
+
+                val navegarCriarConta = Intent(this, cadastrar::class.java)
+                startActivity(navegarCriarConta)
             }
         }
 

@@ -3,6 +3,7 @@ package com.example.debts
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -13,7 +14,7 @@ import com.example.debts.databinding.ActivityTelaPrincipalBinding
 
 class telaPrincipal : AppCompatActivity() {
 
-    private lateinit var telaPrincipalApp: ActivityTelaPrincipalBinding
+    //private lateinit var telaPrincipalApp: ActivityTelaPrincipalBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,29 +26,27 @@ class telaPrincipal : AppCompatActivity() {
             insets
         }
 
-        //configurando a navegação para a tela de perfil do usuário
-        telaPrincipalApp = ActivityTelaPrincipalBinding.inflate(layoutInflater)
-        setContentView(telaPrincipalApp.root)
+//        //configurando a navegação para a tela de perfil do usuário
+//        telaPrincipalApp = ActivityTelaPrincipalBinding.inflate(layoutInflater)
+//        setContentView(telaPrincipalApp.root)
+//
+//        //configurando o evento de click no perfil do usuario
+//        telaPrincipalApp.btnPerfilUsuario.setOnClickListener{
+//            val navegarCriarConta = Intent(this, telaPerfilUsuario::class.java)
+//            startActivity(navegarCriarConta)
+//        }
 
-        //configurando o evento de click no perfil do usuario
-        telaPrincipalApp.btnPerfilUsuario.setOnClickListener{
-            val navegarCriarConta = Intent(this, telaPerfilUsuario::class.java)
-            startActivity(navegarCriarConta)
-        }
-
-        //configurando p/ tela de login iniciar novamente quando o botão de voltar do celular for prescionado
         val voltarTelaLogin = Intent(this, MainActivity::class.java)
 
-        val callback = object : OnBackPressedCallback(true) {
+        //configurando o botão voltar do celular quando for prescionado p/ voltar na tela de login
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
 
-                // Inicie a tela de login novamente
+                //Log.v("Voltar", "Botão voltar Presscionado")
+
                 startActivity(voltarTelaLogin)
                 finish()
             }
-        }
-
-        onBackPressedDispatcher.addCallback(this, callback)
-
+        })
     }
 }

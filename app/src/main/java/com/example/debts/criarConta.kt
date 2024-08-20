@@ -2,6 +2,7 @@ package com.example.debts
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -11,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.debts.databinding.ActivityCriarContaBinding
 import android.view.View
 import android.widget.ImageButton
+import androidx.activity.OnBackPressedCallback
 
 class criarConta : AppCompatActivity() {
 
@@ -29,6 +31,19 @@ class criarConta : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        val voltarTelaLogin = Intent(this, MainActivity::class.java)
+
+        //configurando o botão voltar do celular quando for prescionado p/ voltar na tela de login
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+
+                //Log.v("Voltar", "Botão voltar Presscionado")
+
+                startActivity(voltarTelaLogin)
+                finish()
+            }
+        })
     }
 
     //configurando o botão de icone das senhas para mudarem quando forem clicados

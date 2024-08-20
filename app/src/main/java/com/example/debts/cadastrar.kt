@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.CheckBox
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -22,6 +23,19 @@ class cadastrar : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        val voltarTelaLogin = Intent(this, MainActivity::class.java)
+
+        //configurando o botão voltar do celular quando for prescionado p/ voltar na tela de login
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+
+                //Log.v("Voltar", "Botão voltar Presscionado")
+
+                startActivity(voltarTelaLogin)
+                finish()
+            }
+        })
     }
 
     //configurando o evento de click no botão cadastrar
@@ -33,6 +47,7 @@ class cadastrar : AppCompatActivity() {
         if (termosLidos.isChecked && autorizacaoUsoDados.isChecked) {
             val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)
             startActivity(navegarTelaPrincipal)
+            finish()
         }
     }
 }

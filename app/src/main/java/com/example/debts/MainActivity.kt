@@ -73,6 +73,7 @@ class MainActivity : AppCompatActivity() {
     public fun criarConta(v: View) {
         val navegarCadastrarConta = Intent(this, criarConta::class.java)
         startActivity(navegarCadastrarConta)
+        finish()
     }
 
     //configurando o botão de icone da senha para mudar quando for clicado

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8F8F8"
+    tools:context=".telaPrincipal">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout4"
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:background="@drawable/fundoperfil_usuario_1_"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:id="@+id/button5"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="28dp"
+            android:backgroundTint="#00FFFFFF"
+            android:foregroundGravity="center"
+            android:gravity="center"
+            android:isScrollContainer="false"
+            android:text="B"
+            android:textColor="#00FFFFFF"
+            app:icon="@drawable/house_solid"
+            app:iconGravity="textStart"
+            app:iconSize="30dp"
+            app:iconTint="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/button6"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="16dp"
+            android:backgroundTint="#00FFFFFF"
+            android:text="Button"
+            android:textColor="#00FFFFFF"
+            app:icon="@drawable/notifications"
+            app:iconGravity="textEnd"
+            app:iconSize="35dp"
+            app:iconTint="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="72dp"
+        android:text="Bem-vindo, Usuário"
+        android:textColor="#000000"
+        android:textSize="34sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout4" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="72dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView6"
+        app:layout_constraintVertical_bias="0.417">
+
+        <Button
+            android:id="@+id/button11"
+            android:layout_width="175dp"
+            android:layout_height="170dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="7dp"
+            android:backgroundTint="#FFFFFF"
+            android:text="Questionário"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            app:cornerRadius="15dp"
+            app:icon="@drawable/bot_out"
+            app:iconGravity="textTop"
+            app:iconSize="90dp"
+            app:iconTint="#000000"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btn_perfilUsuario"
+            android:layout_width="175dp"
+            android:layout_height="170dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginEnd="20dp"
+            android:backgroundTint="#FFFFFF"
+            android:text="Perfil do Usuário"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            app:cornerRadius="15dp"
+            app:icon="@drawable/user_2_"
+            app:iconGravity="textTop"
+            app:iconSize="90dp"
+            app:iconTint="#000000"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/button13"
+            android:layout_width="175dp"
+            android:layout_height="170dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="#FFFFFF"
+            android:text="DebtMap"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            app:cornerRadius="15dp"
+            app:icon="@drawable/debtmap"
+            app:iconGravity="textTop"
+            app:iconSize="100dp"
+            app:iconTint="#000000"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/button11" />
+
+        <Button
+            android:id="@+id/button14"
+            android:layout_width="175dp"
+            android:layout_height="170dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="20dp"
+            android:backgroundTint="#FFFFFF"
+            android:text="Relatório de Gastos"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            app:cornerRadius="15dp"
+            app:icon="@drawable/relatoriogastos"
+            app:iconGravity="textTop"
+            app:iconSize="90dp"
+            app:iconTint="#000000"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_perfilUsuario" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

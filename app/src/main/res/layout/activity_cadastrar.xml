@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    tools:context=".cadastrar">
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="10dp"
+        android:text="Termos de usos do aplicativo"
+        android:textColor="#000000"
+        android:textSize="26sp"
+        android:textStyle="normal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.494"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ScrollView
+        android:id="@+id/scrollView2"
+        android:layout_width="370dp"
+        android:layout_height="500dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/campo_termouso"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView5">
+
+        <TextView
+            android:id="@+id/textView11"
+            android:layout_width="355dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="Bem-vindo ao DEBITS! Estamos felizes por você escolher  usar nossos serviços. Ao utilizar nosso aplicativo, você concorda em  cumprir os seguintes termos e condições:\n\nConta e Segurança: Você é responsável por todas as atividades  realizadas através de sua conta. Certifique-se de manter suas  credenciais de login em segurança e não compartilhá-las com terceiros.  Se suspeitar de qualquer atividade não autorizada em sua conta,  notifique-nos imediatamente.\n\nUso Aceitável: Ao usar nosso aplicativo, você concorda em não violar  nenhuma lei aplicável ou infringir os direitos de terceiros. Isso inclui,  mas não se limita a, não enviar conteúdo ilegal, difamatório, obsceno ou  prejudicial. Reservamo-nos o direito de remover qualquer conteúdo que  consideremos inapropriado ou que viole estes termos.\n\nPrivacidade e Dados: Nós coletamos dados para melhorar sua  experiência no aplicativo, como informações de uso e preferências.  Garantimos que suas informações serão tratadas com segurança e  confidencialidade, de acordo com nossa política de privacidade. Não  vendemos ou compartilhamos suas informações pessoais com terceiros  sem seu consentimento.\n\nAlterações nos Termos: Podemos atualizar estes termos periodicamente  para refletir mudanças em nossos serviços ou requisitos legais.  Notificaremos você sobre quaisquer alterações significativas e você  concorda em revisar regularmente os termos atualizados. Se continuar a  usar nosso aplicativo após as alterações, consideraremos que você  aceitou os novos termos.\n\nEncerramento de Conta: Reservamo-nos o direito de suspender ou  encerrar sua conta se violar estes termos ou se considerarmos que seu  uso do aplicativo é prejudicial para nós ou para outros usuários. Você  pode encerrar sua conta a qualquer momento, conforme descrito em  nossas políticas."
+            android:textColor="#000000" />
+    </ScrollView>
+
+    <CheckBox
+        android:id="@+id/checkBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="50dp"
+        android:text="Li e concordo com os termos de uso do aplicativo."
+        android:textColor="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scrollView2" />
+
+    <CheckBox
+        android:id="@+id/checkBox2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="50dp"
+        android:text="Declaro estar ciente e autorizo o uso dos dados."
+        android:textColor="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/checkBox" />
+
+    <Button
+        android:id="@+id/btn_cadastrarConta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:backgroundTint="#FF3131"
+        android:text="Criar Conta"
+        android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/checkBox2"
+        app:layout_constraintVertical_bias="0.259" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

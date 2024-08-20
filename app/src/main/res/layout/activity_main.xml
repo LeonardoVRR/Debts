@@ -66,7 +66,7 @@
                     app:srcCompat="@drawable/user_icon" />
 
                 <EditText
-                    android:id="@+id/input_userName"
+                    android:id="@+id/input_nomeUsuarioLogin"
                     android:layout_width="300dp"
                     android:layout_height="match_parent"
                     android:backgroundTint="#00FFFFFF"
@@ -107,22 +107,8 @@
                     app:layout_constraintVertical_bias="0.542"
                     app:srcCompat="@drawable/password_icon" />
 
-                <Button
-                    android:id="@+id/change_visibility"
-                    android:layout_width="48dp"
-                    android:layout_height="match_parent"
-                    android:backgroundTint="#00FFFFFF"
-                    android:paddingLeft="10dp"
-                    android:text="Button"
-                    app:icon="@drawable/visibility"
-                    app:iconSize="30dp"
-                    app:iconTint="#000000"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
                 <EditText
-                    android:id="@+id/input_password"
+                    android:id="@+id/input_senhaLogin"
                     android:layout_width="280dp"
                     android:layout_height="match_parent"
                     android:backgroundTint="#00FFFFFF"
@@ -131,9 +117,22 @@
                     android:inputType="textPassword"
                     android:textColor="#000000"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/change_visibility"
+                    app:layout_constraintEnd_toStartOf="@+id/btn_visibilidadeSenhaLogin"
                     app:layout_constraintStart_toEndOf="@+id/imageView"
                     app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/btn_visibilidadeSenhaLogin"
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:backgroundTint="#00FFFFFF"
+                    android:onClick="verNovaSenha"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/visibility_off"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
@@ -155,6 +154,7 @@
                 android:layout_height="60dp"
                 android:layout_marginTop="40dp"
                 android:backgroundTint="#FF3131"
+                android:onClick="login"
                 android:paddingLeft="50dp"
                 android:paddingRight="50dp"
                 android:text="Login"

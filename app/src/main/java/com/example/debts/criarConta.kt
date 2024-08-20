@@ -2,18 +2,14 @@ package com.example.debts
 
 import android.content.Intent
 import android.os.Bundle
-import android.text.InputType
-import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.debts.databinding.ActivityCriarContaBinding
 import android.view.View
-import android.widget.Button
 import android.widget.ImageButton
 
 class criarConta : AppCompatActivity() {
@@ -21,8 +17,8 @@ class criarConta : AppCompatActivity() {
     //inicializando as variaveis
     private lateinit var telaCriarConta: ActivityCriarContaBinding;
 
-    var visibilidadeNovaSenha = true
-    var visibilidadeConfirmarSenha = true
+    private var visibilidadeNovaSenha = true
+    private var visibilidadeConfirmarSenha = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,8 +33,7 @@ class criarConta : AppCompatActivity() {
 
     //configurando o botão de icone das senhas para mudarem quando forem clicados
     public fun verNovaSenha(v: View){
-        val iconeSenha: ImageButton = findViewById(R.id.btn_visibilidadeSenha)
-
+        val iconeSenha: ImageButton = findViewById(R.id.btn_visibilidadeNovaSenha)
 
         if (visibilidadeNovaSenha) {
             visibilidadeNovaSenha = false
@@ -52,7 +47,7 @@ class criarConta : AppCompatActivity() {
     }
 
     public fun verConfirmarSenha(v: View){
-        val iconeConfirmarSenha: ImageButton = findViewById(R.id.btn_confirmarSenha)
+        val iconeConfirmarSenha: ImageButton = findViewById(R.id.btn_visibilidadeConfirmarSenha)
 
         if (visibilidadeConfirmarSenha) {
             visibilidadeConfirmarSenha = false

@@ -2,6 +2,7 @@ package com.example.debts
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
@@ -49,30 +50,44 @@ class criarConta : AppCompatActivity() {
     //configurando o botão de icone das senhas para mudarem quando forem clicados
     public fun verNovaSenha(v: View){
         val iconeSenha: ImageButton = findViewById(R.id.btn_visibilidadeNovaSenha)
+        val mostrarSenha: EditText = findViewById(R.id.input_novaSenha)
 
         if (visibilidadeNovaSenha) {
             visibilidadeNovaSenha = false
             iconeSenha.setImageResource(R.drawable.visibility)
+            mostrarSenha.inputType = InputType.TYPE_CLASS_TEXT
         }
 
         else {
             visibilidadeNovaSenha = true
             iconeSenha.setImageResource(R.drawable.visibility_off)
+            mostrarSenha.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         }
+
+        //move o cursor do input para o final do texto digitado
+        val length = mostrarSenha.text.length
+        mostrarSenha.setSelection(length)
     }
 
     public fun verConfirmarSenha(v: View){
         val iconeConfirmarSenha: ImageButton = findViewById(R.id.btn_visibilidadeConfirmarSenha)
+        val mostrarSenha: EditText = findViewById(R.id.input_confirmarSenha)
 
         if (visibilidadeConfirmarSenha) {
             visibilidadeConfirmarSenha = false
             iconeConfirmarSenha.setImageResource(R.drawable.visibility)
+            mostrarSenha.inputType = InputType.TYPE_CLASS_TEXT
         }
 
         else {
             visibilidadeConfirmarSenha = true
             iconeConfirmarSenha.setImageResource(R.drawable.visibility_off)
+            mostrarSenha.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         }
+
+        //move o cursor do input para o final do texto digitado
+        val length = mostrarSenha.text.length
+        mostrarSenha.setSelection(length)
     }
 
     //configurando a ação de click do botão criar conta

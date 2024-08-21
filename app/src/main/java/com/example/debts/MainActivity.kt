@@ -2,6 +2,7 @@ package com.example.debts
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -12,10 +13,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import java.sql.Connection
+import java.sql.ResultSet
+import java.sql.Statement
 
 class MainActivity : AppCompatActivity() {
 
     private var visibilidadeSenha = true
+    lateinit var connect: Connection
+    lateinit var connectionResult: String
 
     //configurando o crud no BD
     private var userDB = "Leonardo"
@@ -79,16 +85,57 @@ class MainActivity : AppCompatActivity() {
     //configurando o botão de icone da senha para mudar quando for clicado
     public fun verNovaSenha(v: View){
         val iconeSenha: ImageButton = findViewById(R.id.btn_visibilidadeSenhaLogin)
-
+        val mostrarSenha: EditText = findViewById(R.id.input_senhaLogin)
 
         if (visibilidadeSenha) {
             visibilidadeSenha = false
             iconeSenha.setImageResource(R.drawable.visibility)
+            mostrarSenha.inputType = InputType.TYPE_CLASS_TEXT
         }
 
         else {
             visibilidadeSenha = true
             iconeSenha.setImageResource(R.drawable.visibility_off)
+            mostrarSenha.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+        }
+
+        //move o cursor do input para o final do texto digitado
+        val length = mostrarSenha.text.length
+        mostrarSenha.setSelection(length)
+    }
+
+    public fun GetTextFromSQL(v: View) {
+        val inputNome: EditText = findViewById(R.id.input_nomeUsuarioLogin)
+        val limparEntradaNome = inputNome.text.toString().lowercase().trim()
+
+        try {
+            var conexaoBD_Debts = conexaoBD_Debts()
+            connect = conexaoBD_Debts.connectionClass()!!
+
+            if (connect != null) {
+                if (!connect.isClosed()){
+                    var query: String = "SELECT * FROM cadastroUsuarios"
+                    var st: Statement = connect.createStatement()
+                    var rs: ResultSet = st.executeQuery(query)
+
+                    while (rs.next()){
+                        Log.v("Consulta BD", "${rs.getString(2)}")
+                    }
+                }
+
+                else {
+                    Log.v("Conexao BD", "Conexão encerrada")
+                }
+            }
+
+            else {
+                connectionResult="Check Connection"
+                Log.v("DB", connectionResult)
+            }
+        }
+
+        catch (ex: Exception) {
+            Log.e("Error 2 ", "${ex.message}")
         }
     }
 }

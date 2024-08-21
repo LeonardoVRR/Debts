@@ -26,16 +26,6 @@ class telaPrincipal : AppCompatActivity() {
             insets
         }
 
-//        //configurando a navegação para a tela de perfil do usuário
-//        telaPrincipalApp = ActivityTelaPrincipalBinding.inflate(layoutInflater)
-//        setContentView(telaPrincipalApp.root)
-//
-//        //configurando o evento de click no perfil do usuario
-//        telaPrincipalApp.btnPerfilUsuario.setOnClickListener{
-//            val navegarCriarConta = Intent(this, telaPerfilUsuario::class.java)
-//            startActivity(navegarCriarConta)
-//        }
-
         val voltarTelaLogin = Intent(this, MainActivity::class.java)
 
         //configurando o botão voltar do celular quando for prescionado p/ voltar na tela de login
@@ -48,5 +38,11 @@ class telaPrincipal : AppCompatActivity() {
                 finish()
             }
         })
+    }
+
+    //configurando o evento de click no botão do perfil do usuario
+    public fun telaPerfilUsuario(v: View) {
+        val navegarCriarConta = Intent(this, telaPerfilUsuario::class.java)
+        startActivity(navegarCriarConta)
     }
 }

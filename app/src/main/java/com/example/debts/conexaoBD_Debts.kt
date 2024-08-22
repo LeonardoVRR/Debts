@@ -20,8 +20,8 @@ class conexaoBD_Debts {
         database = "DEBTS"
         ip = "192.168.0.20"
         port = "1433"
-        nomeUsuario = "adm"
-        senhaUsuario = "adm@2024"
+        nomeUsuario = "DESKTOP-NK3AAJR\\Leo"
+        senhaUsuario = ""
 
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
@@ -30,7 +30,7 @@ class conexaoBD_Debts {
 
         try {
             Class.forName("net.sourceforge.jtds.jdbc.Driver")
-            connectionURL = "jdbc:jtds:sqlserver://"+ ip + ":"+ port+";"+ "databasename="+ database+";"+nomeUsuario+";password="+senhaUsuario+";";
+            connectionURL = "jdbc:jtds:sqlserver://"+ ip + ":"+ port+";"+ "databasename="+ database+";user="+nomeUsuario+";password="+senhaUsuario+";";
             connection = DriverManager.getConnection(connectionURL)
         }
         catch (ex: Exception) {

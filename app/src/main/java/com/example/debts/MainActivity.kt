@@ -1,11 +1,11 @@
 package com.example.debts
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
 import android.view.View
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
@@ -16,12 +16,23 @@ import androidx.core.view.WindowInsetsCompat
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Statement
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
 
     private var visibilidadeSenha = true
     lateinit var connect: Connection
     lateinit var connectionResult: String
+
+    var context: Context = this
+
+    //teste
+    lateinit var conexaoBanco_Debts: conexaoBanco_Debts
+    var conexao: Connection? = null
+    lateinit var db: String
+    lateinit var str: String
 
     //configurando o crud no BD
     private var userDB = "Leonardo"
@@ -36,10 +47,40 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        //db = "DEBTS"
+        //conexaoBanco_Debts = conexaoBanco_Debts()
+        //conexao = conexaoBanco_Debts.conectar()
+        //conectar()
+
+
     }
 
+    //configurando a navegação para a tela principal
     public fun login(v: View) {
-        //configurando a navegação para a tela principal
+//        val conexao = conexaoBanco_Debts()
+//
+//        //faz a chamada no banco de dados
+//        runBlocking {
+//            // Instanciar a classe de conexão
+//            Toast.makeText(context, "Iniciando Conexão ao Banco", Toast.LENGTH_SHORT).show()
+//
+//            // Lançar uma coroutine para realizar a conexão
+//            launch {
+//                val connection = conexao.conectar()
+//                if (connection != null) {
+//                    Log.v("Conexão Banco", "Sucesso")
+//                    // Use a conexão aqui
+//                    Toast.makeText(context, "Conetado ao Banco", Toast.LENGTH_SHORT).show()
+//                    connection.close()
+//                } else {
+//                    Log.v("Conexão Banco", "Falha")
+//                    Toast.makeText(context, "Erro na Conexão ao Banco", Toast.LENGTH_SHORT).show()
+//                }
+//                Toast.makeText(context, "Conexão ao Banco Finalizada", Toast.LENGTH_SHORT).show()
+//            }
+//        }
+
         val inputNome: EditText = findViewById(R.id.input_nomeUsuarioLogin)
         val inputSenha: EditText = findViewById(R.id.input_senhaLogin)
 
@@ -104,6 +145,54 @@ class MainActivity : AppCompatActivity() {
         mostrarSenha.setSelection(length)
     }
 
+    public fun conectar() {
+        val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+        executorService.execute {
+            try {
+                if (conexao == null){
+                    str = "Error"
+                }
+
+                else {
+                    str = "Connected with SQL server"
+                }
+            }
+
+            catch (e: Exception){
+                throw RuntimeException(e)
+            }
+
+            runOnUiThread {
+                try {
+                    Thread.sleep(1000)
+                }
+                catch (e: InterruptedException) {
+                    throw RuntimeException(e)
+                }
+
+                Toast.makeText(this, str, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    public fun autenticacaoLogin(v: View) {
+        val inputNome: EditText = findViewById(R.id.input_nomeUsuarioLogin)
+        val inputSenha: EditText = findViewById(R.id.input_senhaLogin)
+
+        val limparEntradaNome = inputNome.text.toString().lowercase().trim()
+        val limparEntradaSenha = inputSenha.text.toString().trim()
+
+        //var usu = usuarioDAO().selecionarUsuario(limparEntradaNome, limparEntradaSenha)
+//
+//        if (usu != null) {
+//            Log.v("conexão BD", "Sucesso")
+//        }
+//
+//        else {
+//            Log.v("conexão BD", "Fracasso")
+//        }
+    }
+
     public fun GetTextFromSQL(v: View) {
         val inputNome: EditText = findViewById(R.id.input_nomeUsuarioLogin)
         val limparEntradaNome = inputNome.text.toString().lowercase().trim()
@@ -139,3 +228,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
+//suspend fun conectarBanco() = withContext(Dispatchers.IO) {
+//    // Lança uma Coroutine no escopo de `runBlocking`
+//    try {
+//        // Estabelece a conexão com o SQL Server
+//        var conn = conexaoBanco_Debts().conectar()
+//
+//        Log.v("Conectado Banco", "Sucesso")
+//
+//        // Utilize a conexão aqui...
+//
+//        // Feche a conexão após o uso
+//        conn?.close()
+//    } catch (e: Exception) {
+//        e.printStackTrace()
+//        Log.e("Estado Conexão Banco", "${e.message}")
+//    }
+//}

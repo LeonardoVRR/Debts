@@ -138,6 +138,7 @@
             android:layout_marginTop="24dp"
             android:layout_marginEnd="20dp"
             android:backgroundTint="#FFFFFF"
+            android:onClick="teleRelatorioGastos"
             android:text="Relatório de Gastos"
             android:textColor="#000000"
             android:textSize="20sp"

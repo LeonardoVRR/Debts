@@ -65,7 +65,7 @@
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout434">
 
         <ImageButton
-            android:id="@+id/imageButton"
+            android:id="@+id/btn_ProxMes"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_marginTop="5dp"
@@ -74,21 +74,23 @@
             android:src="@drawable/keyboard_arrow_right"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/line_chart"
+            app:layout_constraintTop_toBottomOf="@+id/bar_chart"
             tools:ignore="SpeakableTextPresentCheck" />
 
-        <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/line_chart"
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/bar_chart"
             android:layout_width="match_parent"
             android:layout_height="220dp"
+            android:layout_marginStart="4dp"
             android:layout_marginTop="3dp"
+            android:layout_marginEnd="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView14" />
 
         <ImageButton
-            android:id="@+id/imageButton2"
+            android:id="@+id/btn_PrevMes"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_marginTop="5dp"
@@ -97,11 +99,11 @@
             android:src="@drawable/keyboard_arrow_left"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/line_chart"
+            app:layout_constraintTop_toBottomOf="@+id/bar_chart"
             tools:ignore="SpeakableTextPresentCheck" />
 
         <TextView
-            android:id="@+id/textView7"
+            android:id="@+id/graf_MesAtual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
@@ -110,9 +112,9 @@
             android:textColor="#000000"
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/imageButton"
-            app:layout_constraintStart_toEndOf="@+id/imageButton2"
-            app:layout_constraintTop_toBottomOf="@+id/line_chart" />
+            app:layout_constraintEnd_toStartOf="@+id/btn_ProxMes"
+            app:layout_constraintStart_toEndOf="@+id/btn_PrevMes"
+            app:layout_constraintTop_toBottomOf="@+id/bar_chart" />
 
         <TextView
             android:id="@+id/textView14"

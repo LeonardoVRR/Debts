@@ -1,4 +1,4 @@
-package com.example.debts
+package com.example.debts.Conexao_BD
 
 import android.annotation.SuppressLint
 import android.os.StrictMode

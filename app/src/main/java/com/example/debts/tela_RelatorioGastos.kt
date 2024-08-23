@@ -1,7 +1,9 @@
 package com.example.debts
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -399,6 +401,13 @@ class tela_RelatorioGastos : AppCompatActivity() {
         }
 
         return legendaColunas.toTypedArray() // Converte a lista mutável para um array
+    }
+
+    //função para voltar a tela inicial do aplicativo
+    fun voltarTelaInicial(v: View){
+        val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)
+        startActivity(navegarTelaPrincipal)
+        finish()
     }
 
 }

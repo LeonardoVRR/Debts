@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <Button
-            android:id="@+id/button523"
+            android:id="@+id/btn_homeRelatorioGastos"
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:layout_marginStart="28dp"
@@ -26,6 +26,7 @@
             android:foregroundGravity="center"
             android:gravity="center"
             android:isScrollContainer="false"
+            android:onClick="voltarTelaInicial"
             android:text="B"
             android:textColor="#00FFFFFF"
             app:icon="@drawable/house_solid"

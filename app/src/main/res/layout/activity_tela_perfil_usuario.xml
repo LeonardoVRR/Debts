@@ -23,6 +23,7 @@
             android:layout_height="60dp"
             android:layout_marginStart="16dp"
             android:backgroundTint="#00FFFFFF"
+            android:onClick="voltarTelaInicial"
             android:text="Button"
             android:textColor="#00FFFFFF"
             app:icon="@drawable/house_solid"

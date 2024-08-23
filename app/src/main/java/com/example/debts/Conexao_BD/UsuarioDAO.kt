@@ -1,10 +1,4 @@
-package com.example.debts
-
-import android.util.Log
-import java.sql.Connection
-import java.sql.ResultSet
-import java.sql.SQLException
-import java.sql.Statement
+package com.example.debts.Conexao_BD
 
 class usuarioDAO {
 //    public fun selecionarUsuario(usuario: String, senha: String): usuarioBD_Debts? {

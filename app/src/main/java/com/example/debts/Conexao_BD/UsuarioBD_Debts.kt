@@ -1,4 +1,4 @@
-package com.example.debts
+package com.example.debts.Conexao_BD
 
 class usuarioBD_Debts {
     lateinit var usuario: String

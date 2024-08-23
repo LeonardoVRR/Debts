@@ -13,12 +13,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.Conexao_BD.CustomToast
+import com.example.debts.Conexao_BD.conexaoBD_Debts
+import com.example.debts.Conexao_BD.conexaoBanco_Debts
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Statement
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -92,11 +94,8 @@ class MainActivity : AppCompatActivity() {
 
         //verificando se o nome de usuario e senha conferem com os que foram salvos no BD
         if (limparEntradaSenha.isEmpty() && limparEntradaNome.isEmpty()) {
-            Toast.makeText(
-                this,
-                "Preencha todos os campos.",
-                Toast.LENGTH_SHORT
-            ).show()
+
+            CustomToast().showCustomToast(this, "Preencha todos os campos.")
         }
 
         else {
@@ -107,11 +106,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             else {
-                Toast.makeText(
-                    this,
-                    "Usuario ou Senha incorreto.",
-                    Toast.LENGTH_SHORT
-                ).show()
+                CustomToast().showCustomToast(this, "Usuario ou Senha incorreto.")
             }
         }
 

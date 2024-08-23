@@ -14,6 +14,7 @@ import com.example.debts.databinding.ActivityCriarContaBinding
 import android.view.View
 import android.widget.ImageButton
 import androidx.activity.OnBackPressedCallback
+import com.example.debts.Conexao_BD.CustomToast
 
 class criarConta : AppCompatActivity() {
 
@@ -109,49 +110,28 @@ class criarConta : AppCompatActivity() {
 
         //verifica se os inputs estão vazios
         if (entradaSenha.isEmpty() || entradaCofirmarSenha.isEmpty() || entradaEmail.isEmpty() || entradaCPF.isEmpty() || entradaNomeUsuario.isEmpty()){
-            Toast.makeText(
-                this,
-                "Preencha todos os campos.",
-                Toast.LENGTH_SHORT
-            ).show()
-
+            CustomToast().showCustomToast(this, "Preencha todos os campos.")
         }
 
         else {
             //caso os campos senhas forem diferentes exibira uma mensagem alertam isso
             if (entradaSenha != entradaCofirmarSenha){
-                Toast.makeText( //exibe uma mensagem caso as senhas não forem iguais
-                    this,
-                    "Confirmação de senha incorreta.",
-                    Toast.LENGTH_SHORT
-                ).show()
+                CustomToast().showCustomToast(this, "Confirmação de senha incorreta.")
             }
             //verifica se o email digitado tem o "@" e ".com"
             else if (!validarEmail.containsMatchIn(entradaEmail)) {
-                Toast.makeText(
-                    this,
-                    "Este email não é valido: ${entradaEmail}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                CustomToast().showCustomToast(this, "Este email não é valido: ${entradaEmail}")
             }
             //verificar se o cpf digitado tem 11 numeros
             else if (entradaCPF.length < 11){
-                Toast.makeText(
-                    this,
-                    "Este CPF não é valido: ${entradaCPF}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                CustomToast().showCustomToast(this, "Este CPF não é valido: ${entradaCPF}")
             }
 
             else {
-                Toast.makeText(
-                    this,
-                    "Conta Criada",
-                    Toast.LENGTH_SHORT
-                ).show()
 
                 val navegarCriarConta = Intent(this, cadastrar::class.java)
                 startActivity(navegarCriarConta)
+                finish()
             }
         }
 

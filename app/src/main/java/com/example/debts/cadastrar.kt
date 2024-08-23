@@ -10,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.Conexao_BD.CustomToast
 import com.example.debts.databinding.ActivityCadastrarBinding
 
 class cadastrar : AppCompatActivity() {
@@ -30,8 +31,6 @@ class cadastrar : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
 
-                //Log.v("Voltar", "Botão voltar Presscionado")
-
                 startActivity(voltarTelaLogin)
                 finish()
             }
@@ -45,6 +44,9 @@ class cadastrar : AppCompatActivity() {
 
         //verificando se as checkboxs foram marcadas para prosseguir com a navegação para a tela Principal do App
         if (termosLidos.isChecked && autorizacaoUsoDados.isChecked) {
+
+            CustomToast().showCustomToast(this, "Conta Criada")
+
             val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)
             startActivity(navegarTelaPrincipal)
             finish()

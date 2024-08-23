@@ -1,13 +1,8 @@
-package com.example.debts
+package com.example.debts.Conexao_BD
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.StrictMode
 import android.util.Log
-import android.widget.Toast
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.sql.Connection
 import java.sql.DriverManager
 import java.util.Objects

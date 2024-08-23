@@ -1,6 +1,9 @@
 package com.example.debts
 
 import android.os.Bundle
+import android.view.View
+import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -33,76 +36,124 @@ class tela_RelatorioGastos : AppCompatActivity() {
             insets
         }
 
+        //array que vai conter todas as colunas
+        val entries = mutableListOf<BarEntry>()
+
+        //configurando os botões p/ trocar o mes do grafico
+        val btn_PrevMes: ImageButton = findViewById(R.id.btn_PrevMes)
+        val btn_ProxMes: ImageButton = findViewById(R.id.btn_ProxMes)
+
         //manipulando data
-        val calendar = Calendar.getInstance() // Cria uma instância de Calendar
+        var calendar = Calendar.getInstance() // Cria uma instância de Calendar
         val anoAtual = calendar.get(Calendar.YEAR) //pegando o ano atual
-        val mesAtual = calendar.get(Calendar.MONTH) //pegando o mes atual
-        calendar.set(anoAtual, mesAtual, 1) // Configura o Calendar para o primeiro dia do mês atual
-        var dataInicial = calendar.time
+        var mesAtual = calendar.get(Calendar.MONTH) //pegando o mes atual
+
+        // Configura o Calendar para o primeiro dia do mês atual
+        calendar.set(anoAtual, mesAtual, 1)
+
+        // Obtém o número de dias no mês atual
+        var qtdDiasMes = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
 
         // Obtém o nome do mês atual para exibição
-        val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, java.util.Locale.getDefault())
+        var nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, java.util.Locale.getDefault())
+
+        var dataInicial = calendar.time
+
+        // Define uma formação para a data
+        val formataData = SimpleDateFormat("dd/MM", Locale("pt", "BR"))
+        var dataFormatada = formataData.format(dataInicial) // usa a formatação definida
 
         //configurando para mostra o nome do mes atual
         val viewNomeMes: TextView = findViewById(R.id.graf_MesAtual)
-        viewNomeMes.text = nomeMes
+        viewNomeMes.text = nomeMes.uppercase()
 
-        // Obtém o número de dias no mês atual
-        val qtdDiasMes = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+        //array que contem todas as legendas das colunas
+        var legendaColunas = criarLegendas(qtdDiasMes, formataData, calendar)
 
-        grafico = findViewById(R.id.bar_chart)
+        //quando o btn_ProxMes for clicado vai chamar uma função para avançar o mes
+        btn_ProxMes.setOnClickListener {
+            // Avança para o próximo mês
+            calendar.add(Calendar.MONTH, 1)
+            //retroce um mes mês
+            calendar.add(Calendar.MONTH, -1)
 
-        var entries = mutableListOf<BarEntry>()
+            // Define o dia do mês para 1
+            calendar.set(Calendar.DAY_OF_MONTH, 1)
 
-        //criando colunas do grafico
-        for (i in 0..qtdDiasMes-1) {
-            val valorAleatorio = randomFloat(1.0f, 1001.0f)
+            //atualizando as informações do calendario
+            qtdDiasMes = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
 
-            entries.add(BarEntry(i.toFloat(), valorAleatorio))
+            nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, java.util.Locale.getDefault())
+            viewNomeMes.text = nomeMes.uppercase()
+
+            // Verifica se a lista "entries" tem elementos
+            if (entries.isNotEmpty() && legendaColunas.isNotEmpty()) {
+//                Toast.makeText(
+//                    this,
+//                    "Atualizando",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+
+                entries.clear() // Esvazia a lista
+                legendaColunas = arrayOf() // Esvazia a lista
+                criarColunasGraf(entries, qtdDiasMes)
+                legendaColunas = criarLegendas(qtdDiasMes, formataData, calendar)
+
+                //atualiza as legendas do grafico
+                val xAxis = grafico.xAxis
+                xAxis.valueFormatter = IndexAxisValueFormatter(legendaColunas)
+
+                grafico.notifyDataSetChanged() // Atualiza o grafico quando recebe novos dados
+                grafico.invalidate() // Atualiza o gráfico
+            }
         }
 
-//        val entries = listOf(
-//            BarEntry(0f, 10f),
-//            BarEntry(1f, 20f),
-//            BarEntry(2f, 30f),
-//            BarEntry(3f, 15f),
-//            BarEntry(4f, 25f),
-//            BarEntry(5f, 35f),
-//            BarEntry(6f, 40f),
-//            BarEntry(7f, 50f),
-//            BarEntry(8f, 22f),
-//            BarEntry(9f, 33f),
-//            BarEntry(10f, 45f),
-//            BarEntry(11f, 55f),
-//            BarEntry(12f, 60f),
-//            BarEntry(13f, 12f),
-//            BarEntry(14f, 18f),
-//            BarEntry(15f, 23f),
-//            BarEntry(16f, 28f),
-//            BarEntry(17f, 32f),
-//            BarEntry(18f, 47f),
-//            BarEntry(19f, 52f),
-//            BarEntry(20f, 65f),
-//            BarEntry(21f, 70f),
-//            BarEntry(22f, 38f),
-//            BarEntry(23f, 44f),
-//            BarEntry(24f, 57f),
-//            BarEntry(25f, 63f),
-//            BarEntry(26f, 72f),
-//            BarEntry(27f, 68f),
-//            BarEntry(28f, 1000f),
-//            BarEntry(29f, 1200f),
-//            BarEntry(30f, 1800f)
-//        )
+        //quando o btn_PrevMes for clicado vai chamar uma função para retroceder o mes
+        btn_PrevMes.setOnClickListener{
 
-        val colorColumnsGraf = intArrayOf(
-            android.graphics.Color.RED,
-            android.graphics.Color.YELLOW,
-            android.graphics.Color.GREEN
-        )
+            // Retrocede para o mês anterior
+            calendar.add(Calendar.MONTH, -1)
+            calendar.add(Calendar.MONTH, -1)
+
+            // Define o dia do mês para 1
+            calendar.set(Calendar.DAY_OF_MONTH, 1)
+
+            qtdDiasMes = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+
+            nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, java.util.Locale.getDefault())
+            viewNomeMes.text = nomeMes.uppercase()
+
+            // Verifica se a lista "entries" tem elementos
+            if (entries.isNotEmpty() && legendaColunas.isNotEmpty()) {
+//                Toast.makeText(
+//                    this,
+//                    "Atualizando",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+
+                entries.clear() // Esvazia a lista
+                legendaColunas = arrayOf() // Esvazia a lista
+                criarColunasGraf(entries, qtdDiasMes)
+                legendaColunas = criarLegendas(qtdDiasMes, formataData, calendar)
+
+                //atualiza as legendas do grafico
+                val xAxis = grafico.xAxis
+                xAxis.valueFormatter = IndexAxisValueFormatter(legendaColunas)
+
+                grafico.notifyDataSetChanged() // Atualiza o grafico quando recebe novos dados
+                grafico.invalidate() // Atualiza o gráfico
+            }
+
+        }
+
+        //Obtendo a refencia do grafico
+        grafico = findViewById(R.id.bar_chart)
+
+        //chama a função para criar as colunas do grafico
+        criarColunasGraf(entries, qtdDiasMes)
 
         //Estilizando o grafico
-        var barDataSet1 = BarDataSet(entries, "")
+        val barDataSet1 = BarDataSet(entries, "")
 
         //colorindo as colunas do grafico
         barDataSet1.color = android.graphics.Color.rgb(255, 50, 50) // colorindo as colunas da tabela de vermelho
@@ -132,84 +183,27 @@ class tela_RelatorioGastos : AppCompatActivity() {
         paint.textSize = 70f
         paint.color = android.graphics.Color.RED
 
-        //definindo o espaçamento das colunad da tabela
-        //barDataSet1.barBorderWidth
-
-        //config
-        //xAxis.granularity = 1f
-        //xAxis.labelCount = entries.size
-        //xAxis.isGranularityEnabled = true
-
         //definindo o zoom inicial do grafico no eixo X
         grafico.zoom(5f, 1f, 0f, 0f)
 
         grafico.viewPortHandler.setMaximumScaleX(9f) // Define o zoom máximo no eixo X
         grafico.viewPortHandler.setMinimumScaleX(5f) // Define o zoom minimo no eixo X
-        xAxis.setDrawGridLines(false)
+        xAxis.setDrawGridLines(false) //não deixa desenhar a linha de grade no eixo X
 
-        //barDataSet1.setDrawValues(true)
-        //grafico.setDrawValueAboveBar(true)
-
-        Toast.makeText(
-            this,
-            "Colunas: ${barDataSet1.entryCount}",
-            Toast.LENGTH_SHORT
-        ).show()
-
-        val formataData = SimpleDateFormat("dd/MM", Locale("pt", "BR")) // Define uma formação para a data
-        val data = Date() // pega a data atual
-        val dataFormatada = formataData.format(data); //formata a data conforme a formatação do "formataData"
-
-
-
-        var legendaColunas: Array<String> = arrayOf() //array que vai conter todas as legendas das colunas
-
-        val qtd_colunasGraf = barDataSet1.entryCount //conta quantas colunas tem no grafico
-
-        //adiciona uma legenda para cada coluna do grafico
-        for (i in 1..qtdDiasMes) {
-            legendaColunas += formataData.format(dataInicial)
-
-            // Avança para o próximo dia
-            calendar.time = dataInicial
-            calendar.add(Calendar.DAY_OF_MONTH, 1)
-            dataInicial = calendar.time
-        }
+//        Toast.makeText(
+//            this,
+//            "Colunas: ${barDataSet1.entryCount}",
+//            Toast.LENGTH_SHORT
+//        ).show()
 
         //configurando as legendas das colunas do grafico
-        xAxis.position = XAxis.XAxisPosition.BOTTOM
+        xAxis.position = XAxis.XAxisPosition.BOTTOM // exibe as legendas na parte de baixo do grafico
         xAxis.granularity = 1f
-        xAxis.labelRotationAngle = 45f
-        xAxis.valueFormatter = IndexAxisValueFormatter(legendaColunas)
-
-        //formatando o texto que aparece em cima das colunas da tabela
-        val valueFormatter = object : ValueFormatter() {
-            override fun getBarLabel(barEntry: BarEntry): String {
-                val value = barEntry.y //recebe os valores que ficam acima de cada coluna
-                val valueFormatter = "R$ ${String.format("%.2f", value)}" // formata os valores acima das colunas
-
-                return when {
-                    value < 20 -> {
-                        "$valueFormatter"
-                    }
-
-                    else -> {
-                        "$valueFormatter"
-                    }
-                }
-            }
-        }
+        xAxis.labelRotationAngle = 45f //rotaciona as legendas em 45 graus
+        xAxis.valueFormatter = IndexAxisValueFormatter(legendaColunas) //adiciona as legendas nas colunas do grafico no eixo X
 
         //aplicando a formatação criada em "valueFormatter" nos textos que ficam acima de cada coluna
-        barDataSet1.valueFormatter = valueFormatter
-
-        // Configurar o eixo X com labels personalizadas
-        val dataSet = BarDataSet(dataValue(), "")
-        val barData2 = BarData(dataSet)
-        //grafico.data = barData2
-
-        //grafico.setMaxVisibleValueCount(2)
-        //grafico.setDrawValueAboveBar(true)
+        barDataSet1.valueFormatter = createValueFormatter()
 
         grafico.legend.isEnabled = false // Desativar a legenda
         grafico.description.isEnabled = false // Desativar a descrição que aparece no canto inferior direito do grafico
@@ -227,36 +221,53 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
     }
 
-    private fun obterDataAtual() {
-
-    }
-
-    private fun dataValue(): ArrayList<BarEntry> {
-        val dataVals = ArrayList<BarEntry>()
-
-        dataVals.add(BarEntry(0f, 3f))
-        dataVals.add(BarEntry(1f, 4f))
-        dataVals.add(BarEntry(3f, 6f))
-        dataVals.add(BarEntry(4f, 10f))
-
-        return dataVals
-    }
-
+    //função que gera numeros do tipo float aleatorios
     fun randomFloat(min: Float, max: Float): Float {
         return Random.nextFloat() * (max - min) + min
     }
 
-    fun create30Columns(): List<BarEntry> {
-        val entries = mutableListOf<BarEntry>() // Inicializa a lista mutável de BarEntry
+    // Função que retorna os textos acima das colunas formatados
+    fun createValueFormatter(): ValueFormatter {
+        return object : ValueFormatter() {
+            override fun getBarLabel(barEntry: BarEntry): String {
+                val value = barEntry.y // Recebe os valores que ficam acima de cada coluna
+                val valueFormatter = "R$ ${String.format("%.2f", value)}" // Formata os valores acima das colunas
 
-        // Cria 30 colunas para o gráfico
-        for (i in 0 until 30) {
-            // Adiciona uma nova entrada (BarEntry) para cada coluna
-            // i.toFloat() define a posição da coluna no eixo X
-            // (i * 10).toFloat() é um exemplo de valor no eixo Y, você pode substituir com seus valores
-            entries.add(BarEntry(i.toFloat(), (i * 10).toFloat()))
+                return when {
+                    value < 20 -> { // caso o valor da coluna seja menor que 20 é possivel alterar a formatação
+                        "$valueFormatter"
+                    }
+                    else -> {
+                        "$valueFormatter"
+                    }
+                }
+            }
+        }
+    }
+
+    //função que cria as colunas do grafico
+    private fun criarColunasGraf(entries: MutableList<BarEntry>, qtdDiasMes: Int) {
+        for (i in 0..qtdDiasMes-1) {
+            val valorAleatorio = randomFloat(1.0f, 1001.0f)
+
+            entries.add(BarEntry(i.toFloat(), valorAleatorio)) //adicionando as colunas no array
+        }
+    }
+
+    // função que cria as legendas das colunas
+    private fun criarLegendas(qtdDiasMes: Int, formataData: SimpleDateFormat, calendar: Calendar): Array<String>{
+        val legendaColunas = mutableListOf<String>() // Lista mutável para armazenar as legendas
+
+        //adiciona uma legenda para cada coluna do grafico
+        for (i in 1..qtdDiasMes) {
+            var dataFormatada = formataData.format(calendar.time) //pega o dia do mes e formata ele
+
+            legendaColunas += dataFormatada //adiciona as datas formatadas no array
+
+            calendar.add(Calendar.DAY_OF_MONTH, 1) //avançar os dias no mes
         }
 
-        return entries
+        return legendaColunas.toTypedArray() // Converte a lista mutável para um array
     }
+
 }

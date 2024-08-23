@@ -1,13 +1,12 @@
 package com.example.debts
 
+import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.View
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import java.util.Locale
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -20,12 +19,15 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import kotlin.random.Random
 
 class tela_RelatorioGastos : AppCompatActivity() {
     private lateinit var grafico: BarChart
+    private var campoEntradas_isExpanded = false
+    private var campoDespesas_isExpanded = false
+    private var campoGastos_isExpanded = false
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -218,6 +220,135 @@ class tela_RelatorioGastos : AppCompatActivity() {
         grafico.data = barData // Define os dados no gráfico
         grafico.notifyDataSetChanged() // Atualiza o grafico quando recebe novos dados
         grafico.invalidate() // Atualiza o gráfico
+
+        //------------------------------ configs layouts expansivos ------------------------------//
+
+        //---------- Configurando o Campo Entradas ------------------------//
+        val btnExp_Entradas: ImageButton = findViewById(R.id.btnExp_Entradas)
+        val lytExp_Entradas: ConstraintLayout = findViewById(R.id.lytExp_Entradas)
+
+        //obtendo os parametros da minha view "lytExp_Entradas" e as convertendo para `ConstraintLayout.LayoutParams` para poderem ser manipuladas
+        val lytParams_Entradas = lytExp_Entradas.layoutParams as ConstraintLayout.LayoutParams
+
+        //---------- Configurando o Campo Despesas ------------------------//
+        val btnExp_Despesas: ImageButton = findViewById(R.id.btnExp_Despesas)
+        val lytExp_Despesas: ConstraintLayout = findViewById(R.id.lytExp_Despesas)
+
+        //obtendo os parametros da minha view "lytExp_Despesas" e as convertendo para `ConstraintLayout.LayoutParams` para poderem ser manipuladas
+        val lytParams_Despesas = lytExp_Despesas.layoutParams as ConstraintLayout.LayoutParams
+
+        //---------- Configurando o Campo Gastos ------------------------//
+        val btnExp_Gastos: ImageButton = findViewById(R.id.btnExp_Gastos)
+        val lytExp_Gastos: ConstraintLayout = findViewById(R.id.lytExp_Gastos)
+
+        //obtendo os parametros da minha view "lytExp_Gastos" e as convertendo para `ConstraintLayout.LayoutParams` para poderem ser manipuladas
+        val lytParams_Gastos = lytExp_Gastos.layoutParams as ConstraintLayout.LayoutParams
+
+        //------------------------ configs. botões dos campos ------------------------//
+        btnExp_Entradas.setOnClickListener {
+
+            if (campoEntradas_isExpanded) {
+                // Aumentar a altura da view
+                lytParams_Entradas.height = 500
+
+                //trocar o icone do "btnExp_Entradas"
+                btnExp_Entradas.setImageResource(R.drawable.arrow_up)
+
+                //aplicando o aumento na view "lytExp_Entradas"
+                lytExp_Entradas.layoutParams = lytParams_Entradas
+
+                //trocando os icones dos botoes
+                btnExp_Despesas.setImageResource(R.drawable.arrow_down)
+                btnExp_Gastos.setImageResource(R.drawable.arrow_down)
+
+                //fechando os outros campos
+                lytParams_Despesas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+                lytExp_Despesas.layoutParams = lytParams_Despesas
+
+                lytParams_Gastos.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+                lytExp_Gastos.layoutParams = lytParams_Gastos
+            } else {
+                lytParams_Entradas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+
+                //trocar o icone do "btnExp_Entradas"
+                btnExp_Entradas.setImageResource(R.drawable.arrow_down)
+
+                lytExp_Entradas.layoutParams = lytParams_Entradas
+            }
+            campoEntradas_isExpanded = !campoEntradas_isExpanded
+        }
+
+        btnExp_Despesas.setOnClickListener {
+
+            if (campoDespesas_isExpanded) {
+                // Aumentar a altura da view
+                lytParams_Despesas.height = 500
+
+                campoEntradas_isExpanded = false
+                campoGastos_isExpanded = false
+
+                //trocar o icone do "btnExp_Despesas"
+                btnExp_Despesas.setImageResource(R.drawable.arrow_up)
+
+                //aplicando o aumento na view "lytExp_Despesas"
+                lytExp_Despesas.layoutParams = lytParams_Despesas
+
+                //trocando os icones dos botoes
+                btnExp_Entradas.setImageResource(R.drawable.arrow_down)
+                btnExp_Gastos.setImageResource(R.drawable.arrow_down)
+
+                //fechando os outros campos
+                lytParams_Entradas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+                lytExp_Entradas.layoutParams = lytParams_Entradas
+
+                lytParams_Gastos.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+                lytExp_Gastos.layoutParams = lytParams_Gastos
+            } else {
+                lytParams_Despesas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+
+                //trocar o icone do "btnExp_Despesas"
+                btnExp_Despesas.setImageResource(R.drawable.arrow_down)
+
+                lytExp_Despesas.layoutParams = lytParams_Despesas
+            }
+            campoDespesas_isExpanded = !campoDespesas_isExpanded
+        }
+
+        btnExp_Gastos.setOnClickListener {
+
+            if (campoGastos_isExpanded) {
+                // Aumentar a altura da view
+                lytParams_Gastos.height = 500
+
+                campoEntradas_isExpanded = false
+                campoDespesas_isExpanded = false
+
+                //trocar o icone do "btnExp_Gastos"
+                btnExp_Gastos.setImageResource(R.drawable.arrow_up)
+
+                //aplicando o aumento na view "lytExp_Gastos"
+                lytExp_Gastos.layoutParams = lytParams_Gastos
+
+                //trocando os icones dos botoes
+                btnExp_Entradas.setImageResource(R.drawable.arrow_down)
+                btnExp_Despesas.setImageResource(R.drawable.arrow_down)
+
+                //fechando os outros campos
+                lytParams_Entradas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+                lytExp_Entradas.layoutParams = lytParams_Entradas
+
+                lytParams_Despesas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+                lytExp_Despesas.layoutParams = lytParams_Despesas
+            } else {
+                lytParams_Gastos.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+
+                //trocar o icone do "btnExp_Gastos"
+                btnExp_Gastos.setImageResource(R.drawable.arrow_down)
+
+                lytExp_Gastos.layoutParams = lytParams_Gastos
+            }
+            campoGastos_isExpanded = !campoGastos_isExpanded
+        }
 
     }
 

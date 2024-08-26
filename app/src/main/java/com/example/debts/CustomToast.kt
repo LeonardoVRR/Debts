@@ -1,12 +1,10 @@
-package com.example.debts.Conexao_BD
+package com.example.debts
 
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import com.example.debts.R
 
 class CustomToast {
     fun showCustomToast(context: Context, message: String) {

@@ -58,6 +58,8 @@ dependencies {
     implementation(libs.material.v190)
     implementation(libs.androidx.constraintlayout)
 
+    implementation ("androidx.recyclerview:recyclerview:1.3.2")
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

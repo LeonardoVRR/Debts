@@ -17,6 +17,9 @@
         android:theme="@style/Theme.Debts"
         tools:targetApi="31">
         <activity
+            android:name=".layout_Item_lista.ItemLista"
+            android:exported="false" />
+        <activity
             android:name=".tela_RelatorioGastos"
             android:exported="false" />
         <activity

@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.debts.R
 
-class MyConstraintAdapter(private val items: List<MyData>) :
+class MyConstraintAdapter(private val items: List<MyData>):
     RecyclerView.Adapter<MyConstraintAdapter.MyViewHolder>() {
 
         //O construtor do ViewHolder recebe uma View (o layout do item) e armazena as referências aos componentes dentro do layout

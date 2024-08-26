@@ -11,15 +11,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.util.TypedValueCompat.dpToPx
 import java.util.Locale
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.setMargins
-import androidx.core.view.setPadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.debts.layout_Item_lista.ItemSpacingDecoration
 import com.example.debts.layout_Item_lista.MyConstraintAdapter
 import com.example.debts.layout_Item_lista.MyData
 import com.github.mikephil.charting.charts.BarChart
@@ -29,6 +25,9 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -39,6 +38,23 @@ class tela_RelatorioGastos : AppCompatActivity() {
     private var campoEntradas_isExpanded = false
     private var campoDespesas_isExpanded = false
     private var campoGastos_isExpanded = false
+
+    private val listaEntradas = listOf(
+        MyData("Salario", "PIX", 1200.toString(), "25/08/2024"),
+        MyData("Venda Monitor", "PIX", 2000.toString(), "05/03/2020")
+    )
+    private val listaDespesas = listOf(
+        MyData("Shopping ABC", "Dinheiro", 58.99.toString(), "02/06/2023"),
+        MyData("Shopping ABC", "Dinheiro", 78.85.toString(), "02/06/2023")
+    )
+    private val listaGastos = listOf(
+        MyData("Shopping ElDorado", "Crédito", 200.5.toString(), "17/02/2022"),
+        MyData("McDonalds", "Crédito", 60.5.toString(), "17/02/2021")
+    )
+
+    //função para formatar numeros float para o formato Real(R$)
+    fun formatToCurrency(value: Float): String =
+        NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(value)
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -393,8 +409,19 @@ class tela_RelatorioGastos : AppCompatActivity() {
             campoGastos_isExpanded = !campoGastos_isExpanded
         }
 
-        //-------------------- config. Criação das lista de Items de cada Campo ------------------//
+        //-------------------- config. somas dos gastos dos items de cada campo ------------------//
 
+        val somarItemsListaEntradas = somarValoresCampo(pegarDados(listaEntradas))
+        val somarItemsListaDespesas = somarValoresCampo(pegarDados(listaDespesas))
+        val somarItemsListaGastos = somarValoresCampo(pegarDados(listaGastos))
+
+        val txt_valorEntradas: TextView = findViewById(R.id.txt_valorEntradas)
+        val txt_valorDespesas: TextView = findViewById(R.id.txt_valorDespesas)
+        val txt_valorGastos: TextView = findViewById(R.id.txt_valorGastos)
+
+        txt_valorEntradas.text = "${formatToCurrency(somarItemsListaEntradas)}"
+        txt_valorDespesas.text = "${formatToCurrency(somarItemsListaDespesas)}"
+        txt_valorGastos.text = "${formatToCurrency(somarItemsListaGastos)}"
     }
 
     //função que gera numeros do tipo float aleatorios
@@ -447,34 +474,25 @@ class tela_RelatorioGastos : AppCompatActivity() {
     }
 
     //função que pega os dados do BD para colocar nas listas de items
-    private fun pegarDados(): List<MyData> {
-        val calendarCompra = Calendar.getInstance()
+    private fun pegarDados(listaItems: List<MyData> = emptyList()): List<MyData> {
 
-        // Define a data desejada (ano, mês, dia)
-        calendarCompra.set(2024, Calendar.AUGUST, 25)
+        // Lista que será preenchida com os itens formatados
+        val items: MutableList<MyData> = mutableListOf()
 
-        val dataCompra: Date = calendarCompra.time
-        val formataDataCompra = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR")) //definir a formatação da data
-        var dataCompraFormatada = formataDataCompra.format(dataCompra) // usa a formatação definida da data
+        // Itera sobre cada item da lista de entrada e cria novos itens formatados
+        listaItems.forEach { myData ->
+            // Adiciona um novo item à lista 'items' com os valores formatados
+            items.add(
+                MyData(
+                    myData.Descr_Compra,  // Descrição da compra
+                    myData.forma_pagamento,  // Forma de pagamento
+                    formatToCurrency(myData.valor_compra.toFloat()),  // Valor formatado
+                    myData.data_compra  // Data formatada
+                )
+            )
+        }
 
-        val valorCompra = 25.90f
-        val valorCompraFormatada = "R$ ${String.format("%.2f", valorCompra)}" // Formata o valor da compra para formatação do real
-
-        //dados que vão ser criados na lista Entradas
-        return listOf(
-            MyData("Shopping Atrim", "Débito", valorCompraFormatada, dataCompraFormatada),
-            MyData("Shopping ABC Plaza", "Débito", valorCompraFormatada, dataCompraFormatada),
-            MyData("Shopping Atrim", "Débito", valorCompraFormatada, dataCompraFormatada),
-            MyData("Shopping ABC Plaza", "Débito", valorCompraFormatada, dataCompraFormatada),
-            MyData("Shopping Atrim", "Débito", valorCompraFormatada, dataCompraFormatada),
-            MyData("Shopping ABC Plaza", "Débito", valorCompraFormatada, dataCompraFormatada),
-            MyData("Shopping Atrim", "Débito", valorCompraFormatada, dataCompraFormatada),
-            MyData("Shopping ABC Plaza", "Débito", valorCompraFormatada, dataCompraFormatada),
-            MyData("Shopping Atrim", "Débito", valorCompraFormatada, dataCompraFormatada),
-            MyData("Shopping ABC Plaza", "Débito", valorCompraFormatada, dataCompraFormatada),
-            MyData("Shopping Atrim", "Débito", valorCompraFormatada, dataCompraFormatada),
-            MyData("Shopping ABC Plaza", "Débito", valorCompraFormatada, dataCompraFormatada)
-        )
+        return items
     }
 
     //função para voltar a tela inicial do aplicativo
@@ -482,6 +500,24 @@ class tela_RelatorioGastos : AppCompatActivity() {
         val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)
         startActivity(navegarTelaPrincipal)
         finish()
+    }
+
+    //função para somar o valor total dos gastos ou custos do campo
+    private fun somarValoresCampo(listaItems: List<MyData> = emptyList()): Float {
+
+        // Mapeia cada item para o valor numérico após remover caracteres de formatação
+        val valorTotal = listaItems
+            .map {
+                it.valor_compra
+                    .replace("R$", "")  // Remove símbolo de moeda
+                    .replace(".", "")   // Remove separador de milhares
+                    .replace(",", ".") // Substitui vírgula por ponto decimal
+                    .trim()
+                    .toFloat()
+            }
+            .sum()  // Soma todos os valores
+
+        return valorTotal
     }
 
     //função que remove a lista de items do campo quando ele for fechado
@@ -524,8 +560,6 @@ class tela_RelatorioGastos : AppCompatActivity() {
             }
         }
 
-        //val linearLayoutParams = linearLayout.layoutParams as LinearLayout.LayoutParams
-
         //Cria um novo RecyclerView que vai ser a lista dos items
         val recyclerView = RecyclerView(this).apply {
 
@@ -537,15 +571,29 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
             // Adiciona espaçamento entre os itens
             //val spacingInPixels = resources.getDimensionPixelSize(R.dimen.espaçamentoItems)
-            addItemDecoration(ItemSpacingDecoration())
+            //addItemDecoration(ItemSpacingDecoration())
 
             layoutManager = LinearLayoutManager(this@tela_RelatorioGastos)
             // Define o layout manager do RecyclerView. O LinearLayoutManager organiza os itens da lista
             // de forma linear, um abaixo do outro (ou horizontalmente, se configurado), neste caso, verticalmente.
 
-            adapter = MyConstraintAdapter(pegarDados())
-            // Define o adaptador para o RecyclerView. O adaptador é responsável por conectar os dados (neste caso, a lista de "items")
-            // com o layout de cada item na lista. O MyConstraintAdapter recebe a lista "items" e vincula os dados aos elementos de interface de cada item.
+            if (campo.id == R.id.lytExp_Entradas){
+                adapter = MyConstraintAdapter(pegarDados(listaEntradas))
+                // Define o adaptador para o RecyclerView. O adaptador é responsável por conectar os dados (neste caso, a lista de "items")
+                // com o layout de cada item na lista. O MyConstraintAdapter recebe a lista "items" e vincula os dados aos elementos de interface de cada item.
+            }
+
+            else if (campo.id == R.id.lytExp_Despesas){
+                adapter = MyConstraintAdapter(pegarDados(listaDespesas))
+                // Define o adaptador para o RecyclerView. O adaptador é responsável por conectar os dados (neste caso, a lista de "items")
+                // com o layout de cada item na lista. O MyConstraintAdapter recebe a lista "items" e vincula os dados aos elementos de interface de cada item.
+            }
+
+            else {
+                adapter = MyConstraintAdapter(pegarDados(listaGastos))
+                // Define o adaptador para o RecyclerView. O adaptador é responsável por conectar os dados (neste caso, a lista de "items")
+                // com o layout de cada item na lista. O MyConstraintAdapter recebe a lista "items" e vincula os dados aos elementos de interface de cada item.
+            }
 
             //--------------------- fim config. Criação dos Itens nas Listas ---------------------//
 
@@ -585,6 +633,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
         }
 
         constraintSet.applyTo(campo) // Aplica as constraints ao campo(ConstraintLayout) atual
+
     }
 
 }

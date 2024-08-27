@@ -15,6 +15,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.debts.Conexao_BD.conexaoBD_Debts
 import com.example.debts.Conexao_BD.conexaoBanco_Debts
+import com.example.debts.visibilidadeSenha.AlterarVisibilidade
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Statement
@@ -23,7 +24,7 @@ import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
 
-    private var visibilidadeSenha = true
+
     lateinit var connect: Connection
     lateinit var connectionResult: String
 
@@ -54,6 +55,11 @@ class MainActivity : AppCompatActivity() {
         //conexao = conexaoBanco_Debts.conectar()
         //conectar()
 
+        //configurando o botão de icone da senha para mudar quando for clicado
+        val btn_IconeSenha: ImageButton = findViewById(R.id.btn_visibilidadeSenhaLogin)
+        val campoSenha: EditText = findViewById(R.id.input_senhaLogin)
+
+        btn_IconeSenha.setOnClickListener { AlterarVisibilidade(campoSenha, btn_IconeSenha).verSenha() }
 
     }
 
@@ -115,28 +121,6 @@ class MainActivity : AppCompatActivity() {
         val navegarCadastrarConta = Intent(this, criarConta::class.java)
         startActivity(navegarCadastrarConta)
         finish()
-    }
-
-    //configurando o botão de icone da senha para mudar quando for clicado
-    public fun verNovaSenha(v: View){
-        val iconeSenha: ImageButton = findViewById(R.id.btn_visibilidadeSenhaLogin)
-        val mostrarSenha: EditText = findViewById(R.id.input_senhaLogin)
-
-        if (visibilidadeSenha) {
-            visibilidadeSenha = false
-            iconeSenha.setImageResource(R.drawable.visibility)
-            mostrarSenha.inputType = InputType.TYPE_CLASS_TEXT
-        }
-
-        else {
-            visibilidadeSenha = true
-            iconeSenha.setImageResource(R.drawable.visibility_off)
-            mostrarSenha.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-        }
-
-        //move o cursor do input para o final do texto digitado
-        val length = mostrarSenha.text.length
-        mostrarSenha.setSelection(length)
     }
 
     public fun conectar() {

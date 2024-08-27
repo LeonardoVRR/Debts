@@ -12,6 +12,7 @@ import com.example.debts.databinding.ActivityCriarContaBinding
 import android.view.View
 import android.widget.ImageButton
 import androidx.activity.OnBackPressedCallback
+import com.example.debts.visibilidadeSenha.AlterarVisibilidade
 
 class criarConta : AppCompatActivity() {
 
@@ -31,9 +32,23 @@ class criarConta : AppCompatActivity() {
             insets
         }
 
-        val voltarTelaLogin = Intent(this, MainActivity::class.java)
+        //configurando o botão de icone das senhas para mudarem quando forem clicados
+        val btn_IconeNovaSenha: ImageButton = findViewById(R.id.btn_visibilidadeNovaSenha)
+        val btn_IconeConfirmarNovaSenha: ImageButton = findViewById(R.id.btn_visibilidadeConfirmarSenha)
+
+        val input_NovaSenha: EditText = findViewById(R.id.input_novaSenha)
+        val input_ConfirmarNovaSenha: EditText = findViewById(R.id.input_confirmarSenha)
+
+        //criando uma instancia nova para cada campo senha para que elas não se interfiram
+        val verNovaSenha = AlterarVisibilidade(input_NovaSenha, btn_IconeNovaSenha)
+        val verConfirmarcaoNovaSenha = AlterarVisibilidade(input_ConfirmarNovaSenha, btn_IconeConfirmarNovaSenha)
+
+        btn_IconeNovaSenha.setOnClickListener { verNovaSenha.verSenha() }
+        btn_IconeConfirmarNovaSenha.setOnClickListener { verConfirmarcaoNovaSenha.verSenha() }
 
         //configurando o botão voltar do celular quando for prescionado p/ voltar na tela de login
+        val voltarTelaLogin = Intent(this, MainActivity::class.java)
+
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
 
@@ -45,51 +60,8 @@ class criarConta : AppCompatActivity() {
         })
     }
 
-    //configurando o botão de icone das senhas para mudarem quando forem clicados
-    public fun verNovaSenha(v: View){
-        val iconeSenha: ImageButton = findViewById(R.id.btn_visibilidadeNovaSenha)
-        val mostrarSenha: EditText = findViewById(R.id.input_novaSenha)
-
-        if (visibilidadeNovaSenha) {
-            visibilidadeNovaSenha = false
-            iconeSenha.setImageResource(R.drawable.visibility)
-            mostrarSenha.inputType = InputType.TYPE_CLASS_TEXT
-        }
-
-        else {
-            visibilidadeNovaSenha = true
-            iconeSenha.setImageResource(R.drawable.visibility_off)
-            mostrarSenha.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-        }
-
-        //move o cursor do input para o final do texto digitado
-        val length = mostrarSenha.text.length
-        mostrarSenha.setSelection(length)
-    }
-
-    public fun verConfirmarSenha(v: View){
-        val iconeConfirmarSenha: ImageButton = findViewById(R.id.btn_visibilidadeConfirmarSenha)
-        val mostrarSenha: EditText = findViewById(R.id.input_confirmarSenha)
-
-        if (visibilidadeConfirmarSenha) {
-            visibilidadeConfirmarSenha = false
-            iconeConfirmarSenha.setImageResource(R.drawable.visibility)
-            mostrarSenha.inputType = InputType.TYPE_CLASS_TEXT
-        }
-
-        else {
-            visibilidadeConfirmarSenha = true
-            iconeConfirmarSenha.setImageResource(R.drawable.visibility_off)
-            mostrarSenha.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-        }
-
-        //move o cursor do input para o final do texto digitado
-        val length = mostrarSenha.text.length
-        mostrarSenha.setSelection(length)
-    }
-
     //configurando a ação de click do botão criar conta
-    public fun cadastrarDados(v: View) {
+    fun cadastrarDados(v: View) {
         val senhaDigitada: EditText = findViewById(R.id.input_novaSenha) //referencia o elemento do loyault da tela
         val confirmarSenhaDigitada: EditText = findViewById(R.id.input_confirmarSenha)
         val entradaSenha = senhaDigitada.text.toString().trim() //resgata o que foi digitado no input e converte p/ Str e tira os espaços no inicio e no fim da string

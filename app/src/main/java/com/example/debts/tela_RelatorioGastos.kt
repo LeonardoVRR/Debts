@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.debts.layoutExpandivel.criarListaItems
 import com.example.debts.layoutExpandivel.removerListaItems
+import com.example.debts.layout_Item_lista.ItemSpacingDecoration
 import com.example.debts.layout_Item_lista.MyConstraintAdapter
 import com.example.debts.layout_Item_lista.MyData
 import com.github.mikephil.charting.charts.BarChart
@@ -60,7 +61,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
     fun formatToCurrency(value: Float): String =
         NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(value)
 
-    @SuppressLint("MissingInflatedId")
+    //@SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -183,6 +184,8 @@ class tela_RelatorioGastos : AppCompatActivity() {
             }
 
         }
+
+        //----------------------- config. grafico de colunas -------------------------------------//
 
         //Obtendo a refencia do grafico
         grafico = findViewById(R.id.bar_chart)

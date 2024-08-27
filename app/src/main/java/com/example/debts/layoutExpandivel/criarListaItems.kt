@@ -8,6 +8,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.debts.R
+import com.example.debts.layout_Item_lista.ItemSpacingDecoration
 import com.example.debts.layout_Item_lista.MyConstraintAdapter
 
 class criarListaItems(private val context: Context) {
@@ -50,6 +51,9 @@ class criarListaItems(private val context: Context) {
             // Define o layout manager do RecyclerView. O LinearLayoutManager organiza os itens da lista
             // de forma linear, um abaixo do outro (ou horizontalmente, se configurado), neste caso, verticalmente.
 
+            //configurando o espaçamento entre os itens
+            this.addItemDecoration(ItemSpacingDecoration())
+
             if (campo.id == R.id.lytExp_Entradas){
                 this.adapter = adapter
                 // Define o adaptador para o RecyclerView. O adaptador é responsável por conectar os dados (neste caso, a lista de "items")
@@ -74,9 +78,7 @@ class criarListaItems(private val context: Context) {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,  // Largura igual à largura do pai
                 LinearLayout.LayoutParams.MATCH_PARENT   // Altura igual à altura do pai
-            ).apply {
-                height = 240
-            }
+            )
 
         }
 

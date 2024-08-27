@@ -13,6 +13,6 @@ class ItemSpacingDecoration : RecyclerView.ItemDecoration() {
         //outRect.top = spacing
         //outRect.bottom = spacing
 
-        outRect.set(0, 0, 0, 0)  // Define o espaçamento superior, inferior, esquerdo e direito como 0
+        outRect.set(0, 0, 0, 10)  // Define o espaçamento superior, inferior, esquerdo e direito como 0
     }
 }

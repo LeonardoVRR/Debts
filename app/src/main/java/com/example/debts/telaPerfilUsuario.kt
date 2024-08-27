@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.debts.layoutExpandivel.criarListaItems
+import com.example.debts.layout_Item_lista.ItemSpacingDecoration
 import com.example.debts.layout_Item_lista.MyConstraintAdapter
 import com.example.debts.layout_Item_lista.MyData
 import com.github.mikephil.charting.charts.PieChart
@@ -46,7 +47,7 @@ class telaPerfilUsuario : AppCompatActivity() {
         10f
     )
 
-    private val listaDespesasRecentes = listOf("")
+    //private val listaDespesasRecentes = listOf("")
 
     //função para formatar numeros float para o formato Real(R$)
     fun formatToCurrency(value: Float): String =
@@ -65,7 +66,11 @@ class telaPerfilUsuario : AppCompatActivity() {
         val listaDespesasRecentes: RecyclerView = findViewById(R.id.listaDespesasRecentes)
 
         //configurando o layout manager
-        listaDespesasRecentes.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        listaDespesasRecentes.layoutManager = LinearLayoutManager(this)
+        listaDespesasRecentes.setHasFixedSize(true)
+
+        //configurando o espaçamento entre os itens
+        listaDespesasRecentes.addItemDecoration(ItemSpacingDecoration())
 
         // Crie o adaptador para o RecyclerView
         val adapter = MyConstraintAdapter(pegarDados(listaGastos))

@@ -52,7 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="75dp"
             android:layout_marginTop="16dp"
-            android:backgroundTint="#FF3131"
+            android:backgroundTint="#ff3131"
             android:paddingLeft="15dp"
             android:paddingRight="15dp"
             android:text="Excluir"

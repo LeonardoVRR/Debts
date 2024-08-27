@@ -100,11 +100,11 @@ class configConta_Usuario : AppCompatActivity() {
         val inflater: LayoutInflater = layoutInflater
         val dialogView = inflater.inflate(R.layout.activity_layout_aviso_exclusao_conta, null)
 
-        // Construir o diálogo
+        // Constroi o dialog/pop-up
         val builder = AlertDialog.Builder(this)
         builder.setView(dialogView)
 
-        // Criar o diálogo
+        // Criar o dialog/pop-up
         val dialog: AlertDialog = builder.create()
 
         // Acessar os botões do layout inflado usando dialogView.findViewById
@@ -115,6 +115,10 @@ class configConta_Usuario : AppCompatActivity() {
         btnConfirmarExclusao.setOnClickListener {
             CustomToast().showCustomToast(this, "Conta excluída com sucesso.")
             dialog.dismiss()
+
+            val voltarTelaLogin = Intent(this, MainActivity::class.java)
+            startActivity(voltarTelaLogin)
+            finish()
         }
 
         btnCancelarExclusao.setOnClickListener {

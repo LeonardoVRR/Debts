@@ -17,6 +17,9 @@
         android:theme="@style/Theme.Debts"
         tools:targetApi="31">
         <activity
+            android:name=".tela_DebtMap"
+            android:exported="false" />
+        <activity
             android:name=".Dialog_Style.layout_AvisoExclusaoConta"
             android:exported="false" />
         <activity

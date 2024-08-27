@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <Button
-            android:id="@+id/button5"
+            android:id="@+id/btn_homeTelaPrincipal"
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:layout_marginStart="28dp"
@@ -37,7 +37,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/button6"
+            android:id="@+id/btn_notificaoTelaPrincipal"
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:layout_marginEnd="16dp"
@@ -54,7 +54,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
-        android:id="@+id/textView6"
+        android:id="@+id/txt_saudacaoUsuario"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="72dp"
@@ -73,11 +73,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView6"
+        app:layout_constraintTop_toBottomOf="@+id/txt_saudacaoUsuario"
         app:layout_constraintVertical_bias="0.417">
 
         <Button
-            android:id="@+id/button11"
+            android:id="@+id/btn_Questionario"
             android:layout_width="175dp"
             android:layout_height="170dp"
             android:layout_marginStart="20dp"
@@ -114,12 +114,13 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/button13"
+            android:id="@+id/btn_DebtMap"
             android:layout_width="175dp"
             android:layout_height="170dp"
             android:layout_marginStart="20dp"
             android:layout_marginTop="24dp"
             android:backgroundTint="#FFFFFF"
+            android:onClick="telaDebtMap"
             android:text="DebtMap"
             android:textColor="#000000"
             android:textSize="20sp"
@@ -129,10 +130,10 @@
             app:iconSize="100dp"
             app:iconTint="#000000"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button11" />
+            app:layout_constraintTop_toBottomOf="@+id/btn_Questionario" />
 
         <Button
-            android:id="@+id/button14"
+            android:id="@+id/btn_RelatorioGastos"
             android:layout_width="175dp"
             android:layout_height="170dp"
             android:layout_marginTop="24dp"

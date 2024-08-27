@@ -1,6 +1,8 @@
 package com.example.debts
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -20,6 +22,7 @@ import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -53,6 +56,7 @@ class telaPerfilUsuario : AppCompatActivity() {
     fun formatToCurrency(value: Float): String =
         NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(value)
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -62,6 +66,8 @@ class telaPerfilUsuario : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        //-------------- config. lista de items Despesas Recentes --------------------------------//
 
         val listaDespesasRecentes: RecyclerView = findViewById(R.id.listaDespesasRecentes)
 
@@ -77,6 +83,19 @@ class telaPerfilUsuario : AppCompatActivity() {
 
         //adicionando os items na lista
         listaDespesasRecentes.adapter = adapter
+
+        //--------------------- config. indicador de progresso circular --------------------------//
+        val indicadorProgressoCircular: CircularProgressBar = findViewById(R.id.circularProgressBar_TelaPerfilUsuario)
+        val txt_IndicadorProgresso: TextView = findViewById(R.id.txt_IndicadorProgresso)
+
+        var progressoAtual_IndicadorProgresso: Float = 50f
+
+        txt_IndicadorProgresso.text = "${String.format("%.0f", progressoAtual_IndicadorProgresso)}%" //formatado o texto do indicador de progresso
+
+        indicadorProgressoCircular.apply {
+            progressMax = 100f //define o tamanho max do indicador de progresso
+            setProgressWithAnimation(progressoAtual_IndicadorProgresso, 1000) //indica o progresso
+        }
 
         //--------------------- config. Texto Relatoiro Resumo Mes -------------------------------//
         val somarItemsListaEntradas = somarValoresCampo(pegarDados(listaEntradas))

@@ -73,27 +73,18 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@+id/imageView4">
 
-            <ProgressBar
-                android:id="@+id/progressBar"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="70dp"
-                android:layout_height="match_parent"
-                android:indeterminate="false"
-                android:progress="0"
-                android:max="100"
-                android:layout_centerInParent="true"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0" />
-
-            <TextView
-                android:id="@+id/textView8"
+            <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                android:id="@+id/circularProgressBar_TelaPerfilUsuario"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:text="50%"
-                android:textSize="12sp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="3dp"
+                app:cpb_background_progressbar_color="#FFA8AE"
+                app:cpb_background_progressbar_width="6dp"
+                app:cpb_progressbar_color="#FF3131"
+                app:cpb_progressbar_width="3dp"
+                app:cpb_round_border="true"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -103,32 +94,33 @@
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="120dp"
                 android:layout_height="6dp"
+                android:layout_marginStart="11dp"
                 android:layout_marginTop="2dp"
-                app:layout_constraintStart_toEndOf="@+id/progressBar"
+                app:layout_constraintStart_toEndOf="@+id/circularProgressBar_TelaPerfilUsuario"
                 app:layout_constraintTop_toBottomOf="@+id/textView9" />
 
             <TextView
                 android:id="@+id/textView9"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="2dp"
+                android:layout_marginStart="12dp"
                 android:layout_marginTop="6dp"
                 android:text="Metas: 0%"
                 android:textColor="#000000"
                 android:textSize="10sp"
-                app:layout_constraintStart_toEndOf="@+id/progressBar"
+                app:layout_constraintStart_toEndOf="@+id/circularProgressBar_TelaPerfilUsuario"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/textView10"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="2dp"
+                android:layout_marginStart="12dp"
                 android:layout_marginTop="6dp"
                 android:text="Economia: 0%"
                 android:textColor="#000000"
                 android:textSize="10sp"
-                app:layout_constraintStart_toEndOf="@+id/progressBar"
+                app:layout_constraintStart_toEndOf="@+id/circularProgressBar_TelaPerfilUsuario"
                 app:layout_constraintTop_toBottomOf="@+id/progressBar2" />
 
             <ProgressBar
@@ -136,9 +128,22 @@
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="120dp"
                 android:layout_height="6dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginTop="2dp"
-                app:layout_constraintStart_toEndOf="@+id/progressBar"
+                app:layout_constraintStart_toEndOf="@+id/circularProgressBar_TelaPerfilUsuario"
                 app:layout_constraintTop_toBottomOf="@+id/textView10" />
+
+            <TextView
+                android:id="@+id/txt_IndicadorProgresso"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0%"
+                android:textColor="#FF3131"
+                android:textSize="10sp"
+                app:layout_constraintBottom_toBottomOf="@+id/circularProgressBar_TelaPerfilUsuario"
+                app:layout_constraintEnd_toEndOf="@+id/circularProgressBar_TelaPerfilUsuario"
+                app:layout_constraintStart_toStartOf="@+id/circularProgressBar_TelaPerfilUsuario"
+                app:layout_constraintTop_toTopOf="@+id/circularProgressBar_TelaPerfilUsuario" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -40,14 +40,21 @@ class telaPrincipal : AppCompatActivity() {
         })
     }
 
-    public fun teleRelatorioGastos(v: View) {
-        val navegarTelaRelatorioGastos = Intent(this, tela_RelatorioGastos::class.java)
-        startActivity(navegarTelaRelatorioGastos)
+    //configurando o evento de click no botão do DebtMap
+    fun telaDebtMap(v: View) {
+        val navegartelaDebtMap = Intent(this, tela_DebtMap::class.java)
+        startActivity(navegartelaDebtMap)
     }
 
     //configurando o evento de click no botão do perfil do usuario
-    public fun telaPerfilUsuario(v: View) {
-        val navegarCriarConta = Intent(this, telaPerfilUsuario::class.java)
-        startActivity(navegarCriarConta)
+    fun telaPerfilUsuario(v: View) {
+        val navegartelaPerfilUsuario = Intent(this, telaPerfilUsuario::class.java)
+        startActivity(navegartelaPerfilUsuario)
+    }
+
+    //configurando o evento de click no botão do Relatorio Gastos
+    fun teleRelatorioGastos(v: View) {
+        val navegarTelaRelatorioGastos = Intent(this, tela_RelatorioGastos::class.java)
+        startActivity(navegarTelaRelatorioGastos)
     }
 }

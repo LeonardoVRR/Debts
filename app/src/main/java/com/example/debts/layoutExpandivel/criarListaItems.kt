@@ -33,23 +33,31 @@ class criarListaItems(private val context: Context) {
             //configurando o espaçamento entre os itens
             this.addItemDecoration(ItemSpacingDecoration())
 
-            if (campo.id == R.id.lytExp_Entradas){
-                this.adapter = adapter
-                // Define o adaptador para o RecyclerView. O adaptador é responsável por conectar os dados (neste caso, a lista de "items")
-                // com o layout de cada item na lista. O MyConstraintAdapter recebe a lista "items" e vincula os dados aos elementos de interface de cada item.
-            }
+//            if (campo.id == R.id.lytExp_Entradas){
+//                this.adapter = adapter
+//                // Define o adaptador para o RecyclerView. O adaptador é responsável por conectar os dados (neste caso, a lista de "items")
+//                // com o layout de cada item na lista. O MyConstraintAdapter recebe a lista "items" e vincula os dados aos elementos de interface de cada item.
+//            }
+//
+//            else if (campo.id == R.id.lytExp_Despesas){
+//                this.adapter = adapter
+//                // Define o adaptador para o RecyclerView. O adaptador é responsável por conectar os dados (neste caso, a lista de "items")
+//                // com o layout de cada item na lista. O MyConstraintAdapter recebe a lista "items" e vincula os dados aos elementos de interface de cada item.
+//            }
+//
+//            else if (campo.id == R.id.lytExp_Gastos){
+//                this.adapter = adapter
+//                // Define o adaptador para o RecyclerView. O adaptador é responsável por conectar os dados (neste caso, a lista de "items")
+//                // com o layout de cada item na lista. O MyConstraintAdapter recebe a lista "items" e vincula os dados aos elementos de interface de cada item.
+//            }
+//
+//            else {
+//                this.adapter = adapter
+//                // Define o adaptador para o RecyclerView. O adaptador é responsável por conectar os dados (neste caso, a lista de "items")
+//                // com o layout de cada item na lista. O MyConstraintAdapter recebe a lista "items" e vincula os dados aos elementos de interface de cada item.
+//            }
 
-            else if (campo.id == R.id.lytExp_Despesas){
-                this.adapter = adapter
-                // Define o adaptador para o RecyclerView. O adaptador é responsável por conectar os dados (neste caso, a lista de "items")
-                // com o layout de cada item na lista. O MyConstraintAdapter recebe a lista "items" e vincula os dados aos elementos de interface de cada item.
-            }
-
-            else {
-                this.adapter = adapter
-                // Define o adaptador para o RecyclerView. O adaptador é responsável por conectar os dados (neste caso, a lista de "items")
-                // com o layout de cada item na lista. O MyConstraintAdapter recebe a lista "items" e vincula os dados aos elementos de interface de cada item.
-            }
+            this.adapter = adapter
 
             //--------------------- fim config. Criação dos Itens nas Listas ---------------------//
 

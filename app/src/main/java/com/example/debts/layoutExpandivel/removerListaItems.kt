@@ -11,7 +11,7 @@ class removerListaItems {
             // Verificar se há um RecyclerView dentro do parentLayout
             var existeRecyclerView = false
 
-            //procura no layout pai por um linear layout
+            //procura no layout pai por um RecyclerView
             for (i in 0 until campo.childCount) {
                 val child = campo.getChildAt(i)
                 if (child is RecyclerView) {

@@ -2,23 +2,23 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
+    android:id="@+id/lyt_Item_DebtMap"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/itemlist_style">
+    android:background="@drawable/itemlist_style"
+    android:paddingBottom="15dp">
 
     <com.mikhaellopez.circularprogressbar.CircularProgressBar
         android:id="@+id/circularProgressBar_ItemDebtMap"
         android:layout_width="60dp"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
         app:cpb_background_progressbar_color="#FFA8AE"
         app:cpb_background_progressbar_width="6dp"
         app:cpb_progressbar_color="#FF3131"
         app:cpb_progressbar_width="3dp"
         app:cpb_round_border="true"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -52,12 +52,12 @@
         android:id="@+id/btn_Detalhes_ItemDebtMap"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="20dp"
         android:backgroundTint="#FF3131"
         android:text="Detalhes"
         android:textColor="#FFFFFF"
         android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="TouchTargetSizeCheck" />
@@ -72,5 +72,18 @@
         app:layout_constraintEnd_toEndOf="@+id/txt_NomeMeta"
         app:layout_constraintStart_toStartOf="@+id/txt_NomeMeta"
         app:layout_constraintTop_toBottomOf="@+id/txt_NomeMeta" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/lista_Metas_Item_DebtMap"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="3dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/circularProgressBar_ItemDebtMap" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

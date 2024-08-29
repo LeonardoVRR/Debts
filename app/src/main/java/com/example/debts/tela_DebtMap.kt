@@ -1,13 +1,17 @@
 package com.example.debts
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.debts.Conexao_BD.DadosMetasFinanceiras_Usuario_BD_Debts
 import com.example.debts.layout_Item_lista.ItemSpacingDecoration
 import com.example.debts.layout_Item_lista.MyConstraintAdapter
 import com.example.debts.lista_DebtMap.adapter_DebtMap
@@ -29,28 +33,28 @@ class tela_DebtMap : AppCompatActivity() {
 
     var dataFormatada = "${diaAtual} de ${nomeMes} de ${anoAtual}" // formata a data
 
-    val listaMetas = listOf(
-        dados_listaMeta_Item_DebtMap("economizar R$ 1000,00 para uma viagem"),
-        dados_listaMeta_Item_DebtMap("quitar uma dívida de R$ 500,00"),
-        dados_listaMeta_Item_DebtMap("acumular R$ 2000,00 em fundo de emergência"),
-        dados_listaMeta_Item_DebtMap("investir R$ 300,00 por mês em ações"),
-        dados_listaMeta_Item_DebtMap("economizar R$ 1500,00 para a compra de um novo eletrônico")
+    val listaMetas_STR: List<String> = listOf(
+        "economizar R$ 1000,00 para uma viagem",
+        "quitar uma dívida de R$ 500,00",
+        "acumular R$ 2000,00 em fundo de emergência",
+        "investir R$ 300,00 por mês em ações",
+        "economizar R$ 1500,00 para a compra de um novo eletrônico"
     )
 
-    val listaMetas2 = listOf(
-        dados_listaMeta_Item_DebtMap("pagar R$ 800,00 de despesas médicas"),
-        dados_listaMeta_Item_DebtMap("construir uma reserva de R$ 1200,00 para o futuro"),
-        dados_listaMeta_Item_DebtMap("reduzir o saldo da dívida do cartão de crédito em R$ 600,00"),
-        dados_listaMeta_Item_DebtMap("aumentar a poupança em R$ 1000,00 até o fim do ano"),
-        dados_listaMeta_Item_DebtMap("economizar R$ 700,00 para um curso de aprimoramento profissional")
+    val listaMetas2_STR: List<String> = listOf(
+        "pagar R$ 800,00 de despesas médicas",
+        "construir uma reserva de R$ 1200,00 para o futuro",
+        "reduzir o saldo da dívida do cartão de crédito em R$ 600,00",
+        "aumentar a poupança em R$ 1000,00 até o fim do ano",
+        "economizar R$ 700,00 para um curso de aprimoramento profissional"
     )
 
-    val listaDados = listOf(
-        dados_listaMeta_DebtMap("Meta Cartão A", dataFormatada, listaMetas),
-        dados_listaMeta_DebtMap("Meta Cartão B", dataFormatada, listaMetas2)
-    )
+    //chama a função para converter uma lista de metas do tipo "String" para o tipo "dados_listaMeta_Item_DebtMap"
+    val listaMetas = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas_STR)
 
-    @SuppressLint("MissingInflatedId")
+    //chama a função para converter uma lista de metas do tipo "String" para o tipo "dados_listaMeta_Item_DebtMap"
+    val listaMetas2 = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas2_STR)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -62,6 +66,14 @@ class tela_DebtMap : AppCompatActivity() {
         }
 
         //----------------------- config. lista de items DebtMap ---------------------------------//
+
+        //chama a função para criar uma lista de dados do tipo "dados_listaMeta_DebtMap"
+        val listaDados1 = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap("Meta Cartão A", dataFormatada, listaMetas)
+        val listaDados2 = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap("Meta Cartão B", dataFormatada, listaMetas2)
+
+        //lista que contem todos os items do DebtMap
+        val listaDados = listaDados1 + listaDados2
+
         val lista_Items_DebtMap: RecyclerView = findViewById(R.id.lista_Items_DebtMap)
 
         //configurando o layout manager
@@ -76,5 +88,27 @@ class tela_DebtMap : AppCompatActivity() {
 
         // Crie o adaptador para o RecyclerView
         lista_Items_DebtMap.adapter = adapterItem
+
+        //-------------------- config. botão de voltar do celular --------------------------------//
+
+        //configurando o botão voltar do celular quando for prescionado p/ voltar na tela de login
+        val voltarTelaPrincial = Intent(this, telaPrincipal::class.java)
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+
+                //Log.v("Voltar", "Botão voltar Presscionado")
+
+                startActivity(voltarTelaPrincial)
+                finish()
+            }
+        })
+    }
+
+    //função para voltar a tela inicial do aplicativo
+    fun voltarTelaInicial(v: View){
+        val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)
+        startActivity(navegarTelaPrincipal)
+        finish()
     }
 }

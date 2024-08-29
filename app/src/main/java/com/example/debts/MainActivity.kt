@@ -13,6 +13,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.Conexao_BD.conexaoBD_Debts
 import com.example.debts.Conexao_BD.conexaoBanco_Debts
 import com.example.debts.visibilidadeSenha.AlterarVisibilidade
@@ -37,8 +38,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var str: String
 
     //configurando o crud no BD
-    private var userDB = "Leonardo"
-    private var senhaDB = "123"
+    private var userDB = DadosUsuario_BD_Debts().pegarNomeUsuario()
+    private var senhaDB = DadosUsuario_BD_Debts().pegarSenhaUsuario()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +65,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     //configurando a navegação para a tela principal
-    public fun login(v: View) {
+    fun login(v: View) {
 //        val conexao = conexaoBanco_Debts()
 //
 //        //faz a chamada no banco de dados

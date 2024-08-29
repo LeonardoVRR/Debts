@@ -13,11 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.debts.R
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 
-//define o formato dos dados dos items do DebtMap
-data class dados_listaMeta_Item_DebtMap (
-    val nomeMeta: String
-)
-
 class adapter_Item_DebtMap(private val items: List<dados_listaMeta_Item_DebtMap> = emptyList(), var indicadorProgresso: CircularProgressBar, var txt_IndicadorProgresso: TextView): RecyclerView.Adapter<adapter_Item_DebtMap.MyViewHolder>() {
 
     private var progressoAtual_IndicadorProgresso: Float = 0f

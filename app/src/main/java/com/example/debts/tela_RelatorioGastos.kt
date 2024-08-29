@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -16,6 +17,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.debts.Conexao_BD.DadosFinanceiros_Usuario_BD_Debts
 import com.example.debts.layoutExpandivel.criarListaItems
 import com.example.debts.layoutExpandivel.removerListaItems
 import com.example.debts.layout_Item_lista.ItemSpacingDecoration
@@ -44,18 +46,11 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
     private lateinit var recyclerViewManager: criarListaItems
 
-    private val listaEntradas = listOf(
-        MyData("Salario", "PIX", 1200.toString(), "25/08/2024"),
-        MyData("Venda Monitor", "PIX", 2000.toString(), "05/03/2020")
-    )
-    private val listaDespesas = listOf(
-        MyData("Shopping ABC", "Dinheiro", 58.99.toString(), "02/06/2023"),
-        MyData("Shopping ABC", "Dinheiro", 78.85.toString(), "02/06/2023")
-    )
-    private val listaGastos = listOf(
-        MyData("Shopping ElDorado", "Crédito", 200.5.toString(), "17/02/2022"),
-        MyData("McDonalds", "Crédito", 60.5.toString(), "17/02/2021")
-    )
+    private val listaEntradas = DadosFinanceiros_Usuario_BD_Debts().pegarListaEntradasMes()
+
+    private val listaDespesas = DadosFinanceiros_Usuario_BD_Debts().pegarListaDespesasMes()
+
+    private val listaGastos = DadosFinanceiros_Usuario_BD_Debts().pegarListaGastosMes()
 
     //função para formatar numeros float para o formato Real(R$)
     fun formatToCurrency(value: Float): String =
@@ -440,6 +435,21 @@ class tela_RelatorioGastos : AppCompatActivity() {
         txt_valorEntradas.text = "${formatToCurrency(somarItemsListaEntradas)}"
         txt_valorDespesas.text = "${formatToCurrency(somarItemsListaDespesas)}"
         txt_valorGastos.text = "${formatToCurrency(somarItemsListaGastos)}"
+
+        //-------------------- config. botão de voltar do celular --------------------------------//
+
+        //configurando o botão voltar do celular quando for prescionado p/ voltar na tela de login
+        val voltarTelaPrincial = Intent(this, telaPrincipal::class.java)
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+
+                //Log.v("Voltar", "Botão voltar Presscionado")
+
+                startActivity(voltarTelaPrincial)
+                finish()
+            }
+        })
     }
 
     //função que gera numeros do tipo float aleatorios

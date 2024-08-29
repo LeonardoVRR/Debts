@@ -83,6 +83,7 @@
             android:layout_marginStart="20dp"
             android:layout_marginTop="7dp"
             android:backgroundTint="#FFFFFF"
+            android:onClick="telaQuestionario"
             android:text="Questionário"
             android:textColor="#000000"
             android:textSize="18sp"

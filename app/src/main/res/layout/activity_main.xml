@@ -143,16 +143,18 @@
                 android:text="ESQUECI MINHA SENHA"
                 android:textAlignment="center"
                 android:textColor="#3988FF"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.498"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/campo_senha" />
+                app:layout_constraintTop_toBottomOf="@+id/campo_senha"
+                tools:visibility="gone" />
 
             <Button
                 android:id="@+id/btn_login"
                 android:layout_width="wrap_content"
                 android:layout_height="60dp"
-                android:layout_marginTop="40dp"
+                android:layout_marginTop="80dp"
                 android:backgroundTint="#FF3131"
                 android:onClick="login"
                 android:paddingLeft="50dp"
@@ -161,9 +163,8 @@
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.492"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView" />
+                app:layout_constraintTop_toBottomOf="@+id/campo_senha" />
 
             <Button
                 android:id="@+id/btnCriarConta"

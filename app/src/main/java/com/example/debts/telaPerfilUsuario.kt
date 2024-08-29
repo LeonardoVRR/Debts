@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -14,6 +15,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.debts.Conexao_BD.DadosFinanceiros_Usuario_BD_Debts
+import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.layoutExpandivel.criarListaItems
 import com.example.debts.layout_Item_lista.ItemSpacingDecoration
 import com.example.debts.layout_Item_lista.MyConstraintAdapter
@@ -22,35 +25,22 @@ import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.formatter.PercentFormatter
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import java.text.NumberFormat
 import java.util.Locale
 
 class telaPerfilUsuario : AppCompatActivity() {
 
-    private val listaEntradas = listOf(
-        MyData("Salario", "PIX", 1200.toString(), "25/08/2024"),
-        MyData("Venda Monitor", "PIX", 2000.toString(), "05/03/2020")
-    )
+    private val listaEntradas = DadosFinanceiros_Usuario_BD_Debts().pegarListaEntradasMes()
 
-    private val listaGastos = listOf(
-        MyData("Shopping ElDorado", "Crédito", 200.5.toString(), "17/02/2022"),
-        MyData("McDonalds", "Crédito", 60.5.toString(), "17/02/2021"),
-        MyData("McDonalds", "Crédito", 60.5.toString(), "17/02/2021"),
-        MyData("McDonalds", "Crédito", 60.5.toString(), "17/02/2021")
-    )
+    private val listaGastos = DadosFinanceiros_Usuario_BD_Debts().pegarListaGastosMes() + DadosFinanceiros_Usuario_BD_Debts().pegarListaDespesasMes()
 
     private val listaCoresPieChart = listOf(
         android.graphics.Color.rgb(109, 251, 114),
         android.graphics.Color.rgb(255, 50, 50),
         android.graphics.Color.rgb(255, 226, 11)
-        )
-
-    private val resumoMes = listOf(
-        10f
     )
-
-    //private val listaDespesasRecentes = listOf("")
 
     //função para formatar numeros float para o formato Real(R$)
     fun formatToCurrency(value: Float): String =
@@ -85,17 +75,17 @@ class telaPerfilUsuario : AppCompatActivity() {
         listaDespesasRecentes.adapter = adapter
 
         //--------------------- config. indicador de progresso circular --------------------------//
-        val indicadorProgressoCircular: CircularProgressBar = findViewById(R.id.circularProgressBar_TelaPerfilUsuario)
-        val txt_IndicadorProgresso: TextView = findViewById(R.id.txt_IndicadorProgresso)
-
-        var progressoAtual_IndicadorProgresso: Float = 50f
-
-        txt_IndicadorProgresso.text = "${String.format("%.0f", progressoAtual_IndicadorProgresso)}%" //formatado o texto do indicador de progresso
-
-        indicadorProgressoCircular.apply {
-            progressMax = 100f //define o tamanho max do indicador de progresso
-            setProgressWithAnimation(progressoAtual_IndicadorProgresso, 1000) //indica o progresso
-        }
+//        val indicadorProgressoCircular: CircularProgressBar = findViewById(R.id.circularProgressBar_TelaPerfilUsuario)
+//        val txt_IndicadorProgresso: TextView = findViewById(R.id.txt_IndicadorProgresso)
+//
+//        var progressoAtual_IndicadorProgresso: Float = 50f
+//
+//        txt_IndicadorProgresso.text = "${String.format("%.0f", progressoAtual_IndicadorProgresso)}%" //formatado o texto do indicador de progresso
+//
+//        indicadorProgressoCircular.apply {
+//            progressMax = 100f //define o tamanho max do indicador de progresso
+//            setProgressWithAnimation(progressoAtual_IndicadorProgresso, 1000) //indica o progresso
+//        }
 
         //--------------------- config. Texto Relatoiro Resumo Mes -------------------------------//
         val somarItemsListaEntradas = somarValoresCampo(pegarDados(listaEntradas))
@@ -126,7 +116,12 @@ class telaPerfilUsuario : AppCompatActivity() {
         graficoPizza.legend.isEnabled = false // Desativar a legenda
         graficoPizza.description.isEnabled = false // Desativar a descrição que aparece no canto inferior direito do grafico
 
+        graficoPizza.setUsePercentValues(true) //tornar os valores do grafico em porcentagem
+
         val pieData: PieData = PieData(pieDataSet)
+        pieData.setValueTextSize(12f) // Define o tamanho do texto
+        pieData.setValueFormatter(PercentFormatter(graficoPizza)) // Formata os valores como porcentagem
+
         graficoPizza.data = pieData
         graficoPizza.invalidate()
 
@@ -138,6 +133,32 @@ class telaPerfilUsuario : AppCompatActivity() {
             startActivity(navegarConfiguracoesConta)
             finish()
         }
+
+        //------------------ config. texto do nome e email do usuario ----------------------------//
+
+        val nomeUsuario: String = DadosUsuario_BD_Debts().pegarNomeUsuario()
+        val emailUsuario: String = DadosUsuario_BD_Debts().pegarEmailUsuario()
+
+        val txt_NomeUsuario: TextView = findViewById(R.id.txt_NomeUsuario_Perfil)
+        val txt_EmailUsuario: TextView = findViewById(R.id.txt_emailUsuario_Perfil)
+
+        txt_NomeUsuario.text = nomeUsuario
+        txt_EmailUsuario.text = emailUsuario
+
+        //-------------------- config. botão de voltar do celular --------------------------------//
+
+        //configurando o botão voltar do celular quando for prescionado p/ voltar na tela principal
+        val voltarTelaPrincial = Intent(this, telaPrincipal::class.java)
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+
+                //Log.v("Voltar", "Botão voltar Presscionado")
+
+                startActivity(voltarTelaPrincial)
+                finish()
+            }
+        })
     }
 
     //função que pega os dados do BD para colocar nas listas de items

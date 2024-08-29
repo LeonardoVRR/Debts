@@ -7,11 +7,13 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.visibilidadeSenha.AlterarVisibilidade
 
 class configConta_Usuario : AppCompatActivity() {
@@ -25,7 +27,17 @@ class configConta_Usuario : AppCompatActivity() {
             insets
         }
 
-        //configurando o botão de icone das senhas para mudarem quando forem clicados
+        //--------------- config. texto do hint dos input nome e email ---------------------------//
+        val hint_txt_Nome: EditText = findViewById(R.id.input_mudarNomeUsuario)
+        val hint_txt_email: EditText = findViewById(R.id.input_NovoEmail)
+
+        val nomeUsuario: String = DadosUsuario_BD_Debts().pegarNomeUsuario()
+        val emailUsuario: String = DadosUsuario_BD_Debts().pegarEmailUsuario()
+
+        hint_txt_Nome.hint = nomeUsuario
+        hint_txt_email.hint = emailUsuario
+
+        //--- configurando o botão de icone das senhas para mudarem quando forem clicados --------//
         val btn_IconeRedefinirSenha: ImageButton = findViewById(R.id.btn_visibilidadeRedefinirSenha)
         val btn_IconeConfirmarRedefinirSenha: ImageButton = findViewById(R.id.btn_visibilidadeConfirmarRedefinirSenha)
 
@@ -35,7 +47,7 @@ class configConta_Usuario : AppCompatActivity() {
         btn_IconeRedefinirSenha.setOnClickListener { AlterarVisibilidade(input_RedefinirSenha, btn_IconeRedefinirSenha).verSenha() }
         btn_IconeConfirmarRedefinirSenha.setOnClickListener { AlterarVisibilidade(input_ConfirmarRedefinirSenha, btn_IconeConfirmarRedefinirSenha).verSenha() }
 
-        //configurando a o botão para voltar para a tela do perfil do usuário
+        //----- configurando o botão para voltar para a tela do perfil do usuário --------------//
         val btn_btn_voltarPerfilUsuario: ImageButton = findViewById(R.id.btn_voltarPerfilUsuario)
 
         btn_btn_voltarPerfilUsuario.setOnClickListener{
@@ -43,6 +55,21 @@ class configConta_Usuario : AppCompatActivity() {
             startActivity(navegarPerfilUsuario)
             finish()
         }
+
+        //-------------------- config. botão de voltar do celular --------------------------------//
+
+        //configurando o botão voltar do celular quando for prescionado p/ voltar na tela de perfil usuario
+        val voltarTelaPerfilUsuario = Intent(this, telaPerfilUsuario::class.java)
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+
+                //Log.v("Voltar", "Botão voltar Presscionado")
+
+                startActivity(voltarTelaPerfilUsuario)
+                finish()
+            }
+        })
     }
 
     //configurando a função para o botão que altera o nome e email do usuário

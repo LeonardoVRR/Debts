@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <size
+                android:width="20dp"
+                android:height="20dp" /> <!-- Largura e Altura do thumb -->
+            <solid android:color="#ffffff" /> <!-- Cor do thumb -->
+            <corners android:radius="100dp"/> <!-- Bordas arredondadas -->
+
+            <stroke android:width="0.5dp" android:color="#767676" /> <!--espessura das bordas e cor
+             -->
+        </shape>
+    </item>
+</layer-list>

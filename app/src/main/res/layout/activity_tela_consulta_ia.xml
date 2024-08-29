@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
+    android:backgroundTint="#FFFFFF"
     tools:context=".tela_Consulta_IA">
 
     <ImageView
@@ -35,6 +36,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="#00FFFFFF"
+        android:onClick="voltarTelaInicial"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/house_solid"
@@ -61,160 +63,411 @@
         android:id="@+id/textView6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="65dp"
+        android:layout_marginTop="60dp"
         android:text="Minha Trilha Financeira"
         android:textColor="#000000"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView7" />
 
     <ImageView
-        android:id="@+id/imageView5554"
+        android:id="@+id/imageView88"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="7dp"
-        android:background="?actionBarDivider"
-        app:layout_constraintTop_toBottomOf="@+id/textView6"
-        tools:layout_editor_absoluteX="10dp" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout9"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginHorizontal="7dp"
+        android:background="#99000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView5554">
+        app:layout_constraintTop_toBottomOf="@+id/textView6" />
 
-        <TextView
-            android:id="@+id/textView8"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Conhecimento Financeiro"
-            android:textColor="#000000"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/textView12"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="O quanto você julga que entende de controle financeiro:"
-            android:textColor="#99000000"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="@+id/textView8"
-            app:layout_constraintTop_toBottomOf="@+id/textView8" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="3dp"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/btn_CalcularRotaFinanceira"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout9">
+        app:layout_constraintTop_toBottomOf="@+id/imageView88">
 
-        <Switch
-            android:id="@+id/switch_Questionario"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:text="Já fez algum tipo de investimento"
-            android:textColor="#000000"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="TouchTargetSizeCheck" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <CheckBox
-            android:id="@+id/checkBox_opc_Poupanca"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:layout_marginTop="15dp"
-            android:text="Poupança"
-            android:textColor="#000000"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/switch_Questionario"
-            tools:ignore="TouchTargetSizeCheck" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout9"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-        <CheckBox
-            android:id="@+id/checkBox_poc_TitulosPublicos"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:text="Titulos Publicos"
-            android:textColor="#000000"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/checkBox_opc_Poupanca"
-            tools:ignore="TouchTargetSizeCheck" />
+                <TextView
+                    android:id="@+id/textView8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Conhecimento Financeiro"
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-        <CheckBox
-            android:id="@+id/checkBox_opc_TituloCapitalizacao"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:text="Titulo de capitalização"
-            android:textColor="#000000"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/checkBox_poc_TitulosPublicos"
-            tools:ignore="TouchTargetSizeCheck" />
+                <TextView
+                    android:id="@+id/textView12"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="O quanto você julga que entende de controle financeiro:"
+                    android:textColor="#99000000"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/textView8"
+                    app:layout_constraintTop_toBottomOf="@+id/textView8" />
 
-        <CheckBox
-            android:id="@+id/checkBox_opc_Consorcio"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:text="Consórcio"
-            android:textColor="#000000"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/checkBox_opc_TituloCapitalizacao"
-            tools:ignore="TouchTargetSizeCheck" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <CheckBox
-            android:id="@+id/checkBox_opc_FundosImobiliarios"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:layout_marginStart="120dp"
-            android:layout_marginEnd="30dp"
-            android:text="Fundos Imobiliários"
-            android:textColor="#000000"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/checkBox_opc_Poupanca"
-            app:layout_constraintTop_toTopOf="@+id/checkBox_opc_Poupanca"
-            tools:ignore="TouchTargetSizeCheck" />
+            <TextView
+                android:id="@+id/textView35"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:text="Já fez algum tipo de investimento"
+                android:textColor="#000000"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout9" />
 
-        <CheckBox
-            android:id="@+id/checkBox_opc_FundosMultimercado"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:text="Fundos Multimercado"
-            android:textColor="#000000"
-            app:layout_constraintStart_toStartOf="@+id/checkBox_opc_FundosImobiliarios"
-            app:layout_constraintTop_toBottomOf="@+id/checkBox_opc_FundosImobiliarios"
-            tools:ignore="TouchTargetSizeCheck" />
+            <Switch
+                android:id="@+id/switch_Questionario"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:textColor="#000000"
+                android:thumb="@drawable/switch_thumb_custom"
+                android:track="@drawable/custom_switch_track"
+                app:layout_constraintBottom_toBottomOf="@+id/textView35"
+                app:layout_constraintStart_toEndOf="@+id/textView35"
+                app:layout_constraintTop_toTopOf="@+id/textView35"
+                tools:ignore="TouchTargetSizeCheck" />
 
-        <CheckBox
-            android:id="@+id/checkBox_opc_TesouroDireto"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:text="Tesouro Direto"
-            android:textColor="#000000"
-            app:layout_constraintStart_toStartOf="@+id/checkBox_opc_FundosMultimercado"
-            app:layout_constraintTop_toBottomOf="@+id/checkBox_opc_FundosMultimercado"
-            tools:ignore="TouchTargetSizeCheck" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/lyt_ListaOpcoes_TiposInvestimentos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView35">
 
-        <CheckBox
-            android:id="@+id/checkBox_opc_Acoes"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:text="Ações"
-            android:textColor="#000000"
-            app:layout_constraintStart_toStartOf="@+id/checkBox_opc_TesouroDireto"
-            app:layout_constraintTop_toBottomOf="@+id/checkBox_opc_TesouroDireto"
-            tools:ignore="TouchTargetSizeCheck" />
+                <CheckBox
+                    android:id="@+id/checkBox_opc_Poupanca"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:enabled="false"
+                    android:text="Poupança"
+                    android:textColor="#000000"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="TouchTargetSizeCheck" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                <CheckBox
+                    android:id="@+id/checkBox_poc_TitulosPublicos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:enabled="false"
+                    android:text="Titulos Publicos"
+                    android:textColor="#000000"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/checkBox_opc_Poupanca"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+                <CheckBox
+                    android:id="@+id/checkBox_opc_TituloCapitalizacao"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:enabled="false"
+                    android:text="Titulo de capitalização"
+                    android:textColor="#000000"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/checkBox_poc_TitulosPublicos"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+                <CheckBox
+                    android:id="@+id/checkBox_opc_Consorcio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:enabled="false"
+                    android:text="Consórcio"
+                    android:textColor="#000000"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/checkBox_opc_TituloCapitalizacao"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+                <CheckBox
+                    android:id="@+id/checkBox_opc_FundosImobiliarios"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="120dp"
+                    android:layout_marginEnd="30dp"
+                    android:enabled="false"
+                    android:text="Fundos Imobiliários"
+                    android:textColor="#000000"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/checkBox_opc_Poupanca"
+                    app:layout_constraintTop_toTopOf="@+id/checkBox_opc_Poupanca"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+                <CheckBox
+                    android:id="@+id/checkBox_opc_FundosMultimercado"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:enabled="false"
+                    android:text="Fundos Multimercado"
+                    android:textColor="#000000"
+                    app:layout_constraintStart_toStartOf="@+id/checkBox_opc_FundosImobiliarios"
+                    app:layout_constraintTop_toBottomOf="@+id/checkBox_opc_FundosImobiliarios"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+                <CheckBox
+                    android:id="@+id/checkBox_opc_TesouroDireto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:enabled="false"
+                    android:text="Tesouro Direto"
+                    android:textColor="#000000"
+                    app:layout_constraintStart_toStartOf="@+id/checkBox_opc_FundosMultimercado"
+                    app:layout_constraintTop_toBottomOf="@+id/checkBox_opc_FundosMultimercado"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+                <CheckBox
+                    android:id="@+id/checkBox_opc_Acoes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:enabled="false"
+                    android:text="Ações"
+                    android:textColor="#000000"
+                    app:layout_constraintStart_toStartOf="@+id/checkBox_opc_TesouroDireto"
+                    app:layout_constraintTop_toBottomOf="@+id/checkBox_opc_TesouroDireto"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout11"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="3dp"
+                android:layout_marginEnd="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageView8">
+
+                <TextView
+                    android:id="@+id/textView13"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Meu Perfil"
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/textView31"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Uso de cartão de crédito\n(informe a média de uso por mês para cada item)"
+                    android:textColor="#99000000"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView13" />
+
+                <EditText
+                    android:id="@+id/editTextNumber_opc1"
+                    android:layout_width="55dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="80dp"
+                    android:backgroundTint="#00FFFFFF"
+                    android:ems="10"
+                    android:hint="0"
+                    android:inputType="number"
+                    android:paddingBottom="7dp"
+                    android:textAlignment="center"
+                    android:textColor="#000000"
+                    android:textColorHint="#000000"
+                    app:layout_constraintStart_toEndOf="@+id/textView32"
+                    app:layout_constraintTop_toTopOf="@+id/textView32"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+                <ImageButton
+                    android:id="@+id/btn_aumentar_opc1"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:backgroundTint="#FF3131"
+                    app:layout_constraintBottom_toBottomOf="@+id/editTextNumber_opc1"
+                    app:layout_constraintStart_toEndOf="@+id/editTextNumber_opc1"
+                    app:layout_constraintTop_toTopOf="@+id/editTextNumber_opc1"
+                    app:layout_constraintVertical_bias="1.0"
+                    app:srcCompat="@drawable/baseline_add_24"
+                    tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+
+                <ImageButton
+                    android:id="@+id/btn_diminuir_opc1"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:backgroundTint="#FF3131"
+                    app:layout_constraintBottom_toBottomOf="@+id/editTextNumber_opc1"
+                    app:layout_constraintEnd_toStartOf="@+id/editTextNumber_opc1"
+                    app:layout_constraintTop_toTopOf="@+id/editTextNumber_opc1"
+                    app:layout_constraintVertical_bias="0.714"
+                    app:srcCompat="@drawable/baseline_remove_24"
+                    tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+                <EditText
+                    android:id="@+id/editTextNumber_opc2"
+                    android:layout_width="55dp"
+                    android:layout_height="40dp"
+                    android:backgroundTint="#00FFFFFF"
+                    android:ems="10"
+                    android:hint="0"
+                    android:inputType="number"
+                    android:paddingBottom="7dp"
+                    android:textAlignment="center"
+                    android:textColor="#000000"
+                    android:textColorHint="#000000"
+                    app:layout_constraintEnd_toEndOf="@+id/editTextNumber_opc1"
+                    app:layout_constraintStart_toStartOf="@+id/editTextNumber_opc1"
+                    app:layout_constraintTop_toTopOf="@+id/textView33"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+                <ImageButton
+                    android:id="@+id/btn_diminuir_opc2"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:backgroundTint="#FF3131"
+                    app:layout_constraintBottom_toBottomOf="@+id/editTextNumber_opc2"
+                    app:layout_constraintEnd_toStartOf="@+id/editTextNumber_opc2"
+                    app:layout_constraintTop_toTopOf="@+id/editTextNumber_opc2"
+                    app:srcCompat="@drawable/baseline_remove_24"
+                    tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+
+                <ImageButton
+                    android:id="@+id/btn_aumentar_opc2"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:backgroundTint="#FF3131"
+                    app:layout_constraintBottom_toBottomOf="@+id/editTextNumber_opc2"
+                    app:layout_constraintStart_toEndOf="@+id/editTextNumber_opc2"
+                    app:layout_constraintTop_toTopOf="@+id/editTextNumber_opc2"
+                    app:srcCompat="@drawable/baseline_add_24"
+                    tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+                <EditText
+                    android:id="@+id/editTextNumber_opc3"
+                    android:layout_width="55dp"
+                    android:layout_height="40dp"
+                    android:backgroundTint="#00FFFFFF"
+                    android:ems="10"
+                    android:hint="0"
+                    android:inputType="number"
+                    android:paddingBottom="7dp"
+                    android:textAlignment="center"
+                    android:textColor="#000000"
+                    android:textColorHint="#000000"
+                    app:layout_constraintEnd_toEndOf="@+id/editTextNumber_opc2"
+                    app:layout_constraintStart_toStartOf="@+id/editTextNumber_opc2"
+                    app:layout_constraintTop_toTopOf="@+id/textView34"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+                <ImageButton
+                    android:id="@+id/btn_diminuir_opc3"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:backgroundTint="#FF3131"
+                    app:layout_constraintBottom_toBottomOf="@+id/editTextNumber_opc3"
+                    app:layout_constraintEnd_toStartOf="@+id/editTextNumber_opc3"
+                    app:layout_constraintTop_toTopOf="@+id/editTextNumber_opc3"
+                    app:srcCompat="@drawable/baseline_remove_24"
+                    tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+
+                <ImageButton
+                    android:id="@+id/btn_aumentar_opc3"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:backgroundTint="#FF3131"
+                    app:layout_constraintBottom_toBottomOf="@+id/editTextNumber_opc3"
+                    app:layout_constraintStart_toEndOf="@+id/editTextNumber_opc3"
+                    app:layout_constraintTop_toTopOf="@+id/editTextNumber_opc3"
+                    app:srcCompat="@drawable/baseline_add_24"
+                    tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+                <TextView
+                    android:id="@+id/textView32"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="20dp"
+                    android:text="E-commerce\n(Amazon, ML, Shopee, Shein...)"
+                    android:textColor="#99000000"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView31" />
+
+                <TextView
+                    android:id="@+id/textView33"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="20dp"
+                    android:text="App de transporte\n(Uber, 99...)"
+                    android:textColor="#99000000"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView32" />
+
+                <TextView
+                    android:id="@+id/textView34"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="20dp"
+                    android:text="App de entregas\n(iFood, Daki...)"
+                    android:textColor="#99000000"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView33" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <ImageView
+                android:id="@+id/imageView8"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginHorizontal="7dp"
+                android:layout_marginTop="10dp"
+                android:background="#000000"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/lyt_ListaOpcoes_TiposInvestimentos" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btn_CalcularRotaFinanceira"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="#FF3131"
+        android:text="Calcular minha rota"
+        android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,7 +8,10 @@ import android.widget.CheckBox
 import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.SeekBar
 import android.widget.Switch
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +21,9 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.debts.ManipularUsoCartaoCredito.ManipularUsoCartaoCredito
 
 class tela_Consulta_IA : AppCompatActivity() {
+    private var valorSeekBarFinal: Int = 0
+    private val listaOpcoesSelecionadas: MutableList<String> = mutableListOf()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -28,41 +34,81 @@ class tela_Consulta_IA : AppCompatActivity() {
             insets
         }
 
-        // config uso cartão
+        //------------------ config. seekBar Conhecimento Financeiro -----------------------------//
+
+        val indicador_SeekBar: ImageView = findViewById(R.id.indicador_seekBar)
+        val txt_indicador_SeekBar: TextView = findViewById(R.id.txt_indicador_seekBar)
+        val seekBar: SeekBar = findViewById(R.id.seekBar_ConhecimentoFinanceiro)
+
+
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            var valorSeekBar: Int = 0
+
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                // Calcular a nova posição do ImageView com base no progresso
+                val max = seekBar.max
+                val width = seekBar.width - seekBar.paddingStart - seekBar.paddingEnd
+
+                // Aqui você tem o valor atual do SeekBar
+                valorSeekBar = progress
+
+                // Converter o progresso em posição X
+                val thumbPosX = seekBar.paddingStart + (width * progress / max)
+
+                //atuliza o texto do indicador do seekBar
+                txt_indicador_SeekBar.text = "${valorSeekBar}%"
+
+                // Atualizar a posição do ImageView e TextView
+                indicador_SeekBar.x = (thumbPosX.toFloat() - (indicador_SeekBar.width / 2)) + 27
+                txt_indicador_SeekBar.x = (thumbPosX.toFloat() - (txt_indicador_SeekBar.width / 2)) + 27
+            }
+
+            //função que vai executar quando o usuário começar a interagir com o seekBar
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+
+            //função que vai executar quando o usuário terminar de interagir com o seekBar
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                valorSeekBarFinal = valorSeekBar
+                CustomToast().showCustomToast(this@tela_Consulta_IA, "Conhecimento: ${valorSeekBarFinal}%")
+            }
+        })
+
+        //------------------ config. campo uso cartão credito ------------------------------------//
         val painel_opc1: EditText = findViewById(R.id.editTextNumber_opc1)
+        val painel_opc2: EditText = findViewById(R.id.editTextNumber_opc2)
+        val painel_opc3: EditText = findViewById(R.id.editTextNumber_opc3)
+
         val btn_AumentarUso_opc1: ImageButton = findViewById(R.id.btn_aumentar_opc1)
         val btn_DiminuirUso_opc1: ImageButton = findViewById(R.id.btn_diminuir_opc1)
 
         btn_AumentarUso_opc1.setOnClickListener {
-            var valorPainel = ManipularUsoCartaoCredito(painel_opc1, this).AumentarUso(btn_AumentarUso_opc1)
+            ManipularUsoCartaoCredito(painel_opc1, this).AumentarUso(btn_AumentarUso_opc1)
         }
 
         btn_DiminuirUso_opc1.setOnClickListener {
-            var valorPainel = ManipularUsoCartaoCredito(painel_opc1, this).DiminuirUso(btn_DiminuirUso_opc1)
+            ManipularUsoCartaoCredito(painel_opc1, this).DiminuirUso(btn_DiminuirUso_opc1)
         }
 
-        val painel_opc2: EditText = findViewById(R.id.editTextNumber_opc2)
         val btn_AumentarUso_opc2: ImageButton = findViewById(R.id.btn_aumentar_opc2)
         val btn_DiminuirUso_opc2: ImageButton = findViewById(R.id.btn_diminuir_opc2)
 
         btn_AumentarUso_opc2.setOnClickListener {
-            var valorPainel = ManipularUsoCartaoCredito(painel_opc2, this).AumentarUso(btn_AumentarUso_opc2)
+            ManipularUsoCartaoCredito(painel_opc2, this).AumentarUso(btn_AumentarUso_opc2)
         }
 
         btn_DiminuirUso_opc2.setOnClickListener {
-            var valorPainel = ManipularUsoCartaoCredito(painel_opc2, this).DiminuirUso(btn_DiminuirUso_opc2)
+            ManipularUsoCartaoCredito(painel_opc2, this).DiminuirUso(btn_DiminuirUso_opc2)
         }
 
-        val painel_opc3: EditText = findViewById(R.id.editTextNumber_opc3)
         val btn_AumentarUso_opc3: ImageButton = findViewById(R.id.btn_aumentar_opc3)
         val btn_DiminuirUso_opc3: ImageButton = findViewById(R.id.btn_diminuir_opc3)
 
         btn_AumentarUso_opc3.setOnClickListener {
-            var valorPainel = ManipularUsoCartaoCredito(painel_opc3, this).AumentarUso(btn_AumentarUso_opc3)
+            ManipularUsoCartaoCredito(painel_opc3, this).AumentarUso(btn_AumentarUso_opc3)
         }
 
         btn_DiminuirUso_opc3.setOnClickListener {
-            var valorPainel = ManipularUsoCartaoCredito(painel_opc3, this).DiminuirUso(btn_DiminuirUso_opc3)
+            ManipularUsoCartaoCredito(painel_opc3, this).DiminuirUso(btn_DiminuirUso_opc3)
         }
 
         //------------------------ config area tipos de investimentos ----------------------------//
@@ -77,10 +123,6 @@ class tela_Consulta_IA : AppCompatActivity() {
         val checkBox_opc_FundosMultimercado: CheckBox = findViewById(R.id.checkBox_opc_FundosMultimercado)
         val checkBox_opc_TesouroDireto: CheckBox = findViewById(R.id.checkBox_opc_TesouroDireto)
         val checkBox_opc_Acoes: CheckBox = findViewById(R.id.checkBox_opc_Acoes)
-
-        //val grupo_opc_Investimentos: ConstraintLayout = findViewById(R.id.lyt_ListaOpcoes_TiposInvestimentos)
-
-        val listaOpcoesSelecionadas: MutableList<String> = mutableListOf()
 
         btn_switch_TiposInvestimentos.setOnCheckedChangeListener { _, isChecked ->
             var liberarOpcoes: Boolean
@@ -175,6 +217,30 @@ class tela_Consulta_IA : AppCompatActivity() {
                 finish()
             }
         })
+    }
+
+    //função para salvar os dados na lista de dados p/ calcular a rota financeira
+    fun CalcularRotaFinanceira(v: View) {
+
+        //--------------- config. lista de dados para calcular rota financeira -------------------//
+        val listaDadosCalcularRotaFinanceira: MutableList<String> = mutableListOf()
+
+        val painel_opc1: EditText = findViewById(R.id.editTextNumber_opc1)
+        val painel_opc2: EditText = findViewById(R.id.editTextNumber_opc2)
+        val painel_opc3: EditText = findViewById(R.id.editTextNumber_opc3)
+
+        //pegando o uso do cartão de credito
+        val valor_painel_opc1: String = painel_opc1.text.toString()
+        val valor_painel_opc2: String = painel_opc2.text.toString()
+        val valor_painel_opc3: String = painel_opc3.text.toString()
+
+        listaDadosCalcularRotaFinanceira += "Conhecimento Financeiro: ${valorSeekBarFinal}%"
+        listaDadosCalcularRotaFinanceira += "Tipos de investimentos selecionados: ${listaOpcoesSelecionadas}"
+        listaDadosCalcularRotaFinanceira += "Uso cartão E-commerce: ${valor_painel_opc1}"
+        listaDadosCalcularRotaFinanceira += "Uso cartão App de transporte: ${valor_painel_opc2}"
+        listaDadosCalcularRotaFinanceira += "Uso cartão App de entregas: ${valor_painel_opc3}"
+
+        Log.d("LISTA CALCULAR ROTA", "${listaDadosCalcularRotaFinanceira}")
     }
 
     //função para voltar a tela inicial do aplicativo

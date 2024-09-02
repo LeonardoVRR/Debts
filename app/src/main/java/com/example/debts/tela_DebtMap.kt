@@ -49,6 +49,8 @@ class tela_DebtMap : AppCompatActivity() {
         "economizar R$ 700,00 para um curso de aprimoramento profissional"
     )
 
+    var listasMetas_STR: MutableList<String> = mutableListOf()
+
     //chama a função para converter uma lista de metas do tipo "String" para o tipo "dados_listaMeta_Item_DebtMap"
     val listaMetas = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas_STR)
 
@@ -64,6 +66,9 @@ class tela_DebtMap : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        listasMetas_STR += listasMetas_STR
+        listasMetas_STR += listaMetas2_STR
 
         //----------------------- config. lista de items DebtMap ---------------------------------//
 

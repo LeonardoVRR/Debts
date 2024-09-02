@@ -3,6 +3,7 @@ import org.gradle.internal.impldep.bsh.commands.dir
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-kapt")
 }
 
 android {
@@ -59,7 +60,29 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
 
     implementation ("androidx.recyclerview:recyclerview:1.3.2")
+
+    //Circular ProgressBar
     implementation("com.mikhaellopez:circularprogressbar:3.1.0")
+
+    //JSON
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.fragment.ktx)
+    implementation(libs.androidx.legacy.support.v4)
+
+    //Room
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
+
+    //Inject
+    implementation ("com.google.dagger:dagger:2.52")
+    annotationProcessor ("com.google.dagger:dagger-compiler:2.52")
+
+    //Koin
+    implementation ("io.insert-koin:koin-android:3.2.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

@@ -13,6 +13,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.Conexao_BD.conexaoBD_Debts
 import com.example.debts.Conexao_BD.conexaoBanco_Debts
@@ -24,7 +25,6 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
-
 
     lateinit var connect: Connection
     lateinit var connectionResult: String
@@ -50,6 +50,9 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        //chamando a função para criar/chamar o BD
+        BancoDados(this).criarBancoDados()
 
         //db = "DEBTS"
         //conexaoBanco_Debts = conexaoBanco_Debts()

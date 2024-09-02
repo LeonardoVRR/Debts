@@ -13,6 +13,9 @@ import android.view.View
 import android.widget.ImageButton
 import androidx.activity.OnBackPressedCallback
 import com.example.debts.visibilidadeSenha.AlterarVisibilidade
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 
 class criarConta : AppCompatActivity() {
 
@@ -64,6 +67,7 @@ class criarConta : AppCompatActivity() {
     fun cadastrarDados(v: View) {
         val senhaDigitada: EditText = findViewById(R.id.input_novaSenha) //referencia o elemento do loyault da tela
         val confirmarSenhaDigitada: EditText = findViewById(R.id.input_confirmarSenha)
+
         val entradaSenha = senhaDigitada.text.toString().trim() //resgata o que foi digitado no input e converte p/ Str e tira os espaços no inicio e no fim da string
         val entradaCofirmarSenha = confirmarSenhaDigitada.text.toString().trim()
 
@@ -75,7 +79,7 @@ class criarConta : AppCompatActivity() {
         val entradaCPF = cpf.text.toString().trim()
 
         val nomeUsuario: EditText = findViewById(R.id.input_nomeUsuario)
-        val entradaNomeUsuario = nomeUsuario.toString().trim()
+        val entradaNomeUsuario = nomeUsuario.text.toString().trim()
 
         //verifica se os inputs estão vazios
         if (entradaSenha.isEmpty() || entradaCofirmarSenha.isEmpty() || entradaEmail.isEmpty() || entradaCPF.isEmpty() || entradaNomeUsuario.isEmpty()){
@@ -97,14 +101,19 @@ class criarConta : AppCompatActivity() {
             }
 
             else {
+                val navegarCadastrarConta = Intent(this, cadastrar::class.java)
 
-                val navegarCriarConta = Intent(this, cadastrar::class.java)
-                startActivity(navegarCriarConta)
+                //comandos para passar informações para a promixa tela
+                navegarCadastrarConta.putExtra("nome", entradaNomeUsuario)
+                navegarCadastrarConta.putExtra("email", entradaEmail)
+                navegarCadastrarConta.putExtra("cpf", entradaCPF)
+                navegarCadastrarConta.putExtra("senha", entradaSenha)
+
+                startActivity(navegarCadastrarConta)
                 finish()
             }
         }
 
     }
-
 
 }

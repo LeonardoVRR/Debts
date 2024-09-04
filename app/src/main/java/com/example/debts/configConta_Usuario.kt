@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.visibilidadeSenha.AlterarVisibilidade
 
@@ -79,7 +80,9 @@ class configConta_Usuario : AppCompatActivity() {
 
         val emailAtual: EditText = findViewById(R.id.input_NovoEmail)
         val novoEmail = emailAtual.text.toString().trim()
-        val validarEmail = "(?=.*@)(?=.*\\.com)".toRegex() // expressão regular que verifica se a string tem o "@" e ".com"
+        val validarEmail = "^[^@]+@[^@]+\\.com$".toRegex() // expressão regular que verifica se a string tem o "@" e ".com"
+
+        val idUsuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
 
         if(novoNome.isEmpty() && novoEmail.isEmpty()){
             CustomToast().showCustomToast(this, "Preencha um dos campos primeiro.")
@@ -91,6 +94,11 @@ class configConta_Usuario : AppCompatActivity() {
             }
 
             else {
+                BancoDados(this).atualizarDados(novoNome, novoEmail, idUsuario)
+
+                //atualiza o nome do usuario logado
+                DadosUsuario_BD_Debts(this).salvarUsuarioLogado(novoNome)
+
                 CustomToast().showCustomToast(this, "Dados Atualizados com sucesso.")
             }
         }
@@ -102,6 +110,8 @@ class configConta_Usuario : AppCompatActivity() {
 
         val entradaSenha = senhaDigitada.text.toString().trim() //resgata o que foi digitado no input e converte p/ Str e tira os espaços no inicio e no fim da string
         val entradaCofirmarSenha = confirmarSenhaDigitada.text.toString().trim()
+
+        val idUsuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
 
         //verifica se os inputs estão vazios
         if (entradaSenha.isEmpty() || entradaCofirmarSenha.isEmpty()){
@@ -115,6 +125,8 @@ class configConta_Usuario : AppCompatActivity() {
             }
 
             else {
+                BancoDados(this).atualizarSenha(entradaSenha, idUsuario)
+
                 CustomToast().showCustomToast(this, "Senha redefinida com sucesso.")
             }
         }

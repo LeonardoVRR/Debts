@@ -86,6 +86,7 @@ class MainActivity : AppCompatActivity() {
                 //nome do usuario logado
                 usuarioLogado = limparEntradaNome
 
+                //salva o nome do usuario logado
                 DadosUsuario_BD_Debts(this).salvarUsuarioLogado(limparEntradaNome)
 
                 val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)

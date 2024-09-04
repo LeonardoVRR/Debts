@@ -3,6 +3,7 @@ package com.example.debts
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -17,7 +18,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosFinanceiros_Usuario_BD_Debts
+import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.layoutExpandivel.criarListaItems
 import com.example.debts.layoutExpandivel.removerListaItems
 import com.example.debts.layout_Item_lista.ItemSpacingDecoration
@@ -56,7 +59,6 @@ class tela_RelatorioGastos : AppCompatActivity() {
     fun formatToCurrency(value: Float): String =
         NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(value)
 
-    //@SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -66,6 +68,9 @@ class tela_RelatorioGastos : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        //id do usuario logado
+        val usuarioID = DadosUsuario_BD_Debts(this).pegarIdUsuario()
 
         // Inicializar o RecyclerViewManager
         recyclerViewManager = criarListaItems(this)
@@ -79,7 +84,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
         //manipulando data
         var calendar = Calendar.getInstance() // Cria uma instância de Calendar
-        val anoAtual = calendar.get(Calendar.YEAR) //pegando o ano atual
+        var anoAtual = calendar.get(Calendar.YEAR) //pegando o ano atual
         var mesAtual = calendar.get(Calendar.MONTH) //pegando o mes atual
 
         // Configura o Calendar para o primeiro dia do mês atual
@@ -99,10 +104,17 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
         //configurando para mostra o nome do mes atual
         val viewNomeMes: TextView = findViewById(R.id.graf_MesAtual)
-        viewNomeMes.text = nomeMes.uppercase()
+        viewNomeMes.text = "${nomeMes.uppercase()} $anoAtual"
 
         //array que contem todas as legendas das colunas
         var legendaColunas = criarLegendas(qtdDiasMes, formataData, calendar)
+
+        //lista que vai conter os gastos diarios do mes
+//        var listaValores = listOf<Float>(4.3f, 8.9f, 7.1f, 2.4f, 5.6f, 9.3f, 3.8f, 6.5f, 1.7f, 0.9f,
+//            12.4f, 11.2f, 7.9f, 10.6f, 8.2f, 5.4f, 9.7f, 4.1f, 3.6f, 11.8f,
+//            6.3f, 2.8f, 10.1f, 7.4f, 1.2f, 8.7f, 4.9f, 9.1f, 12.6f, 5.8f)
+
+        var listaValores: MutableList<Float> = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID).toMutableList()
 
         //quando o btn_ProxMes for clicado vai chamar uma função para avançar o mes
         btn_ProxMes.setOnClickListener {
@@ -114,11 +126,13 @@ class tela_RelatorioGastos : AppCompatActivity() {
             // Define o dia do mês para 1
             calendar.set(Calendar.DAY_OF_MONTH, 1)
 
+            anoAtual = calendar.get(Calendar.YEAR)
+
             //atualizando as informações do calendario
             qtdDiasMes = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
 
             nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, java.util.Locale.getDefault())
-            viewNomeMes.text = nomeMes.uppercase()
+            viewNomeMes.text = "${nomeMes.uppercase()} $anoAtual"
 
             // Verifica se a lista "entries" tem elementos
             if (entries.isNotEmpty() && legendaColunas.isNotEmpty()) {
@@ -128,10 +142,15 @@ class tela_RelatorioGastos : AppCompatActivity() {
 //                    Toast.LENGTH_SHORT
 //                ).show()
 
+                listaValores.clear() // Esvazia a lista
                 entries.clear() // Esvazia a lista
                 legendaColunas = arrayOf() // Esvazia a lista
-                criarColunasGraf(entries, qtdDiasMes)
+
+                listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID).toMutableList()
+                criarColunasGraf(entries, qtdDiasMes, listaValores)
                 legendaColunas = criarLegendas(qtdDiasMes, formataData, calendar)
+
+                Log.d("Gastos do Mes", "$listaValores")
 
                 //atualiza as legendas do grafico
                 val xAxis = grafico.xAxis
@@ -152,10 +171,12 @@ class tela_RelatorioGastos : AppCompatActivity() {
             // Define o dia do mês para 1
             calendar.set(Calendar.DAY_OF_MONTH, 1)
 
+            anoAtual = calendar.get(Calendar.YEAR)
+
             qtdDiasMes = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
 
             nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, java.util.Locale.getDefault())
-            viewNomeMes.text = nomeMes.uppercase()
+            viewNomeMes.text = "${nomeMes.uppercase()} $anoAtual"
 
             // Verifica se a lista "entries" tem elementos
             if (entries.isNotEmpty() && legendaColunas.isNotEmpty()) {
@@ -165,10 +186,15 @@ class tela_RelatorioGastos : AppCompatActivity() {
 //                    Toast.LENGTH_SHORT
 //                ).show()
 
+                listaValores.clear() // Esvazia a lista
                 entries.clear() // Esvazia a lista
                 legendaColunas = arrayOf() // Esvazia a lista
-                criarColunasGraf(entries, qtdDiasMes)
+
+                listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID).toMutableList()
+                criarColunasGraf(entries, qtdDiasMes, listaValores)
                 legendaColunas = criarLegendas(qtdDiasMes, formataData, calendar)
+
+                Log.d("Gastos do Mes", "$listaValores")
 
                 //atualiza as legendas do grafico
                 val xAxis = grafico.xAxis
@@ -186,7 +212,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
         grafico = findViewById(R.id.bar_chart)
 
         //chama a função para criar as colunas do grafico
-        criarColunasGraf(entries, qtdDiasMes)
+        criarColunasGraf(entries, qtdDiasMes, listaValores)
 
         //Estilizando o grafico
         val barDataSet1 = BarDataSet(entries, "")
@@ -464,24 +490,30 @@ class tela_RelatorioGastos : AppCompatActivity() {
                 val value = barEntry.y // Recebe os valores que ficam acima de cada coluna
                 val valueFormatter = "R$ ${String.format("%.2f", value)}" // Formata os valores acima das colunas
 
-                return when {
-                    value < 20 -> { // caso o valor da coluna seja menor que 20 é possivel alterar a formatação
-                        "$valueFormatter"
-                    }
-                    else -> {
-                        "$valueFormatter"
-                    }
+                return if (value > 0) {
+                    valueFormatter
+                } else {
+                    "" // Não exibe o texto se o valor for 0
                 }
             }
         }
     }
 
     //função que cria as colunas do grafico
-    private fun criarColunasGraf(entries: MutableList<BarEntry>, qtdDiasMes: Int) {
-        for (i in 0..qtdDiasMes-1) {
-            val valorAleatorio = randomFloat(1.0f, 1001.0f)
+    private fun criarColunasGraf(entries: MutableList<BarEntry>, qtdDiasMes: Int, listaValores: List<Float>) {
 
-            entries.add(BarEntry(i.toFloat(), valorAleatorio)) //adicionando as colunas no array
+        // Itera sobre os elementos de listaValores e adiciona ao entries
+        listaValores.forEachIndexed { i, valor ->
+            entries.add(BarEntry(i.toFloat(), valor)) //adicionando as colunas no array
+        }
+
+        // Preenche o restante com valores 0 até atingir o tamanho dos dias do mes
+        if (listaValores.size < qtdDiasMes) {
+            for (i in listaValores.size until qtdDiasMes+1) {
+                //val valorAleatorio = randomFloat(1.0f, 1001.0f)
+
+                entries.add(BarEntry(i.toFloat(), 0f)) //adicionando as colunas no array
+            }
         }
     }
 

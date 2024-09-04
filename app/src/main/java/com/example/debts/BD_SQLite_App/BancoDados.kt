@@ -134,17 +134,19 @@ class BancoDados(private var context: Context) {
         var contaExiste = false
 
         try {
-            // Consulta para verificar se o email já existe
-            val verificarNome = bancoDados.rawQuery("SELECT * FROM Usuarios_Debts WHERE nome_usuario = ?", arrayOf(nome))
-            val verificarSenha = bancoDados.rawQuery("SELECT * FROM Usuarios_Debts WHERE senha_usuario = ?", arrayOf(senha))
+            val verificarLogin = "SELECT * FROM Usuarios_Debts WHERE nome_usuario = ? AND senha_usuario = ?"
+            val cursor = bancoDados.rawQuery(verificarLogin, arrayOf(nome, senha))
+
+            // Verifica se o cursor retornou algum resultado
+            val usuarioEncontrado = cursor.moveToFirst()
 
             // Se o cursor retornar algum resultado, significa que o email já existe
-            if (verificarNome.moveToFirst() && verificarSenha.moveToFirst()) {
+            if (usuarioEncontrado) {
                 contaExiste = true
             }
 
-            verificarNome.close()
-            verificarSenha.close()
+            cursor.close()
+
         } catch (e: Exception) {
             Log.e("Erro Verificação", e.message ?: "Erro desconhecido")
         } finally {
@@ -167,20 +169,22 @@ class BancoDados(private var context: Context) {
             bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
             // Consulta para obter os dados do usuário com base no nome
-            val cursor = bancoDados.rawQuery("SELECT email_usuario, senha_usuario, cpf_usuario FROM Usuarios_Debts WHERE nome_usuario = ?", arrayOf(nome))
+            val cursor = bancoDados.rawQuery("SELECT email_usuario, senha_usuario, cpf_usuario, id_usuario FROM Usuarios_Debts WHERE nome_usuario = ?", arrayOf(nome))
 
             // Verifica se há resultados e extrai os dados do usuário
             if (cursor.moveToFirst()) {
                 val emailUsuario = cursor.getString(cursor.getColumnIndexOrThrow("email_usuario"))
                 val senhaUsuario = cursor.getString(cursor.getColumnIndexOrThrow("senha_usuario"))
                 val cpfUsuario = cursor.getString(cursor.getColumnIndexOrThrow("cpf_usuario"))
+                val idUsuario = cursor.getString(cursor.getColumnIndexOrThrow("id_usuario"))
 
                 // Armazena os dados do usuário em uma lista
                 dadosUsuario = listOf(
                     nome,
                     emailUsuario,
                     cpfUsuario,
-                    senhaUsuario
+                    senhaUsuario,
+                    idUsuario
                 )
             }
 
@@ -212,14 +216,11 @@ class BancoDados(private var context: Context) {
             // Mostra uma mensagem de sucesso ao usuário
             //CustomToast().showCustomToast(context, "Usuário adicionado com sucesso")
 
+            //definindo uma consulta ao banco de dados
+            val query = "INSERT INTO Usuarios_Debts (nome_usuario, email_usuario, cpf_usuario, senha_usuario) VALUES ('$nome', '$email', $cpf_numeric, '$senha')"
+
             // Adiciona um novo usuário na tabela Usuarios_Debts
-            val values = ContentValues().apply {
-                put("nome_usuario", nome)
-                put("email_usuario", email)
-                put("cpf_usuario", cpf_numeric)
-                put("senha_usuario", senha)
-            }
-            bancoDados.insert("Usuarios_Debts", null, values)
+            bancoDados.execSQL(query)
 
         } catch (e: Exception) {
             // Mostra uma mensagem de erro ao usuário
@@ -233,6 +234,87 @@ class BancoDados(private var context: Context) {
                 bancoDados.close()
             }
         }
+    }
+
+    fun atualizarDados(novoNome: String, novoEmail: String, IdUsuario: Int) {
+        // Abre o banco de dados existente no caminho especificado
+        bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+        try {
+            val query = "UPDATE Usuarios_Debts SET nome_usuario = '$novoNome', email_usuario = '$novoEmail' WHERE id_usuario = $IdUsuario"
+            bancoDados.execSQL(query)
+        } catch (e: Exception) {
+            // Mostra uma mensagem de erro ao usuário
+            CustomToast().showCustomToast(context, "Erro ao atualizar os dados: ${e.message}")
+            // Loga o erro
+            Log.e("Erro Inserção", e.message ?: "Erro desconhecido")
+
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+    }
+
+    fun atualizarSenha(novaSenha: String, IdUsuario: Int) {
+        // Abre o banco de dados existente no caminho especificado
+        bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+        try {
+            val query = "UPDATE Usuarios_Debts SET senha_usuario = '$novaSenha' WHERE id_usuario = $IdUsuario"
+            bancoDados.execSQL(query)
+        } catch (e: Exception) {
+            // Mostra uma mensagem de erro ao usuário
+            CustomToast().showCustomToast(context, "Erro ao atualizar a senha: ${e.message}")
+            // Loga o erro
+            Log.e("Erro Inserção", e.message ?: "Erro desconhecido")
+
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+    }
+
+    fun gastosDiariosMes(mesGasto: String, IdUsuario: Int): List<Float> {
+        // Abre o banco de dados existente no caminho especificado
+        bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+        var listaGastos = mutableListOf<Float>()
+
+        try {
+            // Consulta para obter os dados do usuário com base no id
+            val cursor = bancoDados.rawQuery(
+                "SELECT SUM(valor_gasto) AS total_gasto FROM Dados_Financeiros WHERE id_user_gasto = ? AND mes = ? GROUP BY dt_gasto ORDER BY dt_gasto ASC",
+                arrayOf(IdUsuario.toString(), mesGasto)
+            )
+
+            // Processa todos os resultados da consulta
+            while (cursor.moveToNext()) {
+                val valorGasto = cursor.getString(cursor.getColumnIndexOrThrow("total_gasto"))
+                listaGastos.add(valorGasto.toFloat())
+            }
+
+            //val query = "SELECT valor_gasto FROM Dados_Financeiros WHERE id_user_gasto = $IdUsuario ORDER BY dt_gasto ASC"
+            //bancoDados.execSQL(query)
+
+            cursor.close()
+        } catch (e: Exception) {
+            // Mostra uma mensagem de erro ao usuário
+            CustomToast().showCustomToast(context, "Erro ao recuperar os gastos: ${e.message}")
+            // Loga o erro
+            Log.e("Erro Inserção", e.message ?: "Erro desconhecido")
+
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+
+        return listaGastos.toList()
     }
 
     fun listarMetas() {

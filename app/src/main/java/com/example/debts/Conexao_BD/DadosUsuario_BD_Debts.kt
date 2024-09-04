@@ -14,6 +14,7 @@ class DadosUsuario_BD_Debts(private val context: Context) {
     private var emailUsuario: String? = null
     private var cpfUsuario: String? = null
     private var senhaUsuario: String? = null
+    private var idUsuario: Int = 0
 
     // Função para salvar o nome do usuário logado nas preferências compartilhadas.
     fun salvarUsuarioLogado(usuario: String) {
@@ -37,6 +38,19 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
         // Recupera o valor associado à chave "usuarioLogado". Retorna uma string vazia se não encontrado.
         return sharedPreferences.getString("usuarioLogado", "") ?: ""
+    }
+
+    fun pegarIdUsuario(): Int {
+
+        val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
+
+        if (dados != null) {
+            idUsuario = dados[4].toInt()
+        }
+
+        //CustomToast().showCustomToast(context, "ID: $idUsuario")
+
+        return idUsuario
     }
 
     fun pegarNomeUsuario(): String {

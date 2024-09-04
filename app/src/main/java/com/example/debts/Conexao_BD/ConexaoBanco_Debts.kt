@@ -16,12 +16,13 @@ class conexaoBanco_Debts() {
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
-        var ip: String = "192.168.0.20:1433"
+        var ip: String = "192.168.0.13:1433"
         var db: String = "AdventureWorks2017"
 
         try {
             Class.forName("net.sourceforge.jtds.jdbc.Driver")
-            var connectionURL: String = "jdbc:jtds:sqlserver://"+ ip +";databasename="+ db +";" + "integratedSecurity=true"
+            val connectionURL: String =
+                "jdbc:jtds:sqlserver://$ip;databasename=$db;integratedSecurity=true"
             conn = DriverManager.getConnection(connectionURL)
         }
 

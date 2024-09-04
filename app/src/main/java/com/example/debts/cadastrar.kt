@@ -43,18 +43,19 @@ class cadastrar : AppCompatActivity() {
         val cpf = intent.getStringExtra("cpf").toString()
         val senha = intent.getStringExtra("senha").toString()
 
-        var contaExistente = false
+        var contaExistente: Boolean = false
 
         //Log.d("nome", nome.toString())
         //CustomToast().showCustomToast(this, nome.toString())
 
-        BancoDados(this).cadastrarConta(nome, email, cpf, senha)
-
-        if (BancoDados(this).cadastrarConta(nome, email, cpf, senha)) {
+        if (BancoDados(this).verificarDados(email)) {
             contaExistente = true
+            //CustomToast().showCustomToast(this, "Esse usuário já existe")
         }
         else {
             contaExistente = false
+            BancoDados(this).cadastrarConta(nome, email, cpf, senha)
+            //CustomToast().showCustomToast(this, "Usuário adicionado com sucesso")
         }
 
         return contaExistente
@@ -68,10 +69,8 @@ class cadastrar : AppCompatActivity() {
         //verificando se as checkboxs foram marcadas para prosseguir com a navegação para a tela Principal do App
         if (termosLidos.isChecked && autorizacaoUsoDados.isChecked) {
 
-            recuperarDados()
-
             if (recuperarDados()) {
-                CustomToast().showCustomToast(this, "Conta Já existente")
+                CustomToast().showCustomToast(this, "Essa conta já existe")
             }
 
             else {
@@ -81,6 +80,7 @@ class cadastrar : AppCompatActivity() {
                 startActivity(navegarTelaPrincipal)
                 finish()
             }
+
         }
     }
 }

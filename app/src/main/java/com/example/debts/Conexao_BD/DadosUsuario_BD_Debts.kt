@@ -1,25 +1,84 @@
 package com.example.debts.Conexao_BD
 
-class DadosUsuario_BD_Debts {
+import android.content.Context
+import android.util.Log
+import com.example.debts.BD_SQLite_App.BancoDados
+import com.example.debts.CustomToast
 
-    //função para pegar o nome do usuario no banco de dados
-    fun pegarNomeUsuario(): String{
-        val nome: String = "Leonardo"
+class DadosUsuario_BD_Debts(private val context: Context) {
 
-        return nome
+    var usuarioLogado: String = recuperarUsuarioLogado()
+
+    private val dadosUsuario = BancoDados(context)
+    private var nomeUsuario: String? = null
+    private var emailUsuario: String? = null
+    private var cpfUsuario: String? = null
+    private var senhaUsuario: String? = null
+
+    // Função para salvar o nome do usuário logado nas preferências compartilhadas.
+    fun salvarUsuarioLogado(usuario: String) {
+        // Obtém o SharedPreferences para armazenar dados com o nome "UserPrefs".
+        val sharedPreferences = context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+
+        // Obtém o editor para modificar as preferências.
+        val editor = sharedPreferences.edit()
+
+        // Salva o nome do usuário com a chave "usuarioLogado".
+        editor.putString("usuarioLogado", usuario)
+
+        // Aplica as mudanças de forma assíncrona.
+        editor.apply()
     }
 
-    //função para pegar o senha do usuario no banco de dados
+    // Função para recuperar o nome do usuário logado das preferências compartilhadas.
+    fun recuperarUsuarioLogado(): String {
+        // Obtém o SharedPreferences para ler dados com o nome "UserPrefs".
+        val sharedPreferences = context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+
+        // Recupera o valor associado à chave "usuarioLogado". Retorna uma string vazia se não encontrado.
+        return sharedPreferences.getString("usuarioLogado", "") ?: ""
+    }
+
+    fun pegarNomeUsuario(): String {
+        val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
+
+        if (dados != null) {
+            nomeUsuario = dados[0]
+        }
+
+        return nomeUsuario ?: "Nome não encontrado"
+    }
+
     fun pegarSenhaUsuario(): String {
-        val senha: String = "123"
 
-        return senha
+        val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
+
+        if (dados != null) {
+            senhaUsuario = dados[3]
+        }
+
+        return senhaUsuario ?: "Senha não encontrada"
     }
 
-    //função para pegar o email do usuario no banco de dados
-    fun pegarEmailUsuario(): String {
-        val email: String = "teste@gmail.com"
+    fun pegarCPFUsuario(): String {
 
-        return email
+        val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
+
+        if (dados != null) {
+            cpfUsuario = dados[2]
+        }
+
+        return cpfUsuario ?: "cpf não encontrado"
+    }
+
+    fun pegarEmailUsuario(): String {
+
+        val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
+
+        if (dados != null) {
+            emailUsuario = dados[1]
+        }
+
+        return emailUsuario ?: "Email não encontrado"
     }
 }

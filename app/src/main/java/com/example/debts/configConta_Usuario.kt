@@ -31,11 +31,11 @@ class configConta_Usuario : AppCompatActivity() {
         val hint_txt_Nome: EditText = findViewById(R.id.input_mudarNomeUsuario)
         val hint_txt_email: EditText = findViewById(R.id.input_NovoEmail)
 
-        val nomeUsuario: String = DadosUsuario_BD_Debts().pegarNomeUsuario()
-        val emailUsuario: String = DadosUsuario_BD_Debts().pegarEmailUsuario()
+        val nomeUsuario: String = DadosUsuario_BD_Debts(this).pegarNomeUsuario()
+        val emailUsuario: String = DadosUsuario_BD_Debts(this).pegarEmailUsuario()
 
-        hint_txt_Nome.hint = nomeUsuario
-        hint_txt_email.hint = emailUsuario
+        hint_txt_Nome.setText(nomeUsuario)
+        hint_txt_email.setText(emailUsuario)
 
         //--- configurando o botão de icone das senhas para mudarem quando forem clicados --------//
         val btn_IconeRedefinirSenha: ImageButton = findViewById(R.id.btn_visibilidadeRedefinirSenha)

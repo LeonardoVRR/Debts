@@ -156,7 +156,6 @@
                 android:layout_height="60dp"
                 android:layout_marginTop="80dp"
                 android:backgroundTint="#FF3131"
-                android:onClick="login"
                 android:paddingLeft="50dp"
                 android:paddingRight="50dp"
                 android:text="Login"

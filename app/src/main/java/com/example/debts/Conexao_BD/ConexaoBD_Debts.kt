@@ -30,8 +30,11 @@ class conexaoBD_Debts {
 
         try {
             Class.forName("net.sourceforge.jtds.jdbc.Driver")
-            connectionURL = "jdbc:jtds:sqlserver://"+ ip + ":"+ port+";"+ "databasename="+ database+";user="+nomeUsuario+";password="+senhaUsuario+";";
+            connectionURL =
+                "jdbc:jtds:sqlserver://$ip:$port;databasename=$database;user=$nomeUsuario;integratedSecurity=true";
             connection = DriverManager.getConnection(connectionURL)
+
+            //user=$nomeUsuario;password=$senhaUsuario;
         }
         catch (ex: Exception) {
             Log.e("Error ", "${ex.message}")

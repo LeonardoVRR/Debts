@@ -73,7 +73,7 @@ class criarConta : AppCompatActivity() {
 
         val email:EditText = findViewById(R.id.input_email)
         val entradaEmail = email.text.toString().trim()
-        val validarEmail = "(?=.*@)(?=.*\\.com)".toRegex() // expressão regular que verifica se a string tem o "@" e ".com"
+        val validarEmail = "^[^@]+@[^@]+\\.com$".toRegex() // expressão regular que verifica se a string tem o somente um "@" e ".com"
 
         val cpf:EditText = findViewById(R.id.input_cpf)
         val entradaCPF = cpf.text.toString().trim()

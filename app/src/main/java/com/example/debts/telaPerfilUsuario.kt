@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.debts.Conexao_BD.DadosFinanceiros_Usuario_BD_Debts
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.FormatarNome.FormatarNome
 import com.example.debts.layoutExpandivel.criarListaItems
 import com.example.debts.layout_Item_lista.ItemSpacingDecoration
 import com.example.debts.layout_Item_lista.MyConstraintAdapter
@@ -136,8 +137,8 @@ class telaPerfilUsuario : AppCompatActivity() {
 
         //------------------ config. texto do nome e email do usuario ----------------------------//
 
-        val nomeUsuario: String = DadosUsuario_BD_Debts().pegarNomeUsuario()
-        val emailUsuario: String = DadosUsuario_BD_Debts().pegarEmailUsuario()
+        val nomeUsuario: String = FormatarNome().formatar(DadosUsuario_BD_Debts(this).pegarNomeUsuario())
+        val emailUsuario: String = DadosUsuario_BD_Debts(this).pegarEmailUsuario()
 
         val txt_NomeUsuario: TextView = findViewById(R.id.txt_NomeUsuario_Perfil)
         val txt_EmailUsuario: TextView = findViewById(R.id.txt_emailUsuario_Perfil)

@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.FormatarNome.FormatarNome
 import com.example.debts.databinding.ActivityCadastrarBinding
 import com.example.debts.databinding.ActivityTelaPrincipalBinding
 
@@ -31,7 +32,7 @@ class telaPrincipal : AppCompatActivity() {
         //configurando a mensagem de saudações para o usuário
         val txt_nomeUsuario: TextView = findViewById(R.id.txt_saudacaoUsuario)
 
-        val nomeUsuario: String = DadosUsuario_BD_Debts().pegarNomeUsuario()
+        val nomeUsuario: String = FormatarNome().formatar(DadosUsuario_BD_Debts(this).pegarNomeUsuario())
 
         txt_nomeUsuario.text = "Bem-Vindo, ${nomeUsuario}"
 
@@ -76,4 +77,6 @@ class telaPrincipal : AppCompatActivity() {
         startActivity(navegarTelaRelatorioGastos)
         finish()
     }
+
+
 }

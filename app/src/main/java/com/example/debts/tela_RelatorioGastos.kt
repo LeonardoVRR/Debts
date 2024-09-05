@@ -72,6 +72,8 @@ class tela_RelatorioGastos : AppCompatActivity() {
         //id do usuario logado
         val usuarioID = DadosUsuario_BD_Debts(this).pegarIdUsuario()
 
+        CustomToast().showCustomToast(this, "ID: $usuarioID")
+
         // Inicializar o RecyclerViewManager
         recyclerViewManager = criarListaItems(this)
 
@@ -147,7 +149,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
                 legendaColunas = arrayOf() // Esvazia a lista
 
                 listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID).toMutableList()
-                criarColunasGraf(entries, qtdDiasMes, listaValores)
+                criarColunasGraf(entries, qtdDiasMes, nomeMes, usuarioID)
                 legendaColunas = criarLegendas(qtdDiasMes, formataData, calendar)
 
                 Log.d("Gastos do Mes", "$listaValores")
@@ -191,7 +193,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
                 legendaColunas = arrayOf() // Esvazia a lista
 
                 listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID).toMutableList()
-                criarColunasGraf(entries, qtdDiasMes, listaValores)
+                criarColunasGraf(entries, qtdDiasMes, nomeMes, usuarioID)
                 legendaColunas = criarLegendas(qtdDiasMes, formataData, calendar)
 
                 Log.d("Gastos do Mes", "$listaValores")
@@ -212,7 +214,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
         grafico = findViewById(R.id.bar_chart)
 
         //chama a função para criar as colunas do grafico
-        criarColunasGraf(entries, qtdDiasMes, listaValores)
+        criarColunasGraf(entries, qtdDiasMes, nomeMes, usuarioID)
 
         //Estilizando o grafico
         val barDataSet1 = BarDataSet(entries, "")
@@ -500,29 +502,46 @@ class tela_RelatorioGastos : AppCompatActivity() {
     }
 
     //função que cria as colunas do grafico
-    private fun criarColunasGraf(entries: MutableList<BarEntry>, qtdDiasMes: Int, listaValores: List<Float>) {
+    private fun criarColunasGraf(entries: MutableList<BarEntry>, qtdDiasMes: Int, nomeMes: String, usuarioID: Int) {
+        entries.clear()
 
-        // Itera sobre os elementos de listaValores e adiciona ao entries
+        // Recuperar a lista de valores do banco de dados
+        val listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID)
+
+        // Adicionar todos os valores existentes na lista ao gráfico
         listaValores.forEachIndexed { i, valor ->
-            entries.add(BarEntry(i.toFloat(), valor)) //adicionando as colunas no array
+            entries.add(BarEntry(i.toFloat(), valor)) // Adicionando as colunas com valores reais
         }
 
-        // Preenche o restante com valores 0 até atingir o tamanho dos dias do mes
-        if (listaValores.size < qtdDiasMes) {
-            for (i in listaValores.size until qtdDiasMes+1) {
-                //val valorAleatorio = randomFloat(1.0f, 1001.0f)
-
-                entries.add(BarEntry(i.toFloat(), 0f)) //adicionando as colunas no array
-            }
+        // Adicionar o valor 0 as colunas sem valor na lista para completar até o tamanho do mês
+        for (i in listaValores.size until qtdDiasMes) {
+            entries.add(BarEntry(i.toFloat(), 0f)) // Adicionando as colunas com valor 0
         }
+
+        // Atualizar o gráfico
+        val barDataSet = BarDataSet(entries, "")
+
+        //colorindo as colunas do grafico
+        barDataSet.color = android.graphics.Color.rgb(255, 50, 50) // colorindo as colunas da tabela de vermelho
+
+        //aplicando a formatação criada em "valueFormatter" nos textos que ficam acima de cada coluna
+        barDataSet.valueFormatter = createValueFormatter()
+
+        // Configurar o tamanho do texto dos valores nas colunas
+        barDataSet.valueTextSize = 14f // Exemplo: Tamanho 14sp
+
+        val barData = BarData(barDataSet)
+        grafico.data = barData
+        grafico.invalidate() // Atualiza o gráfico
     }
+
 
     // função que cria as legendas das colunas
     private fun criarLegendas(qtdDiasMes: Int, formataData: SimpleDateFormat, calendar: Calendar): Array<String>{
         val legendaColunas = mutableListOf<String>() // Lista mutável para armazenar as legendas
 
         //adiciona uma legenda para cada coluna do grafico
-        for (i in 1..qtdDiasMes) {
+        repeat (qtdDiasMes) {
             var dataFormatada = formataData.format(calendar.time) //pega o dia do mes e formata ele
 
             legendaColunas += dataFormatada //adiciona as datas formatadas no array

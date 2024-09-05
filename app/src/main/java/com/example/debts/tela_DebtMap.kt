@@ -3,6 +3,7 @@ package com.example.debts
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
@@ -11,7 +12,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosMetasFinanceiras_Usuario_BD_Debts
+import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.layout_Item_lista.ItemSpacingDecoration
 import com.example.debts.layout_Item_lista.MyConstraintAdapter
 import com.example.debts.lista_DebtMap.adapter_DebtMap
@@ -70,14 +73,17 @@ class tela_DebtMap : AppCompatActivity() {
         listasMetas_STR += listasMetas_STR
         listasMetas_STR += listaMetas2_STR
 
+        val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+
         //----------------------- config. lista de items DebtMap ---------------------------------//
 
         //chama a função para criar uma lista de dados do tipo "dados_listaMeta_DebtMap"
-        val listaDados1 = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap("Meta Cartão A", dataFormatada, listaMetas)
-        val listaDados2 = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap("Meta Cartão B", dataFormatada, listaMetas2)
+        //val listaDados1 = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap("Meta Cartão A", dataFormatada, listaMetas)
+        //val listaDados2 = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap("Meta Cartão B", dataFormatada, listaMetas2)
 
         //lista que contem todos os items do DebtMap
-        val listaDados = listaDados1 + listaDados2
+        //val listaDados = listaDados1 + listaDados2
+        val listaDados = BancoDados(this).listarMetas(IDusuario)
 
         val lista_Items_DebtMap: RecyclerView = findViewById(R.id.lista_Items_DebtMap)
 

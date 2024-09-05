@@ -8,10 +8,17 @@ import android.database.sqlite.SQLiteStatement
 import android.util.Log
 import android.widget.ArrayAdapter
 import androidx.recyclerview.widget.ListAdapter
+import com.example.debts.Conexao_BD.DadosMetasFinanceiras_Usuario_BD_Debts
 import com.example.debts.CustomToast
+import com.example.debts.FormatarNome.FormatarNome
+import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
+import com.example.debts.lista_DebtMap.dados_listaMeta_Item_DebtMap
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.util.Calendar
 
 class BancoDados(private var context: Context) {
     private lateinit var bancoDados: SQLiteDatabase
@@ -96,6 +103,7 @@ class BancoDados(private var context: Context) {
         }
     }
 
+    //função para verificar se já existe um email salva no BD na hora de criar uma conta
     fun verificarDados(email: String): Boolean {
 
         // Abre o banco de dados existente no caminho especificado
@@ -126,6 +134,7 @@ class BancoDados(private var context: Context) {
         return emailExiste
     }
 
+    //função para verificar se existe uma conta para fazer o login do usuario
     fun validarLogin(nome: String, senha: String): Boolean {
         // Abre o banco de dados existente no caminho especificado
         bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
@@ -159,6 +168,7 @@ class BancoDados(private var context: Context) {
         return contaExiste
     }
 
+    //função para salvar os dados do usuario logado
     fun salvarDadosUsuario(nome: String): List<String>? {
         val dbPath = context.getDatabasePath("Debts.db").absolutePath
         var bancoDados: SQLiteDatabase? = null
@@ -199,7 +209,7 @@ class BancoDados(private var context: Context) {
         return dadosUsuario
     }
 
-
+    // função para criar uma nova conta de usuario
     fun cadastrarConta(nome: String, email: String, cpf: String, senha: String) {
 
         // Abre o banco de dados existente no caminho especificado
@@ -236,6 +246,7 @@ class BancoDados(private var context: Context) {
         }
     }
 
+    //função para atualizar o nome ou email do usuario no BD
     fun atualizarDados(novoNome: String, novoEmail: String, IdUsuario: Int) {
         // Abre o banco de dados existente no caminho especificado
         bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
@@ -257,6 +268,7 @@ class BancoDados(private var context: Context) {
         }
     }
 
+    //função para atualizar a senha do usuario no BD
     fun atualizarSenha(novaSenha: String, IdUsuario: Int) {
         // Abre o banco de dados existente no caminho especificado
         bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
@@ -278,6 +290,7 @@ class BancoDados(private var context: Context) {
         }
     }
 
+    //função que retorna todos os gastos do mes do usuario
     fun gastosDiariosMes(mesGasto: String, IdUsuario: Int): List<Float> {
         // Abre o banco de dados existente no caminho especificado
         bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
@@ -317,25 +330,162 @@ class BancoDados(private var context: Context) {
         return listaGastos.toList()
     }
 
-    fun listarMetas() {
+    //função que retorna uma lista de itens que seram exibidos na tela DebtMap
+    fun listarMetas(IdUsuario: Int): List<dados_listaMeta_DebtMap> {
+        val listasItemsMetas = mutableListOf<dados_listaMeta_DebtMap>()
+
         try {
             // Abre o banco de dados existente no caminho especificado
             bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
-            //vai pegar todas as linhas onde o "id_usuario_meta" seja igual a "id_usuario"
-            val meuCursor: Cursor = bancoDados.rawQuery("SELECT m.* FROM Usuarios_Metas m JOIN Usuarios_Debts u ON m.id_usuario_meta = u.id_usuario WHERE m.id_usuario_meta = u.id_usuario", null)
-            var listasMetas_STR: MutableList<String> = mutableListOf()
+            // Consulta para obter as metas do usuário
+            val regatarMetas: Cursor = bancoDados.rawQuery("SELECT * FROM Metas_Financeiras WHERE id_user_meta = ?", arrayOf(IdUsuario.toString()))
 
-            val adapter= ArrayAdapter<String> (
-                context,
-                android.R.layout.simple_list_item_1
+            // Verifica se há resultados e processa todos
+            if (regatarMetas.moveToFirst()) {
+                do {
+                    val idMeta = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("id_meta")).toString()
+                    val nomeMeta = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("nome_meta")).toString()
+                    val dataMeta = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("dt_meta")).toString()
+                    val listaMetasJSON = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("lista_metas"))
+
+                    //formatando o nome da meta
+                    val nomeFormatado = FormatarNome().formatar(nomeMeta)
+
+                    // Especifica o tipo da lista para deserialização
+                    val tipoLista = object : TypeToken<List<String>>() {}.type
+
+                    // Converte a lista JSON resgatada do BD para o tipo "List<String>"
+                    val listaMetas: List<String> = Gson().fromJson(listaMetasJSON, tipoLista)
+
+                    // Converte a lista recuperada
+                    val listaConvertida = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas)
+
+                    //faz o fatiamento da data
+                    val dia = dataMeta.substring(8,10)
+                    val mes = (dataMeta.substring(5,7)).toInt()
+                    val ano = dataMeta.substring(0,4)
+
+                    // Obtém o nome do mês atual para exibição
+                    var nomeMes = Calendar.getInstance().getDisplayName(mes, Calendar.LONG, java.util.Locale.getDefault())
+
+                    val dataFormatada = "$dia de $nomeMes de $ano"
+
+                    // Cria o item DebtMap
+                    val itemDebtMap = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap(idMeta, nomeFormatado, dataFormatada, listaConvertida)
+
+                    // Adiciona o item à lista de itens
+                    listasItemsMetas += itemDebtMap
+                } while (regatarMetas.moveToNext()) // Continua para o próximo item
+            }
+
+            regatarMetas.close()
+        } catch (e: Exception) {
+            CustomToast().showCustomToast(context, "Erro recuper metas: ${e.message}")
+            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+
+        // Retorna a lista de itens
+        return listasItemsMetas.toList()
+    }
+
+    //função que retorna a lista de estados da metas (lista guarda qual meta já foi concluida ou não concluida)
+    fun MetasConcluidas(IdUsuario: Int, IdMeta: String): MutableList<Boolean> {
+        var estadosMetas: MutableList<Boolean> = mutableListOf()
+
+        try {
+            // Abre o banco de dados existente no caminho especificado
+            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+            // Consulta para obter as metas do usuário
+            val listaEstadoMetas: Cursor = bancoDados.rawQuery("SELECT metas_concluidas FROM Metas_Financeiras WHERE id_user_meta = ? AND id_meta = ?", arrayOf(IdUsuario.toString(), IdMeta))
+
+            if (listaEstadoMetas.moveToFirst()) {
+                val estadosMetasJSON = listaEstadoMetas.getString(listaEstadoMetas.getColumnIndexOrThrow("metas_concluidas")).toString()
+
+                // Especifica o tipo da lista para deserialização
+                val tipoLista = object : TypeToken<List<Boolean>>() {}.type
+
+                // Converte a lista JSON resgatada do BD para o tipo "List<String>"
+                estadosMetas = Gson().fromJson(estadosMetasJSON, tipoLista)
+            }
+
+        } catch (e: Exception) {
+            CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")
+            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+
+        return estadosMetas
+    }
+
+    fun pegarProgressoAtualMeta(IDusuario: Int, idMeta:String): Float {
+        var progressoMetaAtual: Float = 0f
+
+        try {
+            // Abre o banco de dados existente no caminho especificado
+            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+            // Consulta para obter o progresso da meta do usuário
+            val progressoMetaSalvo = bancoDados.rawQuery(
+                "SELECT progresso_meta FROM Metas_Financeiras WHERE id_user_meta = ? AND id_meta = ?",
+                arrayOf(IDusuario.toString(), idMeta)
             )
 
-            bancoDados.close()
+            // Verifica se há resultados e extrai o valor do progresso_meta
+            if (progressoMetaSalvo.moveToFirst()) {
+                progressoMetaAtual = progressoMetaSalvo.getFloat(progressoMetaSalvo.getColumnIndexOrThrow("progresso_meta"))
+            }
+
+            // Fecha o cursor após o uso
+            progressoMetaSalvo.close()
+
+        } catch (e: Exception) {
+            CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")
+            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
         }
-        catch (e: Exception) {
-            CustomToast().showCustomToast(context, "Erro Consulta: ${e.printStackTrace()}")
-            Log.e("Erro Consulta:", "${e.printStackTrace()}")
+
+        return progressoMetaAtual
+    }
+
+    fun salvarEstadoMetas(IDusuario: Int, listaEstadoMetas: List<Boolean>, idMeta:String, progressoMeta: Float){
+        try {
+
+            // Abre o banco de dados existente no caminho especificado
+            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+            //convertendo a lista de estados para JSON para poder salvar no banco de dados
+            val listaJSON = Gson().toJson(listaEstadoMetas)
+
+            // Cria um objeto ContentValues para usar parâmetros seguros
+            val salvarEstados = ContentValues().apply {
+                put("metas_concluidas", listaJSON)
+                put("progresso_meta", progressoMeta)
+            }
+
+            // Consulta para obter as metas do usuário
+            val query = "id_user_meta = ? AND id_meta = ?"
+            val values = arrayOf(IDusuario.toString(), idMeta)
+
+            bancoDados.update("Metas_Financeiras", salvarEstados, query, values)
+
+        } catch (e: Exception) {
+            CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")
+            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
             if (::bancoDados.isInitialized) {

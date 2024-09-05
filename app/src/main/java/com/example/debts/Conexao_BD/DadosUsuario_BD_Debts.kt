@@ -7,6 +7,10 @@ import com.example.debts.CustomToast
 
 class DadosUsuario_BD_Debts(private val context: Context) {
 
+    object listaMetaEstados {
+        var estados: MutableList<Boolean> = mutableListOf()
+    }
+
     var usuarioLogado: String = recuperarUsuarioLogado()
 
     private val dadosUsuario = BancoDados(context)
@@ -95,4 +99,12 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
         return emailUsuario ?: "Email não encontrado"
     }
+
+    fun pegarListaEstadosMetas(IDusuario: Int, IDmeta: String): MutableList<Boolean> {
+
+        listaMetaEstados.estados = BancoDados(context).MetasConcluidas(IDusuario, IDmeta)
+
+        return listaMetaEstados.estados
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.example.debts.lista_DebtMap
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +10,9 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.debts.BD_SQLite_App.BancoDados
+import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts.listaMetaEstados
 import com.example.debts.R
 import com.example.debts.layoutExpandivel.criarListaItems
 import com.example.debts.layoutExpandivel.removerListaItems
@@ -19,6 +23,7 @@ import com.mikhaellopez.circularprogressbar.CircularProgressBar
 
 class adapter_DebtMap(private val items: List<dados_listaMeta_DebtMap>, private val context: Context): RecyclerView.Adapter<adapter_DebtMap.MyViewHolder>(){
 
+    private val IDusuario = DadosUsuario_BD_Debts(context).pegarIdUsuario()
     private var listaMeta_isExpanded = false
     var existeRecyclerView = false
 
@@ -36,6 +41,7 @@ class adapter_DebtMap(private val items: List<dados_listaMeta_DebtMap>, private 
         val item = items[position]
         holder.txt_NomeMeta.text = item.nomeMeta
         holder.txt_dtCriacaoMeta.text = item.dataCriacaoMeta
+        holder.lista_Meta_ID.text = item.idMeta
 
         // Obtém os LayoutParams do ConstraintLayout
         val lyt_Item_DebtMap_Params = holder.lyt_Item_DebtMap.layoutParams
@@ -46,18 +52,22 @@ class adapter_DebtMap(private val items: List<dados_listaMeta_DebtMap>, private 
         holder.lista_Metas_Item_DebtMap.isNestedScrollingEnabled = false // Desative o scroll aninhado
 
         // Crie o adaptador para o RecyclerView
-        val adapter = adapter_Item_DebtMap(item.listaMetas_Item, holder.circularProgressBar_ItemDebtMap, holder.txt_IndicadorProgresso_ItemDebtMap)
+        val adapter = adapter_Item_DebtMap(item.listaMetas_Item, holder.circularProgressBar_ItemDebtMap, holder.txt_IndicadorProgresso_ItemDebtMap, context, holder.lista_Meta_ID.text.toString())
 
         //adicionando os items na lista
         holder.lista_Metas_Item_DebtMap.adapter = adapter
 
         holder.btn_Detalhes_ItemDebtMap.setOnClickListener {
 
+            //Log.d("ID Metas", "ID antigo: $id_meta_antigo, ID atual: $id_meta_atual")
+
             if (listaMeta_isExpanded) {
                 // mostra a lista de items do campo
                 holder.lista_Metas_Item_DebtMap.visibility = View.VISIBLE
 
             } else {
+                Log.d("Lista de Estados Metas", "${listaMetaEstados.estados}")
+
                 // escode a lista de items do campo
                 holder.lista_Metas_Item_DebtMap.visibility = View.GONE
             }
@@ -81,5 +91,6 @@ class adapter_DebtMap(private val items: List<dados_listaMeta_DebtMap>, private 
         val circularProgressBar_ItemDebtMap: CircularProgressBar = view.findViewById(R.id.circularProgressBar_ItemDebtMap)
         val txt_IndicadorProgresso_ItemDebtMap: TextView = view.findViewById(R.id.txt_IndicadorProgresso_ItemDebtMap)
         val lista_Metas_Item_DebtMap: RecyclerView = view.findViewById(R.id.lista_Metas_Item_DebtMap)
+        val lista_Meta_ID: TextView = view.findViewById(R.id.txt_id_Meta)
     }
 }

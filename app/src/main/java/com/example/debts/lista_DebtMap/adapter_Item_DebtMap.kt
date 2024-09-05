@@ -1,7 +1,9 @@
 package com.example.debts.lista_DebtMap
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.Paint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,12 +12,22 @@ import android.widget.CheckBox
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.example.debts.BD_SQLite_App.BancoDados
+import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts.listaMetaEstados
 import com.example.debts.R
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 
-class adapter_Item_DebtMap(private val items: List<dados_listaMeta_Item_DebtMap> = emptyList(), var indicadorProgresso: CircularProgressBar, var txt_IndicadorProgresso: TextView): RecyclerView.Adapter<adapter_Item_DebtMap.MyViewHolder>() {
+class adapter_Item_DebtMap(private val items: List<dados_listaMeta_Item_DebtMap> = emptyList(), var indicadorProgresso: CircularProgressBar, var txt_IndicadorProgresso: TextView, val context: Context, val lista_Meta_ID:String): RecyclerView.Adapter<adapter_Item_DebtMap.MyViewHolder>() {
 
-    private var progressoAtual_IndicadorProgresso: Float = 0f
+    private val IDusuario = DadosUsuario_BD_Debts(context).pegarIdUsuario()
+    private var progressoAtual_IndicadorProgresso: Float = BancoDados(context).pegarProgressoAtualMeta(IDusuario, lista_Meta_ID)
+    private var listaEstadoMetas = DadosUsuario_BD_Debts(context).pegarListaEstadosMetas(IDusuario, lista_Meta_ID)
+
+    init {
+        // Atualiza o gráfico circular logo após o adaptador ser inicializado
+        obterIndicadorProgressoCircular()
+    }
 
     fun obterIndicadorProgressoCircular() {
         txt_IndicadorProgresso.text = "${String.format("%.0f", progressoAtual_IndicadorProgresso)}%" //formatado o texto do indicador de progresso
@@ -39,11 +51,13 @@ class adapter_Item_DebtMap(private val items: List<dados_listaMeta_Item_DebtMap>
         val item = items[position]
 
         holder.checkBox_Meta_Item.text = item.nomeMeta
+        holder.checkBox_Meta_Item.isChecked = listaEstadoMetas.getOrElse(position) {false}
 
         //configurando o click no checkBox
-        holder.checkBox_Meta_Item.setOnClickListener{
+        holder.checkBox_Meta_Item.setOnCheckedChangeListener { _, isChecked ->
+            listaEstadoMetas[position] = isChecked
 
-            if(holder.checkBox_Meta_Item.isChecked){
+            if (listaEstadoMetas[position]) {
                 //risca o texto se o checkBox tiver sido marcado
                 holder.checkBox_Meta_Item.paintFlags = holder.checkBox_Meta_Item.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
                 //colorindo o texto de preto com 50% de tranparencia da cor
@@ -63,8 +77,13 @@ class adapter_Item_DebtMap(private val items: List<dados_listaMeta_Item_DebtMap>
                 holder.checkBox_Meta_Item.paintFlags = holder.checkBox_Meta_Item.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
             }
 
+            Log.d("EstadoCheckBox", "$listaEstadoMetas")
+
+            BancoDados(context).salvarEstadoMetas(IDusuario, listaEstadoMetas, lista_Meta_ID, progressoAtual_IndicadorProgresso)
+
             obterIndicadorProgressoCircular()
         }
+
     }
 
     //Este método retorna o número total de itens na lista, o que informa ao RecyclerView quantos itens ele deve exibir.

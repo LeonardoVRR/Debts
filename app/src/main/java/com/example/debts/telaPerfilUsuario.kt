@@ -224,6 +224,13 @@ class telaPerfilUsuario : AppCompatActivity() {
         return valorTotal
     }
 
+    //função para ir a tela de rendimentos
+    fun telaRendimentos(v: View) {
+        val navegarTelaRendimento = Intent(this, telaAdicionarRendimentos::class.java)
+        startActivity(navegarTelaRendimento)
+        finish()
+    }
+
     //função para voltar a tela inicial do aplicativo
     fun voltarTelaInicial(v: View){
         val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)

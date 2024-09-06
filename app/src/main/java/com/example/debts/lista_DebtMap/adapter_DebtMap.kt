@@ -1,19 +1,25 @@
 package com.example.debts.lista_DebtMap
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts.listaMetaEstados
+import com.example.debts.CustomToast
+import com.example.debts.MainActivity
 import com.example.debts.R
+import com.example.debts.aviso_Deletar_Meta.avisoDeletarMeta
 import com.example.debts.layoutExpandivel.criarListaItems
 import com.example.debts.layoutExpandivel.removerListaItems
 import com.example.debts.layout_Item_lista.MyConstraintAdapter
@@ -51,13 +57,17 @@ class adapter_DebtMap(private val items: List<dados_listaMeta_DebtMap>, private 
         holder.lista_Metas_Item_DebtMap.setHasFixedSize(true)
         holder.lista_Metas_Item_DebtMap.isNestedScrollingEnabled = false // Desative o scroll aninhado
 
-        // Crie o adaptador para o RecyclerView
-        val adapter = adapter_Item_DebtMap(item.listaMetas_Item, holder.circularProgressBar_ItemDebtMap, holder.txt_IndicadorProgresso_ItemDebtMap, context, holder.lista_Meta_ID.text.toString())
+        //configurando o click do botão excluir meta
+        holder.btn_ExcluirMeta.setOnClickListener {
+            avisoDeletarMeta(context, holder.lista_Meta_ID.text.toString(), IDusuario, holder.txt_NomeMeta.text.toString()).AvisoDeletarMeta()
+        }
 
-        //adicionando os items na lista
-        holder.lista_Metas_Item_DebtMap.adapter = adapter
-
+        //configurando o click do botão detalhes
         holder.btn_Detalhes_ItemDebtMap.setOnClickListener {
+
+            //obtendo o progresso atual da meta
+            var progressoAtual_IndicadorProgresso: Float = BancoDados(context).pegarProgressoAtualMeta(IDusuario, holder.lista_Meta_ID.text.toString())
+
 
             //Log.d("ID Metas", "ID antigo: $id_meta_antigo, ID atual: $id_meta_atual")
 
@@ -65,11 +75,20 @@ class adapter_DebtMap(private val items: List<dados_listaMeta_DebtMap>, private 
                 // mostra a lista de items do campo
                 holder.lista_Metas_Item_DebtMap.visibility = View.VISIBLE
 
+                if (progressoAtual_IndicadorProgresso == 100f) {
+                    holder.btn_ExcluirMeta.visibility = View.VISIBLE
+                }
+
+                else {
+                    holder.btn_ExcluirMeta.visibility = View.GONE
+                }
+
             } else {
                 Log.d("Lista de Estados Metas", "${listaMetaEstados.estados}")
 
                 // escode a lista de items do campo
                 holder.lista_Metas_Item_DebtMap.visibility = View.GONE
+                holder.btn_ExcluirMeta.visibility = View.GONE
             }
 
             holder.lista_Metas_Item_DebtMap.requestLayout()
@@ -77,6 +96,12 @@ class adapter_DebtMap(private val items: List<dados_listaMeta_DebtMap>, private 
 
             listaMeta_isExpanded = !listaMeta_isExpanded
         }
+
+        // Crie o adaptador para o RecyclerView
+        val adapter = adapter_Item_DebtMap(item.listaMetas_Item, holder.circularProgressBar_ItemDebtMap, holder.txt_IndicadorProgresso_ItemDebtMap, context, holder.lista_Meta_ID.text.toString(), holder.btn_ExcluirMeta)
+
+        //adicionando os items na lista
+        holder.lista_Metas_Item_DebtMap.adapter = adapter
     }
 
     //Este método retorna o número total de itens na lista, o que informa ao RecyclerView quantos itens ele deve exibir.
@@ -92,5 +117,6 @@ class adapter_DebtMap(private val items: List<dados_listaMeta_DebtMap>, private 
         val txt_IndicadorProgresso_ItemDebtMap: TextView = view.findViewById(R.id.txt_IndicadorProgresso_ItemDebtMap)
         val lista_Metas_Item_DebtMap: RecyclerView = view.findViewById(R.id.lista_Metas_Item_DebtMap)
         val lista_Meta_ID: TextView = view.findViewById(R.id.txt_id_Meta)
+        val btn_ExcluirMeta: ImageButton = view.findViewById(R.id.btn_ExcluirMeta)
     }
 }

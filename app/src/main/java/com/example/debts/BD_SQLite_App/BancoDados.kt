@@ -534,6 +534,67 @@ class BancoDados(private var context: Context) {
         return listaGastosMes.toList()
     }
 
+    //função para salvar uma nova meta
+    fun salvarMeta(nomeMeta: String, dataMeta: String, listaMetas:List<String>, listaMetasEstados: List<Boolean>, progressoMeta: Float, IDusuario: Int) {
+
+        try {
+
+            // Abre o banco de dados existente no caminho especificado
+            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+            //convertendo a lista de metas para JSON para poder salvar no banco de dados
+            val listaMetasJSON = Gson().toJson(listaMetas)
+
+            //convertendo a lista de estados para JSON para poder salvar no banco de dados
+            val listaMetasEstadosJSON = Gson().toJson(listaMetasEstados)
+
+            val nomeMetaFormatado = nomeMeta.lowercase()
+
+            // query para salvar uma nova meta do usuário
+            val query = "INSERT INTO Metas_Financeiras (nome_meta, dt_meta, lista_metas, metas_concluidas, progresso_meta, id_user_meta) VALUES ('$nomeMetaFormatado', '$dataMeta', '$listaMetasJSON', '$listaMetasEstadosJSON', $progressoMeta, $IDusuario)"
+
+            //executa a query
+            bancoDados.execSQL(query)
+
+            CustomToast().showCustomToast(context, "Meta salva com sucesso!")
+
+        } catch (e: Exception) {
+            CustomToast().showCustomToast(context, "Erro ao salvar meta: ${e.message}")
+            Log.e("Erro ao salvar meta:", e.message ?: "Erro desconhecido")
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+    }
+
+    //função para excluir uma meta
+    fun excluirMeta(IDusuario: Int, IdMeta: String) {
+        try {
+
+            // Abre o banco de dados existente no caminho especificado
+            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+            // query para excluir uma meta do usuário
+            val query = "DELETE FROM Metas_Financeiras WHERE id_user_meta = $IDusuario AND id_meta = $IdMeta"
+
+            //executa a query
+            bancoDados.execSQL(query)
+
+            CustomToast().showCustomToast(context, "Meta deletada com sucesso!")
+
+        } catch (e: Exception) {
+            CustomToast().showCustomToast(context, "Erro ao salvar meta: ${e.message}")
+            Log.e("Erro ao salvar meta:", e.message ?: "Erro desconhecido")
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+    }
+
     //função que retorna uma lista de itens que seram exibidos na tela DebtMap
     fun listarMetas(IdUsuario: Int): List<dados_listaMeta_DebtMap> {
         val listasItemsMetas = mutableListOf<dados_listaMeta_DebtMap>()

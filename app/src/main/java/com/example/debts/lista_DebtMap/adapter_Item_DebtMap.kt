@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
@@ -18,7 +19,7 @@ import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts.listaMetaEstados
 import com.example.debts.R
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 
-class adapter_Item_DebtMap(private val items: List<dados_listaMeta_Item_DebtMap> = emptyList(), var indicadorProgresso: CircularProgressBar, var txt_IndicadorProgresso: TextView, val context: Context, val lista_Meta_ID:String): RecyclerView.Adapter<adapter_Item_DebtMap.MyViewHolder>() {
+class adapter_Item_DebtMap(private val items: List<dados_listaMeta_Item_DebtMap> = emptyList(), var indicadorProgresso: CircularProgressBar, var txt_IndicadorProgresso: TextView, val context: Context, val lista_Meta_ID:String, val btn_ExcluirMeta: ImageButton): RecyclerView.Adapter<adapter_Item_DebtMap.MyViewHolder>() {
 
     private val IDusuario = DadosUsuario_BD_Debts(context).pegarIdUsuario()
     private var progressoAtual_IndicadorProgresso: Float = BancoDados(context).pegarProgressoAtualMeta(IDusuario, lista_Meta_ID)
@@ -77,7 +78,19 @@ class adapter_Item_DebtMap(private val items: List<dados_listaMeta_Item_DebtMap>
                 holder.checkBox_Meta_Item.paintFlags = holder.checkBox_Meta_Item.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
             }
 
-            Log.d("EstadoCheckBox", "$listaEstadoMetas")
+            //configurando a visibilidade do botão excluir meta
+            if (progressoAtual_IndicadorProgresso == 100f) {
+
+                //quando a meta chegar a 100% vai aparecer o botão excluir meta
+                btn_ExcluirMeta.visibility = View.VISIBLE
+            }
+
+            else {
+                //quando a meta for menor que 100% vai desaparecer o botão excluir meta
+                btn_ExcluirMeta.visibility = View.GONE
+            }
+
+            //Log.d("EstadoCheckBox", "$listaEstadoMetas")
 
             BancoDados(context).salvarEstadoMetas(IDusuario, listaEstadoMetas, lista_Meta_ID, progressoAtual_IndicadorProgresso)
 

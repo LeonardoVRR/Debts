@@ -18,7 +18,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.BD_SQLite_App.BancoDados
+import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.ManipularUsoCartaoCredito.ManipularUsoCartaoCredito
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
+import java.util.Locale
 
 class tela_Consulta_IA : AppCompatActivity() {
     private var valorSeekBarFinal: Int = 0
@@ -69,11 +76,12 @@ class tela_Consulta_IA : AppCompatActivity() {
             //função que vai executar quando o usuário terminar de interagir com o seekBar
             override fun onStopTrackingTouch(seekBar: SeekBar) {
                 valorSeekBarFinal = valorSeekBar
-                CustomToast().showCustomToast(this@tela_Consulta_IA, "Conhecimento: ${valorSeekBarFinal}%")
+                //CustomToast().showCustomToast(this@tela_Consulta_IA, "Conhecimento: ${valorSeekBarFinal}%")
             }
         })
 
         //------------------ config. campo uso cartão credito ------------------------------------//
+
         val painel_opc1: EditText = findViewById(R.id.editTextNumber_opc1)
         val painel_opc2: EditText = findViewById(R.id.editTextNumber_opc2)
         val painel_opc3: EditText = findViewById(R.id.editTextNumber_opc3)
@@ -222,6 +230,16 @@ class tela_Consulta_IA : AppCompatActivity() {
     //função para salvar os dados na lista de dados p/ calcular a rota financeira
     fun CalcularRotaFinanceira(v: View) {
 
+        var listaMetasCriadas: MutableList<String> = mutableListOf(
+            "economizar R$ 1000,00 para uma viagem",
+            "quitar uma dívida de R$ 500,00",
+            "acumular R$ 2000,00 em fundo de emergência",
+            "investir R$ 300,00 por mês em ações",
+            "economizar R$ 1500,00 para a compra de um novo eletrônico"
+        )
+
+        val nomeMeta = "Meta Cartão A"
+
         //--------------- config. lista de dados para calcular rota financeira -------------------//
         val listaDadosCalcularRotaFinanceira: MutableList<String> = mutableListOf()
 
@@ -241,6 +259,32 @@ class tela_Consulta_IA : AppCompatActivity() {
         listaDadosCalcularRotaFinanceira += "Uso cartão App de entregas: ${valor_painel_opc3}"
 
         Log.d("LISTA CALCULAR ROTA", "${listaDadosCalcularRotaFinanceira}")
+
+        metasCriadas(nomeMeta, listaMetasCriadas)
+    }
+
+    //função para salvar a lista de metas criadas pela IA
+    fun metasCriadas(nomeMeta: String, listaMetasCriadas: MutableList<String>) {
+
+        //--------------- config. data de criação da meta ----------------------------------------//
+
+        // Obtendo a data atual para a criação da meta
+
+        val dataCriacaoMeta = Calendar.getInstance().time // Cria uma instância de Calendar e pega a data atual
+
+        // Define uma formação para a data
+        val formataData = SimpleDateFormat("yyyy-MM-dd", Locale("pt", "BR"))
+        // usa a formatação definida
+        var dataCriacaoMetaFormatada = formataData.format(dataCriacaoMeta)
+
+        //--------------- fim da config. data de criação da meta ---------------------------------//
+
+        val listaMetas = listaMetasCriadas.toList()
+        val listaMetaEstados = MutableList(listaMetasCriadas.size) { false } // Inicializa uma lista com a qtd de elementos referente a qtd de metas e com todos os valores como false
+        val progressoMeta: Float = 0f
+        val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+
+        BancoDados(this).salvarMeta(nomeMeta, dataCriacaoMetaFormatada, listaMetas, listaMetaEstados, progressoMeta, IDusuario)
     }
 
     //função para voltar a tela inicial do aplicativo

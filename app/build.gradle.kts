@@ -66,6 +66,9 @@ dependencies {
     //Circular ProgressBar
     implementation("com.mikhaellopez:circularprogressbar:3.1.0")
 
+    //maskara (formatação de texto de input) - https://github.com/santalu/maskara
+    implementation("com.github.santalu:maskara:1.0.0")
+
     //JSON
     implementation("com.google.code.gson:gson:2.10.1")
 

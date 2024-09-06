@@ -15,16 +15,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.debts.BD_SQLite_App.BancoDados
-import com.example.debts.Conexao_BD.ConexaoBD
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
-import com.example.debts.Conexao_BD.conexaoBD_Debts
-import com.example.debts.Conexao_BD.conexaoBanco_Debts
 import com.example.debts.visibilidadeSenha.AlterarVisibilidade
-import java.sql.Connection
-import java.sql.ResultSet
-import java.sql.Statement
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
 
@@ -105,24 +97,6 @@ class MainActivity : AppCompatActivity() {
         val navegarCadastrarConta = Intent(this, criarConta::class.java)
         startActivity(navegarCadastrarConta)
         finish()
-    }
-
-    fun autenticacaoLogin(v: View) {
-        val inputNome: EditText = findViewById(R.id.input_nomeUsuarioLogin)
-        val inputSenha: EditText = findViewById(R.id.input_senhaLogin)
-
-        val limparEntradaNome = inputNome.text.toString().lowercase().trim()
-        val limparEntradaSenha = inputSenha.text.toString().trim()
-
-        //var usu = usuarioDAO().selecionarUsuario(limparEntradaNome, limparEntradaSenha)
-//
-//        if (usu != null) {
-//            Log.v("conexão BD", "Sucesso")
-//        }
-//
-//        else {
-//            Log.v("conexão BD", "Fracasso")
-//        }
     }
 
 }

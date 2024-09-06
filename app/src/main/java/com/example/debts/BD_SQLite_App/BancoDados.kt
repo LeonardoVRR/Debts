@@ -760,4 +760,65 @@ class BancoDados(private var context: Context) {
             }
         }
     }
+
+    fun salvarRendimento(descricaoRendimento: String, tipoTransacao: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int) {
+        try {
+
+            // Abre o banco de dados existente no caminho especificado
+            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+            val descricaoRendimentoFormatado = descricaoRendimento.lowercase()
+            val tipoTransacaoFormatado = tipoTransacao.lowercase()
+
+            //formatando a data
+            //faz o fatiamento da data
+            val dia = dataRendimento.substring(0, 2)
+            val mes = dataRendimento.substring(3, 5)
+            val ano = dataRendimento.substring(6, 10)
+
+            val dataFormatada = "$ano-$mes-$dia"
+
+            // query para salvar uma nova meta do usuário
+            val query = "INSERT INTO Rendimentos (descricao_rendimento, tp_transacao, dt_rendimento, valor_redimento, id_user_rendimento) VALUES ('$descricaoRendimentoFormatado', '$tipoTransacaoFormatado', '$dataFormatada', $valorRendimento, $IDusuario)"
+
+            //executa a query
+            bancoDados.execSQL(query)
+
+            CustomToast().showCustomToast(context, "Rendimento salvo com sucesso!")
+
+        } catch (e: Exception) {
+            CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")
+            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+    }
+
+    fun deletarUsuario(IDusuario: Int) {
+        try {
+
+            // Abre o banco de dados existente no caminho especificado
+            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+            // query para excluir um usuário
+            val query = " DELETE FROM Usuarios_Debts WHERE id_usuario = $IDusuario"
+
+            //executa a query
+            bancoDados.execSQL(query)
+
+            //CustomToast().showCustomToast(context, "Meta deletada com sucesso!")
+
+        } catch (e: Exception) {
+            CustomToast().showCustomToast(context, "Erro ao salvar meta: ${e.message}")
+            Log.e("Erro ao salvar meta:", e.message ?: "Erro desconhecido")
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+    }
 }

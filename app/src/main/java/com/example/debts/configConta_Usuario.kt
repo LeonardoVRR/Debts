@@ -150,10 +150,14 @@ class configConta_Usuario : AppCompatActivity() {
         val btnConfirmarExclusao: Button = dialogView.findViewById(R.id.btn_ConfirmarExclusaoConta)
         val btnCancelarExclusao: Button = dialogView.findViewById(R.id.btn_CancelarExclusaoConta)
 
+        val idUsuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+
         // Configurar ações para os botões
         btnConfirmarExclusao.setOnClickListener {
             CustomToast().showCustomToast(this, "Conta excluída com sucesso.")
             dialog.dismiss()
+
+            BancoDados(this).deletarUsuario(idUsuario)
 
             val voltarTelaLogin = Intent(this, MainActivity::class.java)
             startActivity(voltarTelaLogin)

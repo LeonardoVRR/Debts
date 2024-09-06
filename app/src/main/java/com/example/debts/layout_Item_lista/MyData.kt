@@ -8,4 +8,4 @@ data class MyData(
     val forma_pagamento: String,
     val valor_compra: String,
     val data_compra: String
-):Serializable
+)

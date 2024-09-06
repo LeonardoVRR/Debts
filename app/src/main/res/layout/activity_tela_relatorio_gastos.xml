@@ -195,10 +195,12 @@
         android:layout_marginEnd="10dp"
         android:background="@drawable/layout_graf_custom"
 
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lytExp_Entradas">
+        app:layout_constraintTop_toBottomOf="@+id/lytExp_Entradas"
+        tools:visibility="gone">
 
         <TextView
             android:id="@+id/textView17"

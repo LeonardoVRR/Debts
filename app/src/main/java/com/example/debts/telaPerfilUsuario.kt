@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
@@ -29,13 +30,10 @@ import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import java.text.NumberFormat
+import java.util.Calendar
 import java.util.Locale
 
 class telaPerfilUsuario : AppCompatActivity() {
-
-    private val listaEntradas = DadosFinanceiros_Usuario_BD_Debts().pegarListaEntradasMes()
-
-    private val listaGastos = DadosFinanceiros_Usuario_BD_Debts().pegarListaGastosMes() + DadosFinanceiros_Usuario_BD_Debts().pegarListaDespesasMes()
 
     private val listaCoresPieChart = listOf(
         android.graphics.Color.rgb(109, 251, 114),
@@ -47,7 +45,7 @@ class telaPerfilUsuario : AppCompatActivity() {
     fun formatToCurrency(value: Float): String =
         NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(value)
 
-    @SuppressLint("MissingInflatedId")
+    //@SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -57,6 +55,30 @@ class telaPerfilUsuario : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+
+        val listaEntradas = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaEntradasMes()
+
+        val listaGastos = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaGastosMes()
+
+        val listaGastosRecentes = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaGastosRecentes()
+
+        //--------------- config. nome do mes grafico de pizza -----------------------------------//
+
+        //manipulando data
+        var calendar = Calendar.getInstance() // Cria uma instância de Calendar
+        var anoAtual = calendar.get(Calendar.YEAR) //pegando o ano atual
+        var mesAtual = calendar.get(Calendar.MONTH) //pegando o mes atual
+
+        // Obtém o nome do mês atual para exibição
+        var nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+
+        val nomeMesFormatado = "${FormatarNome().formatar(nomeMes)} $anoAtual"
+
+        val txtMesAtual: TextView = findViewById(R.id.txtMesAtual)
+
+        txtMesAtual.text = nomeMesFormatado
 
         //-------------- config. lista de items Despesas Recentes --------------------------------//
 
@@ -70,7 +92,7 @@ class telaPerfilUsuario : AppCompatActivity() {
         listaDespesasRecentes.addItemDecoration(ItemSpacingDecoration())
 
         // Crie o adaptador para o RecyclerView
-        val adapter = MyConstraintAdapter(pegarDados(listaGastos))
+        val adapter = MyConstraintAdapter(listaGastosRecentes)
 
         //adicionando os items na lista
         listaDespesasRecentes.adapter = adapter
@@ -89,8 +111,8 @@ class telaPerfilUsuario : AppCompatActivity() {
 //        }
 
         //--------------------- config. Texto Relatoiro Resumo Mes -------------------------------//
-        val somarItemsListaEntradas = somarValoresCampo(pegarDados(listaEntradas))
-        val somarItemsListaGastos = somarValoresCampo(pegarDados(listaGastos))
+        val somarItemsListaEntradas = somarValoresCampo(listaEntradas)
+        val somarItemsListaGastos = somarValoresCampo(listaGastos)
         val valorTotal = somarItemsListaEntradas - somarItemsListaGastos
 
         val txtValorOrçamento: TextView = findViewById(R.id.txtValor_Orcamento)

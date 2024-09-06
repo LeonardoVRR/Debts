@@ -49,12 +49,6 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
     private lateinit var recyclerViewManager: criarListaItems
 
-    private val listaEntradas = DadosFinanceiros_Usuario_BD_Debts().pegarListaEntradasMes()
-
-    private val listaDespesas = DadosFinanceiros_Usuario_BD_Debts().pegarListaDespesasMes()
-
-    private val listaGastos = DadosFinanceiros_Usuario_BD_Debts().pegarListaGastosMes()
-
     //função para formatar numeros float para o formato Real(R$)
     fun formatToCurrency(value: Float): String =
         NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(value)
@@ -69,10 +63,16 @@ class tela_RelatorioGastos : AppCompatActivity() {
             insets
         }
 
+        val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+
+        val listaEntradas = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaEntradasMes()
+
+        //private val listaDespesas = DadosFinanceiros_Usuario_BD_Debts().pegarListaDespesasMes()
+
+        val listaGastos = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaGastosMes()
+
         //id do usuario logado
         val usuarioID = DadosUsuario_BD_Debts(this).pegarIdUsuario()
-
-        CustomToast().showCustomToast(this, "ID: $usuarioID")
 
         // Inicializar o RecyclerViewManager
         recyclerViewManager = criarListaItems(this)
@@ -112,10 +112,6 @@ class tela_RelatorioGastos : AppCompatActivity() {
         var legendaColunas = criarLegendas(qtdDiasMes, formataData, calendar)
 
         //lista que vai conter os gastos diarios do mes
-//        var listaValores = listOf<Float>(4.3f, 8.9f, 7.1f, 2.4f, 5.6f, 9.3f, 3.8f, 6.5f, 1.7f, 0.9f,
-//            12.4f, 11.2f, 7.9f, 10.6f, 8.2f, 5.4f, 9.7f, 4.1f, 3.6f, 11.8f,
-//            6.3f, 2.8f, 10.1f, 7.4f, 1.2f, 8.7f, 4.9f, 9.1f, 12.6f, 5.8f)
-
         var listaValores: MutableList<Float> = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID).toMutableList()
 
         //quando o btn_ProxMes for clicado vai chamar uma função para avançar o mes
@@ -293,11 +289,11 @@ class tela_RelatorioGastos : AppCompatActivity() {
         val lytParams_Entradas = lytExp_Entradas.layoutParams as ConstraintLayout.LayoutParams
 
         //---------- Configurando o Campo Despesas ------------------------//
-        val btnExp_Despesas: ImageButton = findViewById(R.id.btnExp_Despesas)
-        val lytExp_Despesas: ConstraintLayout = findViewById(R.id.lytExp_Despesas)
-
-        //obtendo os parametros da minha view "lytExp_Despesas" e as convertendo para `ConstraintLayout.LayoutParams` para poderem ser manipuladas
-        val lytParams_Despesas = lytExp_Despesas.layoutParams as ConstraintLayout.LayoutParams
+//        val btnExp_Despesas: ImageButton = findViewById(R.id.btnExp_Despesas)
+//        val lytExp_Despesas: ConstraintLayout = findViewById(R.id.lytExp_Despesas)
+//
+//        //obtendo os parametros da minha view "lytExp_Despesas" e as convertendo para `ConstraintLayout.LayoutParams` para poderem ser manipuladas
+//        val lytParams_Despesas = lytExp_Despesas.layoutParams as ConstraintLayout.LayoutParams
 
         //---------- Configurando o Campo Gastos ------------------------//
         val btnExp_Gastos: ImageButton = findViewById(R.id.btnExp_Gastos)
@@ -312,7 +308,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
             if (campoEntradas_isExpanded) {
                 // Aumentar a altura da view
-                lytParams_Entradas.height = 500
+                lytParams_Entradas.height = 750
 
                 //trocar o icone do "btnExp_Entradas"
                 btnExp_Entradas.setImageResource(R.drawable.arrow_up)
@@ -321,22 +317,22 @@ class tela_RelatorioGastos : AppCompatActivity() {
                 lytExp_Entradas.layoutParams = lytParams_Entradas
 
                 //trocando os icones dos botoes
-                btnExp_Despesas.setImageResource(R.drawable.arrow_down)
+                //btnExp_Despesas.setImageResource(R.drawable.arrow_down)
                 btnExp_Gastos.setImageResource(R.drawable.arrow_down)
 
                 //fechando os outros campos
-                lytParams_Despesas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
-                lytExp_Despesas.layoutParams = lytParams_Despesas
+//                lytParams_Despesas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+//                lytExp_Despesas.layoutParams = lytParams_Despesas
 
                 lytParams_Gastos.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
                 lytExp_Gastos.layoutParams = lytParams_Gastos
 
                 //chamando a função para remover a lista de items do campo
-                removerListaItems.removerListaItems(lytExp_Despesas)
+                //removerListaItems.removerListaItems(lytExp_Despesas)
                 removerListaItems.removerListaItems(lytExp_Gastos)
 
                 // Crie o adaptador para o RecyclerView
-                val adapter = MyConstraintAdapter(pegarDados(listaEntradas))
+                val adapter = MyConstraintAdapter(listaEntradas)
                 //chamando a função para criar a lista de items do campo
                 recyclerViewManager.criarListaItems(lytExp_Entradas, adapter)
             } else {
@@ -353,60 +349,60 @@ class tela_RelatorioGastos : AppCompatActivity() {
             campoEntradas_isExpanded = !campoEntradas_isExpanded
         }
 
-        btnExp_Despesas.setOnClickListener {
-
-            if (campoDespesas_isExpanded) {
-                // Aumentar a altura da view
-                lytParams_Despesas.height = 500
-
-                campoEntradas_isExpanded = false
-                campoGastos_isExpanded = false
-
-                //trocar o icone do "btnExp_Despesas"
-                btnExp_Despesas.setImageResource(R.drawable.arrow_up)
-
-                //aplicando o aumento na view "lytExp_Despesas"
-                lytExp_Despesas.layoutParams = lytParams_Despesas
-
-                //trocando os icones dos botoes
-                btnExp_Entradas.setImageResource(R.drawable.arrow_down)
-                btnExp_Gastos.setImageResource(R.drawable.arrow_down)
-
-                //fechando os outros campos
-                lytParams_Entradas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
-                lytExp_Entradas.layoutParams = lytParams_Entradas
-
-                lytParams_Gastos.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
-                lytExp_Gastos.layoutParams = lytParams_Gastos
-
-                //chamando a função para remover a lista de items do campo
-                removerListaItems.removerListaItems(lytExp_Entradas)
-                removerListaItems.removerListaItems(lytExp_Gastos)
-
-
-                // Crie o adaptador para o RecyclerView
-                val adapter = MyConstraintAdapter(pegarDados(listaDespesas))
-                //chamando a função para criar a lista de items do campo
-                recyclerViewManager.criarListaItems(lytExp_Despesas, adapter)
-            } else {
-                lytParams_Despesas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
-
-                //trocar o icone do "btnExp_Despesas"
-                btnExp_Despesas.setImageResource(R.drawable.arrow_down)
-
-                //chamando a função para remover a lista de items do campo
-                removerListaItems.removerListaItems(lytExp_Despesas)
-
-                lytExp_Despesas.layoutParams = lytParams_Despesas
-            }
-            campoDespesas_isExpanded = !campoDespesas_isExpanded
-        }
+//        btnExp_Despesas.setOnClickListener {
+//
+//            if (campoDespesas_isExpanded) {
+//                // Aumentar a altura da view
+//                lytParams_Despesas.height = 500
+//
+//                campoEntradas_isExpanded = false
+//                campoGastos_isExpanded = false
+//
+//                //trocar o icone do "btnExp_Despesas"
+//                btnExp_Despesas.setImageResource(R.drawable.arrow_up)
+//
+//                //aplicando o aumento na view "lytExp_Despesas"
+//                lytExp_Despesas.layoutParams = lytParams_Despesas
+//
+//                //trocando os icones dos botoes
+//                btnExp_Entradas.setImageResource(R.drawable.arrow_down)
+//                btnExp_Gastos.setImageResource(R.drawable.arrow_down)
+//
+//                //fechando os outros campos
+//                lytParams_Entradas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+//                lytExp_Entradas.layoutParams = lytParams_Entradas
+//
+//                lytParams_Gastos.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+//                lytExp_Gastos.layoutParams = lytParams_Gastos
+//
+//                //chamando a função para remover a lista de items do campo
+//                removerListaItems.removerListaItems(lytExp_Entradas)
+//                removerListaItems.removerListaItems(lytExp_Gastos)
+//
+//
+//                // Crie o adaptador para o RecyclerView
+//                val adapter = MyConstraintAdapter(pegarDados(listaDespesas))
+//                //chamando a função para criar a lista de items do campo
+//                recyclerViewManager.criarListaItems(lytExp_Despesas, adapter)
+//            } else {
+//                lytParams_Despesas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+//
+//                //trocar o icone do "btnExp_Despesas"
+//                btnExp_Despesas.setImageResource(R.drawable.arrow_down)
+//
+//                //chamando a função para remover a lista de items do campo
+//                removerListaItems.removerListaItems(lytExp_Despesas)
+//
+//                lytExp_Despesas.layoutParams = lytParams_Despesas
+//            }
+//            campoDespesas_isExpanded = !campoDespesas_isExpanded
+//        }
 
         btnExp_Gastos.setOnClickListener {
 
             if (campoGastos_isExpanded) {
                 // Aumentar a altura da view
-                lytParams_Gastos.height = 500
+                lytParams_Gastos.height = 750
 
                 campoEntradas_isExpanded = false
                 campoDespesas_isExpanded = false
@@ -419,21 +415,21 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
                 //trocando os icones dos botoes
                 btnExp_Entradas.setImageResource(R.drawable.arrow_down)
-                btnExp_Despesas.setImageResource(R.drawable.arrow_down)
+                //btnExp_Despesas.setImageResource(R.drawable.arrow_down)
 
                 //fechando os outros campos
                 lytParams_Entradas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
                 lytExp_Entradas.layoutParams = lytParams_Entradas
 
-                lytParams_Despesas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
-                lytExp_Despesas.layoutParams = lytParams_Despesas
+                //lytParams_Despesas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+                //lytExp_Despesas.layoutParams = lytParams_Despesas
 
                 //chamando a função para remover a lista de items do campo
                 removerListaItems.removerListaItems(lytExp_Entradas)
-                removerListaItems.removerListaItems(lytExp_Despesas)
+                //removerListaItems.removerListaItems(lytExp_Despesas)
 
                 // Crie o adaptador para o RecyclerView
-                val adapter = MyConstraintAdapter(pegarDados(listaGastos))
+                val adapter = MyConstraintAdapter(listaGastos)
                 //chamando a função para criar a lista de items do campo
                 recyclerViewManager.criarListaItems(lytExp_Gastos, adapter)
             } else {
@@ -452,16 +448,16 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
         //-------------------- config. somas dos gastos dos items de cada campo ------------------//
 
-        val somarItemsListaEntradas = somarValoresCampo(pegarDados(listaEntradas))
-        val somarItemsListaDespesas = somarValoresCampo(pegarDados(listaDespesas))
-        val somarItemsListaGastos = somarValoresCampo(pegarDados(listaGastos))
+        val somarItemsListaEntradas = somarValoresCampo(listaEntradas)
+        //val somarItemsListaDespesas = somarValoresCampo(pegarDados(listaDespesas))
+        val somarItemsListaGastos = somarValoresCampo(listaGastos)
 
         val txt_valorEntradas: TextView = findViewById(R.id.txt_valorEntradas)
-        val txt_valorDespesas: TextView = findViewById(R.id.txt_valorDespesas)
+        //val txt_valorDespesas: TextView = findViewById(R.id.txt_valorDespesas)
         val txt_valorGastos: TextView = findViewById(R.id.txt_valorGastos)
 
         txt_valorEntradas.text = "${formatToCurrency(somarItemsListaEntradas)}"
-        txt_valorDespesas.text = "${formatToCurrency(somarItemsListaDespesas)}"
+        //txt_valorDespesas.text = "${formatToCurrency(somarItemsListaDespesas)}"
         txt_valorGastos.text = "${formatToCurrency(somarItemsListaGastos)}"
 
         //-------------------- config. botão de voltar do celular --------------------------------//

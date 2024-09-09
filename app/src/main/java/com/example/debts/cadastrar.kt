@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.debts.BD_SQLite_App.BancoDados
+import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 
 class cadastrar : AppCompatActivity() {
 
@@ -55,6 +56,9 @@ class cadastrar : AppCompatActivity() {
         else {
             contaExistente = false
             BancoDados(this).cadastrarConta(nome, email, cpf, senha)
+
+            //salva o nome do usuario logado
+            DadosUsuario_BD_Debts(this).salvarUsuarioLogado(nome)
             //CustomToast().showCustomToast(this, "Usuário adicionado com sucesso")
         }
 
@@ -81,6 +85,10 @@ class cadastrar : AppCompatActivity() {
                 finish()
             }
 
+        }
+
+        else {
+            CustomToast().showCustomToast(this, "Para continuar, aceite os Termos.")
         }
     }
 }

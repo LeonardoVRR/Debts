@@ -19,11 +19,13 @@ import java.io.InputStream
 import java.io.OutputStream
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.io.File
 import java.util.Calendar
 import java.text.NumberFormat
 import java.util.Locale
 
 class BancoDados(private var context: Context) {
+
     private lateinit var bancoDados: SQLiteDatabase
 
     //nome do banco de dados
@@ -34,31 +36,37 @@ class BancoDados(private var context: Context) {
 
     // Função que copia um banco de dados da pasta assets para o armazenamento interno do Android
     fun copyDatabase() {
-        // Abre o arquivo do banco de dados localizado na pasta assets
-        val inputStream: InputStream = context.assets.open(dbName)
 
-        // Obtém o caminho para o banco de dados no diretório de armazenamento interno do aplicativo
-        val outputFile = context.getDatabasePath(dbName)
+        // Verifica se o arquivo do banco de dados já existe no armazenamento interno
+        // Se o arquivo não existir, chama o método para copiar o banco de dados da pasta assets para o armazenamento interno
+        if (!File(dbPath).exists()) {
 
-        // Certifica-se de que o diretório do banco de dados existe, criando-o se necessário
-        outputFile.parentFile?.mkdirs()
+            // Abre o arquivo do banco de dados localizado na pasta assets
+            val inputStream: InputStream = context.assets.open(dbName)
 
-        // Cria um fluxo de saída para escrever o banco de dados no armazenamento interno
-        val outputStream: OutputStream = FileOutputStream(outputFile)
+            // Obtém o caminho para o banco de dados no diretório de armazenamento interno do aplicativo
+            val outputFile = context.getDatabasePath(dbName)
 
-        // Cria um buffer para copiar os dados do banco de dados
-        val buffer = ByteArray(1024)
-        var length: Int
+            // Certifica-se de que o diretório do banco de dados existe, criando-o se necessário
+            outputFile.parentFile?.mkdirs()
 
-        // Lê o banco de dados em partes (buffer de 1024 bytes) e escreve no arquivo de destino
-        while (inputStream.read(buffer).also { length = it } > 0) {
-            outputStream.write(buffer, 0, length)
+            // Cria um fluxo de saída para escrever o banco de dados no armazenamento interno
+            val outputStream: OutputStream = FileOutputStream(outputFile)
+
+            // Cria um buffer para copiar os dados do banco de dados
+            val buffer = ByteArray(1024)
+            var length: Int
+
+            // Lê o banco de dados em partes (buffer de 1024 bytes) e escreve no arquivo de destino
+            while (inputStream.read(buffer).also { length = it } > 0) {
+                outputStream.write(buffer, 0, length)
+            }
+
+            // Garante que todos os dados sejam escritos e fecha os fluxos de entrada e saída
+            outputStream.flush()
+            outputStream.close()
+            inputStream.close()
         }
-
-        // Garante que todos os dados sejam escritos e fecha os fluxos de entrada e saída
-        outputStream.flush()
-        outputStream.close()
-        inputStream.close()
     }
 
     fun acessarBancoDados() {

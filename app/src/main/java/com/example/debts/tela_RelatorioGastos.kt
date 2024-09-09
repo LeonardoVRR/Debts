@@ -109,7 +109,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
         viewNomeMes.text = "${nomeMes.uppercase()} $anoAtual"
 
         //array que contem todas as legendas das colunas
-        var legendaColunas = criarLegendas(qtdDiasMes, formataData, calendar)
+        var legendaColunas = criarLegendas(qtdDiasMes, calendar)
 
         //lista que vai conter os gastos diarios do mes
         var listaValores: MutableList<Float> = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID).toMutableList()
@@ -146,7 +146,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
                 listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID).toMutableList()
                 criarColunasGraf(entries, qtdDiasMes, nomeMes, usuarioID)
-                legendaColunas = criarLegendas(qtdDiasMes, formataData, calendar)
+                legendaColunas = criarLegendas(qtdDiasMes, calendar)
 
                 Log.d("Gastos do Mes", "$listaValores")
 
@@ -190,7 +190,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
                 listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID).toMutableList()
                 criarColunasGraf(entries, qtdDiasMes, nomeMes, usuarioID)
-                legendaColunas = criarLegendas(qtdDiasMes, formataData, calendar)
+                legendaColunas = criarLegendas(qtdDiasMes, calendar)
 
                 Log.d("Gastos do Mes", "$listaValores")
 
@@ -308,7 +308,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
             if (campoEntradas_isExpanded) {
                 // Aumentar a altura da view
-                lytParams_Entradas.height = 750
+                lytParams_Entradas.height = 350
 
                 //trocar o icone do "btnExp_Entradas"
                 btnExp_Entradas.setImageResource(R.drawable.arrow_up)
@@ -402,7 +402,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
             if (campoGastos_isExpanded) {
                 // Aumentar a altura da view
-                lytParams_Gastos.height = 750
+                lytParams_Gastos.height = 350
 
                 campoEntradas_isExpanded = false
                 campoDespesas_isExpanded = false
@@ -533,12 +533,15 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
 
     // função que cria as legendas das colunas
-    private fun criarLegendas(qtdDiasMes: Int, formataData: SimpleDateFormat, calendar: Calendar): Array<String>{
+    private fun criarLegendas(qtdDiasMes: Int, calendar: Calendar): Array<String>{
         val legendaColunas = mutableListOf<String>() // Lista mutável para armazenar as legendas
+
+        val formataData = SimpleDateFormat("dd", Locale("pt", "BR"))
 
         //adiciona uma legenda para cada coluna do grafico
         repeat (qtdDiasMes) {
-            var dataFormatada = formataData.format(calendar.time) //pega o dia do mes e formata ele
+            //pega o dia do mes e formata ele
+            var dataFormatada = "dia ${formataData.format(calendar.time)}"
 
             legendaColunas += dataFormatada //adiciona as datas formatadas no array
 

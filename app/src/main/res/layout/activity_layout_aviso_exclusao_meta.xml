@@ -72,7 +72,7 @@
         android:id="@+id/btn_CancelarExclusaoMeta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
+        android:layout_marginEnd="88dp"
         android:backgroundTint="#42D547"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
@@ -80,7 +80,7 @@
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@+id/btn_ConfirmarExclusaoMeta"
-        app:layout_constraintStart_toEndOf="@+id/btn_ConfirmarExclusaoMeta"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/btn_ConfirmarExclusaoMeta" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

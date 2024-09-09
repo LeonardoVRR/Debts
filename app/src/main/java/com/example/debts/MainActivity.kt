@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         //chamando a função para acessar o BD
-        //BancoDados(this).copyDatabase()
+        BancoDados(this).copyDatabase()
         //BancoDados(this).acessarBancoDados()
 
         //configurando o click do botão logar
@@ -64,8 +64,8 @@ class MainActivity : AppCompatActivity() {
         val limparEntradaNome = inputNome.text.toString().lowercase().trim()
         val limparEntradaSenha = inputSenha.text.toString().trim()
 
-        //verificando se o nome de usuario e senha conferem com os que foram salvos no BD
-        if (limparEntradaSenha.isEmpty() && limparEntradaNome.isEmpty()) {
+        //verificando se o nome de usuario ou senha conferem estão vazios
+        if (limparEntradaSenha.isEmpty() || limparEntradaNome.isEmpty()) {
 
             CustomToast().showCustomToast(this, "Preencha todos os campos.")
         }

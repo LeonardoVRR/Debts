@@ -116,4 +116,10 @@ class criarConta : AppCompatActivity() {
 
     }
 
+    fun voltarTelaLogin(v: View) {
+        val navegarTelaLogin = Intent(this, MainActivity::class.java)
+        startActivity(navegarTelaLogin)
+        finish()
+    }
+
 }

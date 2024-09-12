@@ -1,6 +1,5 @@
 package com.example.debts
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -10,19 +9,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.size
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosMetasFinanceiras_Usuario_BD_Debts
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.layout_Item_lista.ItemSpacingDecoration
-import com.example.debts.layout_Item_lista.MyConstraintAdapter
 import com.example.debts.lista_DebtMap.adapter_DebtMap
 import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
-import com.example.debts.lista_DebtMap.dados_listaMeta_Item_DebtMap
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 class tela_DebtMap : AppCompatActivity() {
 
@@ -85,20 +81,75 @@ class tela_DebtMap : AppCompatActivity() {
         //val listaDados = listaDados1 + listaDados2
         val listaDados = BancoDados(this).listarMetas(IDusuario)
 
-        val lista_Items_DebtMap: RecyclerView = findViewById(R.id.lista_Items_DebtMap)
+        val listaMetasNovas: RecyclerView = findViewById(R.id.listaMetasNovas)
+        val listaMetasEmProgresso: RecyclerView = findViewById(R.id.lista_Items_DebtMap)
+        val listaMetasConcluidas: RecyclerView = findViewById(R.id.listaMetasConcluidas)
 
-        //configurando o layout manager
-        lista_Items_DebtMap.layoutManager = LinearLayoutManager(this)
-        lista_Items_DebtMap.setHasFixedSize(true)
+        //lista de dados dos campos metas
+        val listaDadosMetasNovas: MutableList<dados_listaMeta_DebtMap> = mutableListOf()
+        val listaDadosMetasEmProgresso: MutableList<dados_listaMeta_DebtMap> = mutableListOf()
+        val listaDadosMetasConcluidas: MutableList<dados_listaMeta_DebtMap> = mutableListOf()
+
+        listaDados.mapIndexedNotNull { index, item ->
+
+
+            if (item.progressoMeta == 0f) {
+                Log.d("Lista Metas Novas", "${item}")
+
+                listaDadosMetasNovas.add(item)
+            }
+
+            else if (item.progressoMeta > 0f && item.progressoMeta < 100f) {
+                Log.d("Lista Metas em progresso", "${item}")
+
+                listaDadosMetasEmProgresso.add(item)
+            }
+
+            else {
+                Log.d("Lista Metas em concluidas", "${item}")
+
+                listaDadosMetasConcluidas.add(item)
+            }
+        }
+
+        //------------- configurando o layout manager do listaMetasNovas -------------------------//
+        listaMetasNovas.layoutManager = LinearLayoutManager(this)
+        listaMetasNovas.setHasFixedSize(true)
 
         //configurando o espaçamento entre os itens
-        lista_Items_DebtMap.addItemDecoration(ItemSpacingDecoration())
+        listaMetasNovas.addItemDecoration(ItemSpacingDecoration())
 
         // Crie o adaptador para o RecyclerView
-        val adapterItem = adapter_DebtMap(listaDados, this)
+        val adapterListaMetasNovas = adapter_DebtMap(listaDadosMetasNovas, this)
 
         // Crie o adaptador para o RecyclerView
-        lista_Items_DebtMap.adapter = adapterItem
+        listaMetasNovas.adapter = adapterListaMetasNovas
+
+        //--------------- configurando o layout manager do listaMetasEmProgresso -----------------//
+        listaMetasEmProgresso.layoutManager = LinearLayoutManager(this)
+        listaMetasEmProgresso.setHasFixedSize(true)
+
+        //configurando o espaçamento entre os itens
+        listaMetasEmProgresso.addItemDecoration(ItemSpacingDecoration())
+
+        // Crie o adaptador para o RecyclerView
+        val adapterListaMetasEmProgresso = adapter_DebtMap(listaDadosMetasEmProgresso, this)
+
+        // Crie o adaptador para o RecyclerView
+        listaMetasEmProgresso.adapter = adapterListaMetasEmProgresso
+
+        //----------- configurando o layout manager do listaMetasConcluidas ----------------------//
+        listaMetasConcluidas.layoutManager = LinearLayoutManager(this)
+        listaMetasConcluidas.setHasFixedSize(true)
+
+        //configurando o espaçamento entre os itens
+        listaMetasConcluidas.addItemDecoration(ItemSpacingDecoration())
+
+        // Crie o adaptador para o RecyclerView
+        val adapterListaMetasConcluidas = adapter_DebtMap(listaDadosMetasConcluidas, this)
+
+        // Crie o adaptador para o RecyclerView
+        listaMetasConcluidas.adapter = adapterListaMetasConcluidas
 
         //-------------------- config. botão de voltar do celular --------------------------------//
 

@@ -657,6 +657,7 @@ class BancoDados(private var context: Context) {
                     val nomeMeta = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("nome_meta")).toString()
                     val dataMeta = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("dt_meta")).toString()
                     val listaMetasJSON = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("lista_metas"))
+                    val progressoMeta = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("progresso_meta"))
 
                     //formatando o nome da meta
                     val nomeFormatado = FormatarNome().formatar(nomeMeta)
@@ -683,7 +684,7 @@ class BancoDados(private var context: Context) {
                     val dataFormatada = "$dia de $nomeMes de $ano"
 
                     // Cria o item DebtMap
-                    val itemDebtMap = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap(idMeta, nomeFormatado, dataFormatada, listaConvertida)
+                    val itemDebtMap = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap(idMeta, nomeFormatado, progressoMeta.toFloat(), dataFormatada, listaConvertida)
 
                     // Adiciona o item à lista de itens
                     listasItemsMetas += itemDebtMap
@@ -805,14 +806,13 @@ class BancoDados(private var context: Context) {
         }
     }
 
-    fun salvarRendimento(descricaoRendimento: String, tipoTransacao: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int) {
+    fun salvarRendimento(tipoMovimento: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int) {
         try {
 
             // Abre o banco de dados existente no caminho especificado
             bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
-            val descricaoRendimentoFormatado = descricaoRendimento.lowercase()
-            val tipoTransacaoFormatado = tipoTransacao.lowercase()
+            val tipoMovimentoFormatado = tipoMovimento.lowercase()
 
             //formatando a data
             //faz o fatiamento da data
@@ -820,15 +820,64 @@ class BancoDados(private var context: Context) {
             val mes = dataRendimento.substring(3, 5)
             val ano = dataRendimento.substring(6, 10)
 
+            val mesBalanco = (dataRendimento.substring(3, 5)).toInt()
+
+            // Obtém o nome do mês atual para exibição
+            val calendar = Calendar.getInstance()
+            calendar.set(Calendar.MONTH, mesBalanco)
+            val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+
             val dataFormatada = "$ano-$mes-$dia"
 
             // query para salvar uma nova meta do usuário
-            val query = "INSERT INTO Rendimentos (descricao_rendimento, tp_transacao, dt_rendimento, valor_redimento, id_user_rendimento) VALUES ('$descricaoRendimentoFormatado', '$tipoTransacaoFormatado', '$dataFormatada', $valorRendimento, $IDusuario)"
+            val query = "INSERT INTO Rendimentos (tp_movimento, dt_rendimento, mes, valor_rendimento, id_user_rendimento) VALUES ('$tipoMovimentoFormatado', '$dataFormatada', '$nomeMes', $valorRendimento, $IDusuario)"
 
             //executa a query
             bancoDados.execSQL(query)
 
-            CustomToast().showCustomToast(context, "Rendimento salvo com sucesso!")
+            CustomToast().showCustomToast(context, "Balanço salvo com sucesso!")
+
+        } catch (e: Exception) {
+            CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")
+            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+    }
+
+    fun salvarDivida(tipoMovimento: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int) {
+        try {
+
+            // Abre o banco de dados existente no caminho especificado
+            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+            val tipoMovimentoFormatado = tipoMovimento.lowercase()
+
+            //formatando a data
+            //faz o fatiamento da data
+            val dia = dataRendimento.substring(0, 2)
+            val mes = dataRendimento.substring(3, 5)
+            val ano = dataRendimento.substring(6, 10)
+
+            val mesBalanco = (dataRendimento.substring(3, 5)).toInt()
+
+            // Obtém o nome do mês atual para exibição
+            val calendar = Calendar.getInstance()
+            calendar.set(Calendar.MONTH, mesBalanco)
+            val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+
+            val dataFormatada = "$ano-$mes-$dia"
+
+            // query para salvar uma nova meta do usuário
+            val query = "INSERT INTO Rendimentos (tp_movimento, dt_rendimento, mes, valor_rendimento, id_user_rendimento) VALUES ('$tipoMovimentoFormatado', '$dataFormatada', '$nomeMes', $valorRendimento, $IDusuario)"
+
+            //executa a query
+            bancoDados.execSQL(query)
+
+            CustomToast().showCustomToast(context, "Balanço salvo com sucesso!")
 
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")

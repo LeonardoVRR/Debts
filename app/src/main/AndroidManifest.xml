@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <!-- solicitando permissão para o app ter acesso a internet -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -17,7 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Debts"
         tools:targetApi="31">
-
+        <activity
+            android:name=".adapterDropList_telaBalanco.dropDown_item_listaBalanco"
+            android:exported="false" />
         <!-- Configurando a orientação para "portrait" em todas as atividades -->
         <activity
             android:name=".Dialog_Style.layout_AvisoExclusaoMeta"
@@ -69,8 +70,10 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
+
 </manifest>

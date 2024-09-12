@@ -127,26 +127,32 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.02"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/input_tpMovimentacao" />
+                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
 
-            <EditText
-                android:id="@+id/input_tpMovimentacao"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/textInputLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="15dp"
                 android:background="@drawable/form_inputs"
-                android:ems="10"
-                android:hint="Descrição"
-                android:inputType="text"
-                android:paddingLeft="20dp"
-                android:textColor="#000000"
-                android:textColorHint="#FF8A8A8A"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txt_tipoMovimentacao" />
+                app:layout_constraintTop_toBottomOf="@+id/txt_tipoMovimentacao">
+
+                <AutoCompleteTextView
+                    android:id="@+id/autoCompleteTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:background="#00FFFFFF"
+                    android:inputType="none"
+                    android:text="Tipo de Movimentação"
+                    android:textColor="#000000" />
+
+            </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
                 android:id="@+id/txt_dtRendimento"
@@ -165,7 +171,7 @@
             <com.santalu.maskara.widget.MaskEditText
                 android:id="@+id/input_dtRendimento"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="70dp"
                 android:layout_marginStart="15dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="15dp"
@@ -188,7 +194,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="16dp"
-                android:text="Valor Recebido:"
+                android:text="Valor:"
                 android:textColor="#000000"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -199,7 +205,7 @@
             <EditText
                 android:id="@+id/input_valorRendimento"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="70dp"
                 android:layout_marginStart="15dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="15dp"
@@ -229,7 +235,7 @@
         android:layout_marginTop="20dp"
         android:backgroundTint="#FF3131"
         android:onClick="salvarRendimento"
-        android:text="Salvar Rendimento"
+        android:text="Salvar"
         android:textColor="#FFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

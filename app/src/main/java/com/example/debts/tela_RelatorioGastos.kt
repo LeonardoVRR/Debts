@@ -549,16 +549,6 @@ class tela_RelatorioGastos : AppCompatActivity() {
             entries.add(BarEntry(i.toFloat(), floatArrayOf(valorGasto, valorEntrada)))
         }
 
-//        // Adicionar todos os valores existentes na lista ao gráfico
-//        listaValores.forEachIndexed { i, valor ->
-//            entries.add(BarEntry(i.toFloat(), floatArrayOf())) // Adicionando as colunas com valores reais
-//        }
-
-//        // Adicionar o valor 0 as colunas sem valor na lista para completar até o tamanho do mês
-//        for (i in listaValores.size until qtdDiasMes) {
-//            entries.add(BarEntry(i.toFloat(), 0f)) // Adicionando as colunas com valor 0
-//        }
-
         // Preenchendo os dias restantes com valores 0 se necessário
         if (qtdDiasMes > maxSize) {
             for (i in maxSize until qtdDiasMes) {

@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
 import androidx.activity.OnBackPressedCallback
@@ -14,6 +16,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.google.android.material.textfield.TextInputLayout
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Locale
@@ -64,6 +67,13 @@ class telaAdicionarRendimentos : AppCompatActivity() {
             finish()
         }
 
+        //--------------------- config. dropDown list --------------------------------------------//
+
+        val tps_movimentacao = resources.getStringArray(R.array.Escolha)
+        val arrayAdapter = ArrayAdapter(this, R.layout.activity_drop_down_item_lista_balanco, tps_movimentacao)
+        val autoCompleteTextView: AutoCompleteTextView = findViewById(R.id.autoCompleteTextView)
+        autoCompleteTextView.setAdapter(arrayAdapter)
+
         //-------------------- config. botão de voltar do celular --------------------------------//
 
         //configurando o botão voltar do celular quando for prescionado p/ voltar na tela de perfil usuario
@@ -83,13 +93,13 @@ class telaAdicionarRendimentos : AppCompatActivity() {
     fun salvarRendimento(v: View) {
 
         //-------------------- config. dos campos inputs p/ adicionar rendimento -----------------//
-        val input_nomeRendimento: EditText = findViewById(R.id.input_nomeRendimento)
-        val input_tpMovimentacao: EditText = findViewById(R.id.input_tpMovimentacao)
+        //val input_nomeRendimento: EditText = findViewById(R.id.input_nomeRendimento)
+        val input_tpMovimentacao: AutoCompleteTextView = findViewById(R.id.autoCompleteTextView)
         val input_dtRendimento: EditText = findViewById(R.id.input_dtRendimento)
         val input_valorRendimento: EditText = findViewById(R.id.input_valorRendimento)
 
-        val nomeRendimeto = input_nomeRendimento.text.toString().trim()
-        val formaRecebimento = input_tpMovimentacao.text.toString().trim()
+        //val nomeRendimeto = input_nomeRendimento.text.toString().trim()
+        val tipoMovimentacao = input_tpMovimentacao.text.toString().trim()
 
         val dataRendimento = input_dtRendimento.text.toString().trim()
 
@@ -97,8 +107,12 @@ class telaAdicionarRendimentos : AppCompatActivity() {
 
         val idUsuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
 
-        if (nomeRendimeto.isEmpty() || formaRecebimento.isEmpty() || dataRendimento.isEmpty() || valorRendimento.isEmpty()){
+        if (tipoMovimentacao.isEmpty() || dataRendimento.isEmpty() || valorRendimento.isEmpty()){
             CustomToast().showCustomToast(this, "Preencha todos os campos.")
+        }
+
+        else if (tipoMovimentacao == "Tipo de Movimentação") {
+            CustomToast().showCustomToast(this, "Escolha um tipo de movimentação.")
         }
 
         else {
@@ -113,7 +127,10 @@ class telaAdicionarRendimentos : AppCompatActivity() {
             }
 
             else {
-                BancoDados(this).salvarRendimento(nomeRendimeto, formaRecebimento, dataRendimento, valorRendimentoFormatado, idUsuario)
+
+                if (tipoMovimentacao != "Divida") {
+                    BancoDados(this).salvarRendimento(tipoMovimentacao, dataRendimento, valorRendimentoFormatado, idUsuario)
+                }
             }
         }
     }

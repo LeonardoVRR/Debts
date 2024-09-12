@@ -1,3 +1,9 @@
 <resources>
-    <string name="app_name">debts</string>
+    <string name="app_name">DEBTS</string>
+
+    <string-array name="Escolha">
+        <item>Recebimento recorrente</item>
+        <item>Recebimento único</item>
+        <item>Divida</item>
+    </string-array>
 </resources>

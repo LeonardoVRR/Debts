@@ -80,8 +80,8 @@ class cadastrar : AppCompatActivity() {
             else {
                 CustomToast().showCustomToast(this, "Conta Criada")
 
-                val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)
-                startActivity(navegarTelaPrincipal)
+                val navegarTelaQuestionario = Intent(this, tela_Consulta_IA::class.java)
+                startActivity(navegarTelaQuestionario)
                 finish()
             }
 

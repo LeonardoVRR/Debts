@@ -70,7 +70,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="72dp"
+        android:layout_marginTop="70dp"
+        android:layout_marginBottom="70dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -79,18 +80,18 @@
         app:layout_constraintVertical_bias="0.417">
 
         <Button
-            android:id="@+id/btn_Questionario"
+            android:id="@+id/btn_Balanco"
             android:layout_width="175dp"
             android:layout_height="170dp"
             android:layout_marginStart="20dp"
             android:layout_marginTop="7dp"
             android:backgroundTint="#FFFFFF"
-            android:onClick="telaQuestionario"
-            android:text="Questionário"
+            android:onClick="telaBalanco"
+            android:text="Balanço"
             android:textColor="#000000"
             android:textSize="18sp"
             app:cornerRadius="15dp"
-            app:icon="@drawable/bot_out"
+            app:icon="@drawable/dollars_sign"
             app:iconGravity="textTop"
             app:iconSize="90dp"
             app:iconTint="#000000"
@@ -101,7 +102,6 @@
             android:id="@+id/btn_perfilUsuario"
             android:layout_width="175dp"
             android:layout_height="170dp"
-            android:layout_marginTop="7dp"
             android:layout_marginEnd="20dp"
             android:backgroundTint="#FFFFFF"
             android:onClick="telaPerfilUsuario"
@@ -113,14 +113,15 @@
             app:iconGravity="textTop"
             app:iconSize="90dp"
             app:iconTint="#000000"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_Balanco"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/btn_Balanco"
+            app:layout_constraintVertical_bias="1.0" />
 
         <Button
             android:id="@+id/btn_DebtMap"
             android:layout_width="175dp"
             android:layout_height="170dp"
-            android:layout_marginStart="20dp"
             android:layout_marginTop="24dp"
             android:backgroundTint="#FFFFFF"
             android:onClick="telaDebtMap"
@@ -132,15 +133,15 @@
             app:iconGravity="textTop"
             app:iconSize="100dp"
             app:iconTint="#000000"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_Questionario" />
+            app:layout_constraintEnd_toEndOf="@+id/btn_Balanco"
+            app:layout_constraintStart_toStartOf="@+id/btn_Balanco"
+            app:layout_constraintTop_toBottomOf="@+id/btn_Balanco" />
 
         <Button
             android:id="@+id/btn_RelatorioGastos"
             android:layout_width="175dp"
             android:layout_height="170dp"
             android:layout_marginTop="24dp"
-            android:layout_marginEnd="20dp"
             android:backgroundTint="#FFFFFF"
             android:onClick="teleRelatorioGastos"
             android:text="Relatório de Gastos"
@@ -151,7 +152,8 @@
             app:iconGravity="textTop"
             app:iconSize="90dp"
             app:iconTint="#000000"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/btn_perfilUsuario"
+            app:layout_constraintStart_toStartOf="@+id/btn_perfilUsuario"
             app:layout_constraintTop_toBottomOf="@+id/btn_perfilUsuario" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

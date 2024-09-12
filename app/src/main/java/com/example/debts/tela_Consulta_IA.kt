@@ -1,9 +1,11 @@
 package com.example.debts
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.CheckBox
 import android.widget.CompoundButton
 import android.widget.EditText
@@ -31,6 +33,7 @@ class tela_Consulta_IA : AppCompatActivity() {
     private var valorSeekBarFinal: Int = 0
     private val listaOpcoesSelecionadas: MutableList<String> = mutableListOf()
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -211,6 +214,14 @@ class tela_Consulta_IA : AppCompatActivity() {
             }
         }
 
+        //-------------------- config. botão salvarQuest -----------------------------------------//
+
+        val btn_salvarQuest: Button = findViewById(R.id.btn_salvarQuest)
+
+        btn_salvarQuest.setOnClickListener {
+            salvarQuestionario()
+        }
+
         //-------------------- config. botão de voltar do celular --------------------------------//
 
         //configurando o botão voltar do celular quando for prescionado p/ voltar na tela principal
@@ -228,7 +239,7 @@ class tela_Consulta_IA : AppCompatActivity() {
     }
 
     //função para salvar os dados na lista de dados p/ calcular a rota financeira
-    fun CalcularRotaFinanceira(v: View) {
+    fun salvarQuestionario() {
 
         var listaMetasCriadas: MutableList<String> = mutableListOf(
             "economizar R$ 1000,00 para uma viagem",
@@ -260,7 +271,11 @@ class tela_Consulta_IA : AppCompatActivity() {
 
         Log.d("LISTA CALCULAR ROTA", "${listaDadosCalcularRotaFinanceira}")
 
-        metasCriadas(nomeMeta, listaMetasCriadas)
+        //metasCriadas(nomeMeta, listaMetasCriadas)
+
+        val idUsuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+
+        BancoDados(this).salvarQuestionario(valorSeekBarFinal, listaOpcoesSelecionadas, valor_painel_opc1.toInt(), valor_painel_opc2.toInt(), valor_painel_opc3.toInt(), idUsuario)
     }
 
     //função para salvar a lista de metas criadas pela IA
@@ -284,7 +299,7 @@ class tela_Consulta_IA : AppCompatActivity() {
         val progressoMeta: Float = 0f
         val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
 
-        BancoDados(this).salvarMeta(nomeMeta, dataCriacaoMetaFormatada, listaMetas, listaMetaEstados, progressoMeta, IDusuario)
+        //BancoDados(this).salvarMeta(nomeMeta, dataCriacaoMetaFormatada, listaMetas, listaMetaEstados, progressoMeta, IDusuario)
     }
 
     //função para voltar a tela inicial do aplicativo

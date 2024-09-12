@@ -39,7 +39,7 @@ class BancoDados(private var context: Context) {
 
         // Verifica se o arquivo do banco de dados já existe no armazenamento interno
         // Se o arquivo não existir, chama o método para copiar o banco de dados da pasta assets para o armazenamento interno
-        if (!File(dbPath).exists()) {
+        if (File(dbPath).exists()) {
 
             // Abre o arquivo do banco de dados localizado na pasta assets
             val inputStream: InputStream = context.assets.open(dbName)
@@ -347,22 +347,22 @@ class BancoDados(private var context: Context) {
             bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
             // Consulta para obter as metas do usuário
-            val regatarGastos: Cursor = bancoDados.rawQuery("SELECT * FROM Rendimentos WHERE id_user_rendimento = ? ORDER BY dt_rendimento DESC", arrayOf(IdUsuario.toString()))
+            val regatarGastos: Cursor = bancoDados.rawQuery(" SELECT * FROM Rendimentos WHERE id_user_rendimento = ? ORDER BY dt_rendimento ASC", arrayOf(IdUsuario.toString()))
 
             // Verifica se há resultados e processa todos
             if (regatarGastos.moveToFirst()) {
                 do {
                     //val idMeta = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("id_meta")).toString()
-                    val nomeRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("descricao_rendimento")).toString()
-                    val forma_pagamento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("tp_transacao"))
+                    val nomeRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("tp_movimento")).toString()
+                    //val forma_pagamento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("tp_transacao"))
                     val dataRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("dt_rendimento")).toString()
-                    val valorRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("valor_redimento"))
+                    val valorRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("valor_rendimento"))
 
                     //formatando o nome do gasto
                     val nomeRendimentoFormatado = FormatarNome().formatar(nomeRendimento)
 
                     //formatando o a forma de pagamento
-                    val forma_pagamento_formatada = FormatarNome().formatar(forma_pagamento)
+                    val forma_pagamento_formatada = ""
 
                     //formatando a data
                     //faz o fatiamento da data
@@ -388,6 +388,42 @@ class BancoDados(private var context: Context) {
 
                     // Adiciona o item à lista de itens
                     listaRendimentosMes += itemGasto
+                } while (regatarGastos.moveToNext()) // Continua para o próximo item
+            }
+
+            regatarGastos.close()
+
+        } catch (e: Exception) {
+            CustomToast().showCustomToast(context, "Erro recuper metas: ${e.message}")
+            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+
+        return listaRendimentosMes.toList()
+    }
+
+    fun rendimentosMes(IdUsuario: Int, mesRendimento: String): List<Float> {
+
+        var listaRendimentosMes: MutableList<Float> = mutableListOf()
+
+        try {
+            // Abre o banco de dados existente no caminho especificado
+            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+            // Consulta para obter as metas do usuário
+            val regatarGastos: Cursor = bancoDados.rawQuery(" SELECT SUM(valor_rendimento) AS total_rendimento FROM Rendimentos WHERE id_user_rendimento = ? AND mes = ? GROUP BY dt_rendimento ORDER BY dt_rendimento ASC", arrayOf(IdUsuario.toString(), mesRendimento))
+
+            // Verifica se há resultados e processa todos
+            if (regatarGastos.moveToFirst()) {
+                do {
+                    val valorRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("total_rendimento"))
+
+                    // Adiciona o item à lista de itens
+                    listaRendimentosMes += valorRendimento.toFloat()
                 } while (regatarGastos.moveToNext()) // Continua para o próximo item
             }
 
@@ -829,4 +865,62 @@ class BancoDados(private var context: Context) {
             }
         }
     }
+
+    fun salvarQuestionario(nvl_conhecimeto_financ: Int, tps_investimentos: List<String>, tx_uso_ecommerce: Int, tx_uso_app_transporte: Int, tx_uso_app_entrega: Int, IDusuario: Int) {
+
+        try {
+
+            // Abre o banco de dados existente no caminho especificado
+            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+            //convertendo a lista para JSON para poder salvar no banco de dados
+            val listaTps_investimentosJSON = Gson().toJson(tps_investimentos)
+
+            // Consulta para obter o progresso da meta do usuário
+            val questionarioSalvo = bancoDados.rawQuery(
+                "SELECT * FROM QuestionarioUsuario WHERE id_user_quest = ?",
+                arrayOf(IDusuario.toString())
+            )
+
+            // Verifica se já existe um questionario salvo se existir ele só atualiza as informações
+            if (questionarioSalvo.moveToFirst()) {
+                // Cria um objeto ContentValues para usar parâmetros seguros
+                val salvarAlteracao = ContentValues().apply {
+                    put("nvl_conhecimeto_financ", nvl_conhecimeto_financ)
+                    put("tps_investimentos", listaTps_investimentosJSON)
+                    put("tx_uso_ecommerce", tx_uso_ecommerce)
+                    put("tx_uso_app_transporte", tx_uso_app_transporte)
+                    put("tx_uso_app_entrega", tx_uso_app_entrega)
+                }
+
+                // Consulta para obter as metas do usuário
+                val query = "id_user_quest = ?"
+                val values = arrayOf(IDusuario.toString())
+
+                bancoDados.update("QuestionarioUsuario", salvarAlteracao, query, values)
+
+                CustomToast().showCustomToast(context, "Informações atualizadas com sucesso!")
+            }
+
+            else {
+                // query para salvar uma nova meta do usuário
+                val query = "INSERT INTO QuestionarioUsuario (nvl_conhecimeto_financ, tps_investimentos, tx_uso_ecommerce, tx_uso_app_transporte, tx_uso_app_entrega, id_user_quest) VALUES ('$nvl_conhecimeto_financ', '$tps_investimentos', '$tx_uso_ecommerce', '$tx_uso_app_transporte', $tx_uso_app_entrega, $IDusuario)"
+
+                //executa a query
+                bancoDados.execSQL(query)
+
+                CustomToast().showCustomToast(context, "Questionario salvo com sucesso!")
+            }
+
+        } catch (e: Exception) {
+            CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")
+            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+    }
+
 }

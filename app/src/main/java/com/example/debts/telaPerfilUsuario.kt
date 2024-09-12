@@ -225,9 +225,9 @@ class telaPerfilUsuario : AppCompatActivity() {
     }
 
     //função para ir a tela de rendimentos
-    fun telaRendimentos(v: View) {
-        val navegarTelaRendimento = Intent(this, telaAdicionarRendimentos::class.java)
-        startActivity(navegarTelaRendimento)
+    fun telaQuestionario(v: View) {
+        val navegarTelaQuestionario = Intent(this, tela_Consulta_IA::class.java)
+        startActivity(navegarTelaQuestionario)
         finish()
     }
 

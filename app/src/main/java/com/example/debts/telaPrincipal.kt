@@ -51,9 +51,9 @@ class telaPrincipal : AppCompatActivity() {
     }
 
     //configurando o evento de click no botão do Questionario
-    fun telaQuestionario(v: View){
-        val navegartelaQuestionario = Intent(this, tela_Consulta_IA::class.java)
-        startActivity(navegartelaQuestionario)
+    fun telaBalanco(v: View){
+        val navegartelaBalanco = Intent(this, telaAdicionarRendimentos::class.java)
+        startActivity(navegartelaBalanco)
         finish()
     }
 

@@ -216,7 +216,13 @@ class tela_RelatorioGastos : AppCompatActivity() {
         val barDataSet1 = BarDataSet(entries, "")
 
         //colorindo as colunas do grafico
-        barDataSet1.color = android.graphics.Color.rgb(255, 50, 50) // colorindo as colunas da tabela de vermelho
+        //barDataSet1.color = android.graphics.Color.rgb(255, 50, 50) // colorindo as colunas da tabela de vermelho
+
+        //lista de cores das colunas
+        val coresColunas = listOf<Int>(android.graphics.Color.rgb(255, 50, 50), android.graphics.Color.rgb(109, 251, 114))
+
+        //colorindo as colunas do grafico
+        barDataSet1.setColors(coresColunas)
 
         // Desativando o fundo de grade e rotulos que aparecem nos eixos X e Y
         val xAxis = grafico.xAxis
@@ -308,7 +314,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
             if (campoEntradas_isExpanded) {
                 // Aumentar a altura da view
-                lytParams_Entradas.height = 350
+                lytParams_Entradas.height = 500
 
                 //trocar o icone do "btnExp_Entradas"
                 btnExp_Entradas.setImageResource(R.drawable.arrow_up)
@@ -402,7 +408,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
             if (campoGastos_isExpanded) {
                 // Aumentar a altura da view
-                lytParams_Gastos.height = 350
+                lytParams_Gastos.height = 500
 
                 campoEntradas_isExpanded = false
                 campoDespesas_isExpanded = false
@@ -502,23 +508,50 @@ class tela_RelatorioGastos : AppCompatActivity() {
         entries.clear()
 
         // Recuperar a lista de valores do banco de dados
-        val listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID)
+        val listaValores: List<Float> = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID)
+        val listaEntradas: List<Float> = BancoDados(this).rendimentosMes(usuarioID, nomeMes.lowercase())
 
-        // Adicionar todos os valores existentes na lista ao gráfico
-        listaValores.forEachIndexed { i, valor ->
-            entries.add(BarEntry(i.toFloat(), valor)) // Adicionando as colunas com valores reais
+        // Se uma lista for menor, preencha com zeros
+        val maxSize = maxOf(listaValores.size, listaEntradas.size)
+        val listaValoresAjustada = listaValores + List(maxSize - listaValores.size) { 0f }
+        val listaEntradasAjustada = listaEntradas + List(maxSize - listaEntradas.size) { 0f }
+
+        // Iterar e adicionar os valores ao gráfico
+        for (i in 0 until qtdDiasMes) {
+            val valorGasto = if (i < listaValoresAjustada.size) listaValoresAjustada[i] else 0f
+            val valorEntrada = if (i < listaEntradasAjustada.size) listaEntradasAjustada[i] else 0f
+
+            entries.add(BarEntry(i.toFloat(), floatArrayOf(valorGasto, valorEntrada)))
         }
 
-        // Adicionar o valor 0 as colunas sem valor na lista para completar até o tamanho do mês
-        for (i in listaValores.size until qtdDiasMes) {
-            entries.add(BarEntry(i.toFloat(), 0f)) // Adicionando as colunas com valor 0
+//        // Adicionar todos os valores existentes na lista ao gráfico
+//        listaValores.forEachIndexed { i, valor ->
+//            entries.add(BarEntry(i.toFloat(), floatArrayOf())) // Adicionando as colunas com valores reais
+//        }
+
+//        // Adicionar o valor 0 as colunas sem valor na lista para completar até o tamanho do mês
+//        for (i in listaValores.size until qtdDiasMes) {
+//            entries.add(BarEntry(i.toFloat(), 0f)) // Adicionando as colunas com valor 0
+//        }
+
+        // Preenchendo os dias restantes com valores 0 se necessário
+        if (qtdDiasMes > maxSize) {
+            for (i in maxSize until qtdDiasMes) {
+                entries.add(BarEntry(i.toFloat(), floatArrayOf(0f, 0f)))
+            }
         }
 
         // Atualizar o gráfico
         val barDataSet = BarDataSet(entries, "")
 
+        //lista de cores das colunas
+        val coresColunas = listOf<Int>(android.graphics.Color.rgb(255, 50, 50), android.graphics.Color.rgb(109, 251, 114))
+
         //colorindo as colunas do grafico
-        barDataSet.color = android.graphics.Color.rgb(255, 50, 50) // colorindo as colunas da tabela de vermelho
+        barDataSet.setColors(coresColunas)
+
+        //colorindo as colunas do grafico
+        //barDataSet.color = android.graphics.Color.rgb(255, 50, 50) // colorindo as colunas da tabela de vermelho
 
         //aplicando a formatação criada em "valueFormatter" nos textos que ficam acima de cada coluna
         barDataSet.valueFormatter = createValueFormatter()

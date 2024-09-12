@@ -1,24 +1,19 @@
 package com.example.debts
 
-import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageButton
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.widget.addTextChangedListener
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
-import com.example.debts.layout_Item_lista.MyData
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Locale
@@ -61,10 +56,10 @@ class telaAdicionarRendimentos : AppCompatActivity() {
         })
 
         //----- configurando o botão para voltar para a tela do perfil do usuário --------------//
-        val btn_btn_voltarPerfilUsuario: Button = findViewById(R.id.btn_homeRendimentos)
+        val btn_voltarTelaPrincipal: Button = findViewById(R.id.btn_homeRendimentos)
 
-        btn_btn_voltarPerfilUsuario.setOnClickListener{
-            val navegarPerfilUsuario = Intent(this, telaPerfilUsuario::class.java)
+        btn_voltarTelaPrincipal.setOnClickListener{
+            val navegarPerfilUsuario = Intent(this, telaPrincipal::class.java)
             startActivity(navegarPerfilUsuario)
             finish()
         }
@@ -72,14 +67,14 @@ class telaAdicionarRendimentos : AppCompatActivity() {
         //-------------------- config. botão de voltar do celular --------------------------------//
 
         //configurando o botão voltar do celular quando for prescionado p/ voltar na tela de perfil usuario
-        val voltarTelaPerfilUsuario = Intent(this, telaPerfilUsuario::class.java)
+        val voltarTelaPrincipal = Intent(this, telaPrincipal::class.java)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
 
                 //Log.v("Voltar", "Botão voltar Presscionado")
 
-                startActivity(voltarTelaPerfilUsuario)
+                startActivity(voltarTelaPrincipal)
                 finish()
             }
         })
@@ -89,12 +84,12 @@ class telaAdicionarRendimentos : AppCompatActivity() {
 
         //-------------------- config. dos campos inputs p/ adicionar rendimento -----------------//
         val input_nomeRendimento: EditText = findViewById(R.id.input_nomeRendimento)
-        val input_tpTransacao: EditText = findViewById(R.id.input_tpTransacao)
+        val input_tpMovimentacao: EditText = findViewById(R.id.input_tpMovimentacao)
         val input_dtRendimento: EditText = findViewById(R.id.input_dtRendimento)
         val input_valorRendimento: EditText = findViewById(R.id.input_valorRendimento)
 
         val nomeRendimeto = input_nomeRendimento.text.toString().trim()
-        val formaRecebimento = input_tpTransacao.text.toString().trim()
+        val formaRecebimento = input_tpMovimentacao.text.toString().trim()
 
         val dataRendimento = input_dtRendimento.text.toString().trim()
 

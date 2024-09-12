@@ -224,6 +224,9 @@ class tela_RelatorioGastos : AppCompatActivity() {
         //colorindo as colunas do grafico
         barDataSet1.setColors(coresColunas)
 
+        // Definindo os rótulos para as legenda das cores do grafico
+        barDataSet1.stackLabels = arrayOf("Despesas", "Rendimentos")
+
         // Desativando o fundo de grade e rotulos que aparecem nos eixos X e Y
         val xAxis = grafico.xAxis
 
@@ -271,7 +274,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
         //aplicando a formatação criada em "valueFormatter" nos textos que ficam acima de cada coluna
         barDataSet1.valueFormatter = createValueFormatter()
 
-        grafico.legend.isEnabled = false // Desativar a legenda
+        grafico.legend.isEnabled = true // Desativar a legenda
         grafico.description.isEnabled = false // Desativar a descrição que aparece no canto inferior direito do grafico
         //grafico.isScaleXEnabled = false //bloqueando o zoom no eixo x no grafico
         grafico.isScaleYEnabled = false //bloqueando o zoom no eixo y no grafico
@@ -490,14 +493,36 @@ class tela_RelatorioGastos : AppCompatActivity() {
     // Função que retorna os textos acima das colunas formatados
     fun createValueFormatter(): ValueFormatter {
         return object : ValueFormatter() {
-            override fun getBarLabel(barEntry: BarEntry): String {
-                val value = barEntry.y // Recebe os valores que ficam acima de cada coluna
-                val valueFormatter = "R$ ${String.format("%.2f", value)}" // Formata os valores acima das colunas
+            override fun getBarStackedLabel(value: Float, stackedEntry: BarEntry): String {
+                val stackedValues = stackedEntry.yVals
 
-                return if (value > 0) {
-                    valueFormatter
+                // Se houver múltiplos valores (barra empilhada)
+                return if (stackedValues != null) {
+                    // Formata e exibe os valores empilhados individualmente
+                    val despesas = stackedValues[0]
+                    val rendimentos = stackedValues[1]
+
+                    val despesasFormatado = if (despesas > 0) {
+                        "R$ ${String.format(Locale("pt", "BR"), "%,.2f", despesas)}"
+                    } else {
+                        ""
+                    }
+
+                    val rendimentosFormatado = if (rendimentos > 0) {
+                        "R$ ${String.format(Locale("pt", "BR"), "%,.2f", rendimentos)}"
+                    } else {
+                        ""
+                    }
+
+                    // Retorna o valor correto para a barra empilhada
+                    when (value) {
+                        despesas -> despesasFormatado
+                        rendimentos -> rendimentosFormatado
+                        else -> ""
+                    }
                 } else {
-                    "" // Não exibe o texto se o valor for 0
+                    // Para o caso de uma única barra
+                    if (value > 0) "R$ ${String.format(Locale("pt", "BR"), "%,.2f", value)}" else ""
                 }
             }
         }
@@ -558,6 +583,9 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
         // Configurar o tamanho do texto dos valores nas colunas
         barDataSet.valueTextSize = 14f // Exemplo: Tamanho 14sp
+
+        // Definindo os rótulos para as legenda das cores do grafico
+        barDataSet.stackLabels = arrayOf("Despesas", "Rendimentos")
 
         val barData = BarData(barDataSet)
         grafico.data = barData

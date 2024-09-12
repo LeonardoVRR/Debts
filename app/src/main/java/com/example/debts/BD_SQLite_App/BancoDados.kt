@@ -39,7 +39,7 @@ class BancoDados(private var context: Context) {
 
         // Verifica se o arquivo do banco de dados já existe no armazenamento interno
         // Se o arquivo não existir, chama o método para copiar o banco de dados da pasta assets para o armazenamento interno
-        if (File(dbPath).exists()) {
+        if (!File(dbPath).exists()) {
 
             // Abre o arquivo do banco de dados localizado na pasta assets
             val inputStream: InputStream = context.assets.open(dbName)

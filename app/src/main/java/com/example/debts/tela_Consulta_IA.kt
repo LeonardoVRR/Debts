@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.ManipularUsoCartaoCredito.ManipularUsoCartaoCredito
@@ -28,6 +29,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class tela_Consulta_IA : AppCompatActivity() {
     private var valorSeekBarFinal: Int = 0
@@ -241,41 +244,60 @@ class tela_Consulta_IA : AppCompatActivity() {
     //função para salvar os dados na lista de dados p/ calcular a rota financeira
     fun salvarQuestionario() {
 
-        var listaMetasCriadas: MutableList<String> = mutableListOf(
-            "economizar R$ 1000,00 para uma viagem",
-            "quitar uma dívida de R$ 500,00",
-            "acumular R$ 2000,00 em fundo de emergência",
-            "investir R$ 300,00 por mês em ações",
-            "economizar R$ 1500,00 para a compra de um novo eletrônico"
-        )
+//        var listaMetasCriadas: MutableList<String> = mutableListOf(
+//            "economizar R$ 1000,00 para uma viagem",
+//            "quitar uma dívida de R$ 500,00",
+//            "acumular R$ 2000,00 em fundo de emergência",
+//            "investir R$ 300,00 por mês em ações",
+//            "economizar R$ 1500,00 para a compra de um novo eletrônico"
+//        )
+//
+//        val nomeMeta = "Meta Cartão A"
 
-        val nomeMeta = "Meta Cartão A"
-
-        //--------------- config. lista de dados para calcular rota financeira -------------------//
-        val listaDadosCalcularRotaFinanceira: MutableList<String> = mutableListOf()
-
-        val painel_opc1: EditText = findViewById(R.id.editTextNumber_opc1)
-        val painel_opc2: EditText = findViewById(R.id.editTextNumber_opc2)
-        val painel_opc3: EditText = findViewById(R.id.editTextNumber_opc3)
-
-        //pegando o uso do cartão de credito
-        val valor_painel_opc1: String = painel_opc1.text.toString()
-        val valor_painel_opc2: String = painel_opc2.text.toString()
-        val valor_painel_opc3: String = painel_opc3.text.toString()
-
-        listaDadosCalcularRotaFinanceira += "Conhecimento Financeiro: ${valorSeekBarFinal}%"
-        listaDadosCalcularRotaFinanceira += "Tipos de investimentos selecionados: ${listaOpcoesSelecionadas}"
-        listaDadosCalcularRotaFinanceira += "Uso cartão E-commerce: ${valor_painel_opc1}"
-        listaDadosCalcularRotaFinanceira += "Uso cartão App de transporte: ${valor_painel_opc2}"
-        listaDadosCalcularRotaFinanceira += "Uso cartão App de entregas: ${valor_painel_opc3}"
-
-        Log.d("LISTA CALCULAR ROTA", "${listaDadosCalcularRotaFinanceira}")
+        //Log.d("LISTA CALCULAR ROTA", "${listaDadosCalcularRotaFinanceira}")
 
         //metasCriadas(nomeMeta, listaMetasCriadas)
 
-        val idUsuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+        //BancoDados(this).salvarQuestionario(valorSeekBarFinal, listaOpcoesSelecionadas, valor_painel_opc1.toInt(), valor_painel_opc2.toInt(), valor_painel_opc3.toInt(), idUsuario)
 
-        BancoDados(this).salvarQuestionario(valorSeekBarFinal, listaOpcoesSelecionadas, valor_painel_opc1.toInt(), valor_painel_opc2.toInt(), valor_painel_opc3.toInt(), idUsuario)
+        val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+        executorService.execute {
+
+            //--------------- config. lista de dados para salvar as informações preechidas pelo usuario -------------------//
+            val listaDadosCalcularRotaFinanceira: MutableList<String> = mutableListOf()
+
+            val painel_opc1: EditText = findViewById(R.id.editTextNumber_opc1)
+            val painel_opc2: EditText = findViewById(R.id.editTextNumber_opc2)
+            val painel_opc3: EditText = findViewById(R.id.editTextNumber_opc3)
+
+            //pegando o uso do cartão de credito
+            val valor_painel_opc1: String = painel_opc1.text.toString()
+            val valor_painel_opc2: String = painel_opc2.text.toString()
+            val valor_painel_opc3: String = painel_opc3.text.toString()
+
+            listaDadosCalcularRotaFinanceira += "Conhecimento Financeiro: ${valorSeekBarFinal}%"
+            listaDadosCalcularRotaFinanceira += "Tipos de investimentos selecionados: ${listaOpcoesSelecionadas}"
+            listaDadosCalcularRotaFinanceira += "Uso cartão E-commerce: ${valor_painel_opc1}"
+            listaDadosCalcularRotaFinanceira += "Uso cartão App de transporte: ${valor_painel_opc2}"
+            listaDadosCalcularRotaFinanceira += "Uso cartão App de entregas: ${valor_painel_opc3}"
+
+            val idUsuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+
+            var salvar = ""
+
+            try {
+
+                salvar = Metodos_BD_MySQL().salvarQuestionario(valorSeekBarFinal, listaOpcoesSelecionadas, valor_painel_opc1.toInt(), valor_painel_opc2.toInt(), valor_painel_opc3.toInt(), idUsuario)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            // Atualizar a UI no thread principal
+            runOnUiThread {
+                CustomToast().showCustomToast(this, "$salvar")
+            }
+        }
     }
 
     //função para salvar a lista de metas criadas pela IA

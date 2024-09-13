@@ -93,6 +93,9 @@ dependencies {
     //Koin
     implementation ("io.insert-koin:koin-android:3.2.0")
 
+    // https://mvnrepository.com/artifact/mysql/mysql-connector-java
+    implementation("mysql:mysql-connector-java:5.1.49")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

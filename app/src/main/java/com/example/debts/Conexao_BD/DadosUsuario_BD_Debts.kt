@@ -2,6 +2,7 @@ package com.example.debts.Conexao_BD
 
 import android.content.Context
 import android.util.Log
+import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.CustomToast
 
@@ -12,6 +13,8 @@ class DadosUsuario_BD_Debts(private val context: Context) {
     }
 
     var usuarioLogado: String = recuperarUsuarioLogado()
+
+    private val dadosUsuario_MySQL = Metodos_BD_MySQL()
 
     private val dadosUsuario = BancoDados(context)
     private var nomeUsuario: String? = null
@@ -46,7 +49,9 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
     fun pegarIdUsuario(): Int {
 
-        val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
+        //val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
+
+        val dados = Metodos_BD_MySQL.dadosUsuario.listaDados
 
         if (dados != null) {
             idUsuario = dados[4].toInt()
@@ -58,7 +63,9 @@ class DadosUsuario_BD_Debts(private val context: Context) {
     }
 
     fun pegarNomeUsuario(): String {
-        val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
+        //val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
+
+        val dados = Metodos_BD_MySQL.dadosUsuario.listaDados
 
         if (dados != null) {
             nomeUsuario = dados[0]
@@ -69,7 +76,9 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
     fun pegarSenhaUsuario(): String {
 
-        val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
+        //val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
+
+        val dados = Metodos_BD_MySQL.dadosUsuario.listaDados
 
         if (dados != null) {
             senhaUsuario = dados[3]
@@ -80,7 +89,9 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
     fun pegarCPFUsuario(): String {
 
-        val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
+        //val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
+
+        val dados = Metodos_BD_MySQL.dadosUsuario.listaDados
 
         if (dados != null) {
             cpfUsuario = dados[2]
@@ -91,7 +102,9 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
     fun pegarEmailUsuario(): String {
 
-        val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
+        //val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
+
+        val dados = Metodos_BD_MySQL.dadosUsuario.listaDados
 
         if (dados != null) {
             emailUsuario = dados[1]

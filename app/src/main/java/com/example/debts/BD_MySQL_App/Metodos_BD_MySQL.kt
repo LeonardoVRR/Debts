@@ -9,8 +9,14 @@ import com.google.gson.Gson
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
+import java.util.Calendar
+import java.util.Locale
 
 class Metodos_BD_MySQL {
+
+    object dadosUsuario {
+        var listaDados: MutableList<String> = mutableListOf()
+    }
 
     //função para verificar se existe uma conta para fazer o login do usuario
     fun validarLogin(nome: String, senha: String): Boolean {
@@ -25,7 +31,7 @@ class Metodos_BD_MySQL {
             val statement: Statement = con.createStatement()
 
             // Defina a consulta SQL
-            val sql = " SELECT * FROM usuarios_debts WHERE nome_usuario = '$nome' AND senha_usuario = '$senha'"
+            val sql = "SELECT * FROM usuarios_debts WHERE nome_usuario = '$nome' AND senha_usuario = '$senha'"
 
             try {
                 // Execute a consulta e obtenha o resultado
@@ -34,9 +40,22 @@ class Metodos_BD_MySQL {
                 // Processar o resultado
                 if (resultSet.next()) {
                     // Exemplo de processamento de dados
-                    val id = resultSet.getInt("id_usuario") // Substitua pelo nome da coluna
-                    val nome = resultSet.getString("nome_usuario") // Substitua pelo nome da coluna
-                    Log.d("ConsultaResult", "ID: $id, Nome: $nome")
+                    val idUsuario = resultSet.getInt("id_usuario")
+                    val nome = resultSet.getString("nome_usuario")
+                    val emailUsuario = resultSet.getString("email_usuario")
+                    val cpfUsuario = resultSet.getString("cpf_usuario")
+                    val senhaUsuario = resultSet.getString("senha_usuario")
+
+                    Log.d("ConsultaResult", "ID: $idUsuario, Nome: $nome")
+
+                    // Armazena os dados do usuário em uma lista
+                    dadosUsuario.listaDados.add(nome)
+                    dadosUsuario.listaDados.add(emailUsuario)
+                    dadosUsuario.listaDados.add(cpfUsuario)
+                    dadosUsuario.listaDados.add(senhaUsuario)
+                    dadosUsuario.listaDados.add(idUsuario.toString())
+
+                    Log.d("LISTA DADOS", "${dadosUsuario}")
 
                     loginValido = true
                 }
@@ -66,8 +85,69 @@ class Metodos_BD_MySQL {
         return loginValido
     }
 
+//    fun salvarDadosUsuario(nome: String): List<String> {
+//        // Inicialize a conexão com BD
+//        val con = ConnectionClass().CONN()
+//
+//        var dadosUsuario: MutableList<String> = mutableListOf()
+//
+//        // Verifica se a conexão foi estabelecida
+//        if (con != null) {
+//            // Crie um Statement para executar a consulta
+//            val statement: Statement = con.createStatement()
+//
+//            // Defina a consulta SQL
+//            val sql = " SELECT * FROM usuarios_debts WHERE nome_usuario = '${nome.lowercase()}'"
+//
+//            try {
+//                // Execute a consulta e obtenha o resultado
+//                val resultSet: ResultSet = statement.executeQuery(sql)
+//
+//                // Processar o resultado
+//                if (resultSet.next()) {
+//                    // Exemplo de processamento de dados
+//                    val idUsuario = resultSet.getInt("id_usuario").toString()
+//                    val nome = resultSet.getString("nome_usuario")
+//                    val emailUsuario = resultSet.getString("email_usuario")
+//                    val cpfUsuario = resultSet.getInt("cpfUsuario").toString()
+//                    val senhaUsuario = resultSet.getString("senhaUsuario")
+//
+//                    //Log.d("ConsultaResult", "ID: $id, Nome: $nome")
+//
+//                    // Armazena os dados do usuário em uma lista
+//                    dadosUsuario.add(nome)
+//                    dadosUsuario.add(emailUsuario)
+//                    dadosUsuario.add(cpfUsuario)
+//                    dadosUsuario.add(senhaUsuario)
+//                    dadosUsuario.add(idUsuario)
+//
+//                    Log.d("LISTA DADOS", "${dadosUsuario}")
+//                }
+//
+//                resultSet?.close()
+//
+//            } catch (e: SQLException) {
+//                e.printStackTrace()
+//                Log.e("ErroConsulta", "Erro ao realizar a consulta: ${e.message}")
+//            } finally {
+//                // Feche os recursos
+//                try {
+//                    statement?.close()
+//                    con?.close()
+//                } catch (e: SQLException) {
+//                    e.printStackTrace()
+//                }
+//            }
+//        } else {
+//            Log.e("ErroConexao", "Conexão não estabelecida")
+//        }
+//
+//        return dadosUsuario.toList()
+//    }
+
+
     fun salvarQuestionario(nvl_conhecimeto_financ: Int, tps_investimentos: List<String>, tx_uso_ecommerce: Int, tx_uso_app_transporte: Int, tx_uso_app_entrega: Int, IDusuario: Int): String {
-        // Inicialize a conexão com BD
+        // Inicializa a conexão com BD
         val con = ConnectionClass().CONN()
 
         //convertendo a lista para JSON para poder salvar no banco de dados
@@ -165,6 +245,80 @@ class Metodos_BD_MySQL {
 
         return resultado
 
+    }
+
+    fun salvarRendimento(tipoMovimento: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int): String {
+        // Inicializa a conexão com BD
+        val con = ConnectionClass().CONN()
+
+        //resultado da operação
+        var resultado = ""
+
+        // Verifica se a conexão foi estabelecida
+        if (con != null){
+
+            //formatando a data
+            //faz o fatiamento da data
+            val dia = dataRendimento.substring(0, 2)
+            val mes = dataRendimento.substring(3, 5)
+            val ano = dataRendimento.substring(6, 10)
+
+            val mesBalanco = (dataRendimento.substring(3, 5)).toInt()
+
+            // Obtém o nome do mês atual para exibição
+            val calendar = Calendar.getInstance()
+            calendar.set(Calendar.MONTH, mesBalanco)
+            val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+
+            val dataFormatada = "$ano-$mes-$dia"
+
+            // Crie um Statement para executar a consulta
+            val statement: Statement = con.createStatement()
+
+            // query para salvar um novo rendimento do usuário
+            val sql = "INSERT INTO rendimentos (tp_movimento, dt_rendimento, mes, valor_rendimento, id_user_rendimento) VALUES (?, ?, ?, ?, ?);"
+
+            try {
+
+                // Preparar a instrução SQL
+                val salvarRendimento = con.prepareStatement(sql)
+
+                // Definir os parâmetros da consulta
+                salvarRendimento.setString(1, tipoMovimento)
+                salvarRendimento.setString(2, dataFormatada)
+                salvarRendimento.setString(3, nomeMes)
+                salvarRendimento.setFloat(4, valorRendimento)
+                salvarRendimento.setInt(5, IDusuario)
+
+                // Executa a consulta
+                salvarRendimento.executeUpdate()
+
+                resultado = "Informações salvas com sucesso!"
+
+                salvarRendimento.close()
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta", "Erro ao realizar a consulta: ${e.message}")
+
+                resultado = "Erro ao realizar a consulta: ${e.message}"
+            } finally {
+                // Feche os recursos
+                try {
+                    statement?.close()
+                    con?.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+
+        } else {
+            Log.e("ErroConexao", "Conexão não estabelecida")
+
+            resultado = "Conexão não estabelecida"
+        }
+
+        return resultado
     }
 
 }

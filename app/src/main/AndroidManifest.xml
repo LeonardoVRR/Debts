@@ -17,9 +17,11 @@
         android:theme="@style/Theme.Debts"
         tools:targetApi="31">
         <activity
-            android:name=".adapterDropList_telaBalanco.dropDown_item_listaBalanco"
+            android:name=".tela_Carregamento"
             android:exported="false" />
-        <!-- Configurando a orientação para "portrait" em todas as atividades -->
+        <activity
+            android:name=".adapterDropList_telaBalanco.dropDown_item_listaBalanco"
+            android:exported="false" /> <!-- Configurando a orientação para "portrait" em todas as atividades -->
         <activity
             android:name=".Dialog_Style.layout_AvisoExclusaoMeta"
             android:exported="false"

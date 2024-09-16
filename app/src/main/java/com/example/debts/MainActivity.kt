@@ -18,6 +18,7 @@ import com.example.debts.BD_MySQL_App.ConnectionClass
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.MsgCarregando.MensagemCarregando
 import com.example.debts.visibilidadeSenha.AlterarVisibilidade
 import java.sql.Connection
 import java.util.concurrent.ExecutorService
@@ -156,6 +157,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun validarLogin_MySQL(nome: String, senha: String) {
+
+        val msgCarregando = MensagemCarregando(this)
+
+        msgCarregando.mostrarMensagem()
+
         val executorService: ExecutorService = Executors.newSingleThreadExecutor()
         executorService.execute {
             try {
@@ -171,11 +177,12 @@ class MainActivity : AppCompatActivity() {
                     msg_login = "Usuario: $usuarioLogado logado."
 
                     //salva o nome do usuario logado
-                    DadosUsuario_BD_Debts(this).salvarUsuarioLogado(usuarioLogado)
+                    //DadosUsuario_BD_Debts(this).salvarUsuarioLogado(usuarioLogado)
+                    //conexao.salvarDadosUsuario(usuarioLogado)
 
-                        val navegarTelaPrincipal = Intent(this, tela_Consulta_IA::class.java)
-                        startActivity(navegarTelaPrincipal)
-                        finish()
+                    val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)
+                    startActivity(navegarTelaPrincipal)
+                    finish()
                 }
 
                 else {
@@ -185,11 +192,15 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 str = "Erro ao se conectar: ${e.message}"
-            }
+            } finally {
 
-            // Atualizar a UI no thread principal
-            runOnUiThread {
-                CustomToast().showCustomToast(this, "$msg_login")
+                // Atualizar a UI no thread principal
+                runOnUiThread {
+                    msgCarregando.ocultarMensagem()
+                    Log.d("lista dados SALVOS", "${Metodos_BD_MySQL.dadosUsuario.listaDados}")
+                }
+
+                executorService.shutdown()
             }
         }
     }

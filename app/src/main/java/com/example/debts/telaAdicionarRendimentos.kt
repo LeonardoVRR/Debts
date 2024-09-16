@@ -14,12 +14,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.MsgCarregando.MensagemCarregando
 import com.google.android.material.textfield.TextInputLayout
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class telaAdicionarRendimentos : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,45 +96,69 @@ class telaAdicionarRendimentos : AppCompatActivity() {
 
     fun salvarRendimento(v: View) {
 
-        //-------------------- config. dos campos inputs p/ adicionar rendimento -----------------//
-        //val input_nomeRendimento: EditText = findViewById(R.id.input_nomeRendimento)
-        val input_tpMovimentacao: AutoCompleteTextView = findViewById(R.id.autoCompleteTextView)
-        val input_dtRendimento: EditText = findViewById(R.id.input_dtRendimento)
-        val input_valorRendimento: EditText = findViewById(R.id.input_valorRendimento)
+        val msgCarregando = MensagemCarregando(this)
 
-        //val nomeRendimeto = input_nomeRendimento.text.toString().trim()
-        val tipoMovimentacao = input_tpMovimentacao.text.toString().trim()
+        var resultado = ""
 
-        val dataRendimento = input_dtRendimento.text.toString().trim()
+        msgCarregando.mostrarMensagem()
 
-        val valorRendimento = input_valorRendimento.text.toString().trim()
+        val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+        executorService.execute {
+            try {
 
-        val idUsuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+                //-------------------- config. dos campos inputs p/ adicionar rendimento -----------------//
+                //val input_nomeRendimento: EditText = findViewById(R.id.input_nomeRendimento)
+                val input_tpMovimentacao: AutoCompleteTextView = findViewById(R.id.autoCompleteTextView)
+                val input_dtRendimento: EditText = findViewById(R.id.input_dtRendimento)
+                val input_valorRendimento: EditText = findViewById(R.id.input_valorRendimento)
 
-        if (tipoMovimentacao.isEmpty() || dataRendimento.isEmpty() || valorRendimento.isEmpty()){
-            CustomToast().showCustomToast(this, "Preencha todos os campos.")
-        }
+                //val nomeRendimeto = input_nomeRendimento.text.toString().trim()
+                val tipoMovimentacao = input_tpMovimentacao.text.toString().trim()
 
-        else if (tipoMovimentacao == "Tipo de Movimentação") {
-            CustomToast().showCustomToast(this, "Escolha um tipo de movimentação.")
-        }
+                val dataRendimento = input_dtRendimento.text.toString().trim()
 
-        else {
+                val valorRendimento = input_valorRendimento.text.toString().trim()
 
-            //formata o valor do valor rendimento para o formato Real(R$)
-            val valorRendimentoFormatado = formatarValorRendimento(valorRendimento)
+                val idUsuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
 
-            //verifica se a data digitada é valida
-            if (!validarData(dataRendimento)) {
-                // Data válida
-                CustomToast().showCustomToast(this@telaAdicionarRendimentos, "Data Inválida: $dataRendimento")
+                if (tipoMovimentacao.isEmpty() || dataRendimento.isEmpty() || valorRendimento.isEmpty()){
+                    CustomToast().showCustomToast(this, "Preencha todos os campos.")
+                }
+
+                else if (tipoMovimentacao == "Tipo de Movimentação") {
+                    CustomToast().showCustomToast(this, "Escolha um tipo de movimentação.")
+                }
+
+                else {
+
+                    //formata o valor do valor rendimento para o formato Real(R$)
+                    val valorRendimentoFormatado = formatarValorRendimento(valorRendimento)
+
+                    //verifica se a data digitada é valida
+                    if (!validarData(dataRendimento)) {
+                        // Data válida
+                        CustomToast().showCustomToast(this@telaAdicionarRendimentos, "Data Inválida: $dataRendimento")
+                    }
+
+                    else {
+
+                        if (tipoMovimentacao != "Divida") {
+                            //BancoDados(this).salvarRendimento(tipoMovimentacao, dataRendimento, valorRendimentoFormatado, idUsuario)
+
+                            resultado = Metodos_BD_MySQL().salvarRendimento(tipoMovimentacao, dataRendimento, valorRendimentoFormatado, idUsuario)
+                        }
+                    }
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                //str = "Erro ao se conectar: ${e.message}"
             }
 
-            else {
-
-                if (tipoMovimentacao != "Divida") {
-                    BancoDados(this).salvarRendimento(tipoMovimentacao, dataRendimento, valorRendimentoFormatado, idUsuario)
-                }
+            // Atualizar a UI no thread principal
+            runOnUiThread {
+                msgCarregando.ocultarMensagem()
+                CustomToast().showCustomToast(this, resultado)
             }
         }
     }

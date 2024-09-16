@@ -24,6 +24,7 @@ import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.ManipularUsoCartaoCredito.ManipularUsoCartaoCredito
+import com.example.debts.MsgCarregando.MensagemCarregando
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -260,6 +261,9 @@ class tela_Consulta_IA : AppCompatActivity() {
 
         //BancoDados(this).salvarQuestionario(valorSeekBarFinal, listaOpcoesSelecionadas, valor_painel_opc1.toInt(), valor_painel_opc2.toInt(), valor_painel_opc3.toInt(), idUsuario)
 
+        val msgCarregando = MensagemCarregando(this)
+        msgCarregando.mostrarMensagem()
+
         val executorService: ExecutorService = Executors.newSingleThreadExecutor()
         executorService.execute {
 
@@ -295,6 +299,7 @@ class tela_Consulta_IA : AppCompatActivity() {
 
             // Atualizar a UI no thread principal
             runOnUiThread {
+                msgCarregando.ocultarMensagem()
                 CustomToast().showCustomToast(this, "$salvar")
             }
         }

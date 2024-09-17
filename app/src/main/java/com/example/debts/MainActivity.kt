@@ -51,6 +51,9 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        //definindo o estado do login do usuário
+        DadosUsuario_BD_Debts(this).salvarEstadoLogin(false)
+
         connectionClass = ConnectionClass()
 
         //chamando a função para acessar o BD

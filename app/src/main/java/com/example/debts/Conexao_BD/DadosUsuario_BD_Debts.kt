@@ -23,6 +23,21 @@ class DadosUsuario_BD_Debts(private val context: Context) {
     private var senhaUsuario: String? = null
     private var idUsuario: Int = 0
 
+    // Função para salvar o estado de login
+    fun salvarEstadoLogin(loginEfetuado: Boolean) {
+        val sharedPref = context.getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putBoolean("loginEfetuado", loginEfetuado)
+            apply()
+        }
+    }
+
+    // Função para verificar o estado de login
+    fun verificarEstadoLogin(): Boolean {
+        val sharedPref = context.getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE)
+        return sharedPref.getBoolean("loginEfetuado", false) // false é o valor padrão
+    }
+
     // Função para salvar o nome do usuário logado nas preferências compartilhadas.
     fun salvarUsuarioLogado(usuario: String) {
         // Obtém o SharedPreferences para armazenar dados com o nome "UserPrefs".

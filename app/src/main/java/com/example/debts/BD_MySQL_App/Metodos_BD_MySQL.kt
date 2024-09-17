@@ -48,14 +48,24 @@ class Metodos_BD_MySQL {
 
                     Log.d("ConsultaResult", "ID: $idUsuario, Nome: $nome")
 
-                    // Armazena os dados do usuário em uma lista
-                    dadosUsuario.listaDados.add(nome)
-                    dadosUsuario.listaDados.add(emailUsuario)
-                    dadosUsuario.listaDados.add(cpfUsuario)
-                    dadosUsuario.listaDados.add(senhaUsuario)
-                    dadosUsuario.listaDados.add(idUsuario.toString())
+                    if (dadosUsuario.listaDados.size > 0) {
+                        dadosUsuario.listaDados[0] = nome
+                        dadosUsuario.listaDados[1] = emailUsuario
+                        dadosUsuario.listaDados[2] = cpfUsuario
+                        dadosUsuario.listaDados[3] = senhaUsuario
+                        dadosUsuario.listaDados[4] = idUsuario.toString()
+                    }
 
-                    Log.d("LISTA DADOS", "${dadosUsuario}")
+                    else {
+                        // Armazena os dados do usuário em uma lista
+                        dadosUsuario.listaDados.add(nome)
+                        dadosUsuario.listaDados.add(emailUsuario)
+                        dadosUsuario.listaDados.add(cpfUsuario)
+                        dadosUsuario.listaDados.add(senhaUsuario)
+                        dadosUsuario.listaDados.add(idUsuario.toString())
+
+                        Log.d("LISTA DADOS", "${dadosUsuario.listaDados}")
+                    }
 
                     loginValido = true
                 }
@@ -85,66 +95,187 @@ class Metodos_BD_MySQL {
         return loginValido
     }
 
-//    fun salvarDadosUsuario(nome: String): List<String> {
-//        // Inicialize a conexão com BD
-//        val con = ConnectionClass().CONN()
-//
-//        var dadosUsuario: MutableList<String> = mutableListOf()
-//
-//        // Verifica se a conexão foi estabelecida
-//        if (con != null) {
-//            // Crie um Statement para executar a consulta
-//            val statement: Statement = con.createStatement()
-//
-//            // Defina a consulta SQL
-//            val sql = " SELECT * FROM usuarios_debts WHERE nome_usuario = '${nome.lowercase()}'"
-//
-//            try {
-//                // Execute a consulta e obtenha o resultado
-//                val resultSet: ResultSet = statement.executeQuery(sql)
-//
-//                // Processar o resultado
-//                if (resultSet.next()) {
-//                    // Exemplo de processamento de dados
-//                    val idUsuario = resultSet.getInt("id_usuario").toString()
-//                    val nome = resultSet.getString("nome_usuario")
-//                    val emailUsuario = resultSet.getString("email_usuario")
-//                    val cpfUsuario = resultSet.getInt("cpfUsuario").toString()
-//                    val senhaUsuario = resultSet.getString("senhaUsuario")
-//
-//                    //Log.d("ConsultaResult", "ID: $id, Nome: $nome")
-//
-//                    // Armazena os dados do usuário em uma lista
-//                    dadosUsuario.add(nome)
-//                    dadosUsuario.add(emailUsuario)
-//                    dadosUsuario.add(cpfUsuario)
-//                    dadosUsuario.add(senhaUsuario)
-//                    dadosUsuario.add(idUsuario)
-//
-//                    Log.d("LISTA DADOS", "${dadosUsuario}")
-//                }
-//
-//                resultSet?.close()
-//
-//            } catch (e: SQLException) {
-//                e.printStackTrace()
-//                Log.e("ErroConsulta", "Erro ao realizar a consulta: ${e.message}")
-//            } finally {
-//                // Feche os recursos
-//                try {
-//                    statement?.close()
-//                    con?.close()
-//                } catch (e: SQLException) {
-//                    e.printStackTrace()
-//                }
-//            }
-//        } else {
-//            Log.e("ErroConexao", "Conexão não estabelecida")
-//        }
-//
-//        return dadosUsuario.toList()
-//    }
+    // função para criar uma nova conta de usuário
+    fun cadastrarConta(nome: String, email: String, cpf: String, senha: String): Boolean {
+        // Inicializa a conexão com BD
+        val con = ConnectionClass().CONN()
 
+        var contaExiste = false
+        val nomeFormatado = nome.lowercase()
+        val emailFormatado = email.lowercase()
+
+        // Verifica se a conexão foi estabelecida
+        if (con != null) {
+            try {
+                // Verificar se o email já existe
+                val emailConsulta = "SELECT * FROM usuarios_debts WHERE email_usuario = ?"
+                val verificarEmailStmt = con.prepareStatement(emailConsulta)
+                verificarEmailStmt.setString(1, emailFormatado)
+                val verificarEmail: ResultSet = verificarEmailStmt.executeQuery()
+
+                // Verificar se o CPF já existe
+                val cpfConsulta = "SELECT * FROM usuarios_debts WHERE cpf_usuario = ?"
+                val verificarCPFStmt = con.prepareStatement(cpfConsulta)
+                verificarCPFStmt.setString(1, cpf) // CPF como string
+                val verificarCPF: ResultSet = verificarCPFStmt.executeQuery()
+
+                // Verifica se já existe uma conta com o mesmo email ou CPF
+                if (verificarEmail.next() || verificarCPF.next()) {
+                    contaExiste = true
+                } else {
+                    // Caso não exista, cria uma nova conta
+                    val insert = "INSERT INTO usuarios_debts (nome_usuario, email_usuario, cpf_usuario, senha_usuario) VALUES (?, ?, ?, ?)"
+                    val cadastrarContaStmt = con.prepareStatement(insert)
+                    cadastrarContaStmt.setString(1, nomeFormatado)
+                    cadastrarContaStmt.setString(2, emailFormatado)
+                    cadastrarContaStmt.setString(3, cpf)
+                    cadastrarContaStmt.setString(4, senha)
+
+                    // Executa a inserção
+                    cadastrarContaStmt.executeUpdate()
+
+                    cadastrarContaStmt.close()
+                }
+
+                verificarEmailStmt.close()
+                verificarCPFStmt.close()
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta", "Erro ao realizar a consulta: ${e.message}")
+            } finally {
+                // Feche os recursos
+                try {
+                    con.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            Log.e("ErroConexao", "Conexão não estabelecida")
+        }
+
+        return contaExiste
+    }
+
+    //função para atualizar o nome ou email do usuario no BD
+    fun atualizarDados(novoNome: String, novoEmail: String, IDusuario: Int): String {
+        // Inicialize a conexão com BD
+        val con = ConnectionClass().CONN()
+
+        //resultado da operação
+        var resultado = ""
+
+        // Verifica se a conexão foi estabelecida
+        if (con != null){
+
+            // Crie um Statement para executar a consulta
+            val statement: Statement = con.createStatement()
+
+            val update = "update usuarios_debts set nome_usuario = ?, email_usuario = ? where id_usuario = ?"
+
+            try {
+
+                // Preparar a instrução SQL
+                val atualizarDados = con.prepareStatement(update)
+
+                // Definir os parâmetros da consulta
+                atualizarDados.setString(1, novoNome)
+                atualizarDados.setString(2, novoEmail)
+                atualizarDados.setInt(3, IDusuario)
+
+                // Executar a instrução de update
+                val rowsUpdated = atualizarDados.executeUpdate()
+
+                // Verificar se alguma linha foi atualizada
+                if (rowsUpdated > 0) {
+                    resultado = "Dados atualizados com sucesso!"
+                }
+
+                atualizarDados.close()
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta", "Erro ao realizar a consulta: ${e.message}")
+
+                resultado = "Erro ao realizar a consulta: ${e.message}"
+            } finally {
+                // Feche os recursos
+                try {
+                    statement?.close()
+                    con?.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+
+        } else {
+            Log.e("ErroConexao", "Conexão não estabelecida")
+
+            resultado = "Conexão não estabelecida"
+        }
+
+        return resultado
+    }
+
+    //função para atualizar a senha do usuario no BD MySQL
+    fun atualizarSenha(novaSenha: String, IDusuario: Int): String {
+        // Inicialize a conexão com BD
+        val con = ConnectionClass().CONN()
+
+        //resultado da operação
+        var resultado = ""
+
+        // Verifica se a conexão foi estabelecida
+        if (con != null){
+
+            // Crie um Statement para executar a consulta
+            val statement: Statement = con.createStatement()
+
+            val update = "update usuarios_debts set senha_usuario = ? where id_usuario = ?"
+
+            try {
+
+                // Preparar a instrução SQL
+                val atualizarSenha = con.prepareStatement(update)
+
+                // Definir os parâmetros da consulta
+                atualizarSenha.setString(1, novaSenha)
+                atualizarSenha.setInt(2, IDusuario)
+
+                // Executar a instrução de update
+                val rowsUpdated = atualizarSenha.executeUpdate()
+
+                // Verificar se alguma linha foi atualizada
+                if (rowsUpdated > 0) {
+                    resultado = "Senha atualizada com sucesso!"
+                }
+
+                atualizarSenha.close()
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta", "Erro ao realizar a consulta: ${e.message}")
+
+                resultado = "Erro ao realizar a consulta: ${e.message}"
+            } finally {
+                // Feche os recursos
+                try {
+                    statement?.close()
+                    con?.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+
+        } else {
+            Log.e("ErroConexao", "Conexão não estabelecida")
+
+            resultado = "Conexão não estabelecida"
+        }
+
+        return resultado
+    }
 
     fun salvarQuestionario(nvl_conhecimeto_financ: Int, tps_investimentos: List<String>, tx_uso_ecommerce: Int, tx_uso_app_transporte: Int, tx_uso_app_entrega: Int, IDusuario: Int): String {
         // Inicializa a conexão com BD
@@ -319,6 +450,46 @@ class Metodos_BD_MySQL {
         }
 
         return resultado
+    }
+
+    fun deletarUsuario(IDusuario: Int) {
+        // Inicializa a conexão com BD
+        val con = ConnectionClass().CONN()
+
+        // query para excluir um usuário
+        val query = " DELETE FROM Usuarios_Debts WHERE id_usuario = ?"
+
+        if (con !== null) {
+            try {
+
+                // Preparar a instrução SQL
+                val deletarUsuario = con.prepareStatement(query)
+
+                // Definir o parâmetro ID do usuário
+                deletarUsuario.setInt(1, IDusuario)
+
+                // Executa a consulta
+                deletarUsuario.executeUpdate()
+
+
+                deletarUsuario.close()
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta", "Erro ao realizar a consulta: ${e.message}")
+
+            } finally {
+                // Feche os recursos
+                try {
+                    con?.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            Log.e("ErroConexao", "Conexão não estabelecida")
+
+        }
     }
 
 }

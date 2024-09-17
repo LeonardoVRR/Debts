@@ -2,6 +2,7 @@ package com.example.debts
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -13,9 +14,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.MsgCarregando.MensagemCarregando
 import com.example.debts.visibilidadeSenha.AlterarVisibilidade
+import kotlinx.coroutines.delay
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class configConta_Usuario : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,12 +100,47 @@ class configConta_Usuario : AppCompatActivity() {
             }
 
             else {
-                BancoDados(this).atualizarDados(novoNome, novoEmail, idUsuario)
+                //BancoDados(this).atualizarDados(novoNome, novoEmail, idUsuario)
+                //CustomToast().showCustomToast(this, "Dados Atualizados com sucesso.")
 
                 //atualiza o nome do usuario logado
                 DadosUsuario_BD_Debts(this).salvarUsuarioLogado(novoNome)
 
-                CustomToast().showCustomToast(this, "Dados Atualizados com sucesso.")
+                var resultado = ""
+
+                val msgCarregando = MensagemCarregando(this)
+
+                msgCarregando.mostrarMensagem()
+
+                val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+                executorService.execute {
+                    try {
+
+                        resultado = Metodos_BD_MySQL().atualizarDados(novoNome, novoEmail, idUsuario)
+
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        //str = "Erro ao se conectar: ${e.message}"
+                    } finally {
+
+                        // Atualizar a UI no thread principal
+                        runOnUiThread {
+                            msgCarregando.ocultarMensagem()
+
+                            val texto = CustomToast()
+                            texto.showCustomToast(this, resultado)
+
+                            texto.showCustomToast(this, "Sessão expirada. Refaça o login.")
+
+                            val navegarTelaLogin = Intent(this, MainActivity::class.java)
+                            startActivity(navegarTelaLogin)
+                            finish()
+                        }
+
+                        executorService.shutdown()
+                    }
+                }
+
             }
         }
     }
@@ -125,9 +166,35 @@ class configConta_Usuario : AppCompatActivity() {
             }
 
             else {
-                BancoDados(this).atualizarSenha(entradaSenha, idUsuario)
+//                BancoDados(this).atualizarSenha(entradaSenha, idUsuario)
+//                CustomToast().showCustomToast(this, "Senha redefinida com sucesso.")
 
-                CustomToast().showCustomToast(this, "Senha redefinida com sucesso.")
+                var resultado = ""
+
+                val msgCarregando = MensagemCarregando(this)
+
+                msgCarregando.mostrarMensagem()
+
+                val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+                executorService.execute {
+                    try {
+
+                        resultado = Metodos_BD_MySQL().atualizarSenha(entradaSenha, idUsuario)
+
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        //str = "Erro ao se conectar: ${e.message}"
+                    } finally {
+
+                        // Atualizar a UI no thread principal
+                        runOnUiThread {
+                            msgCarregando.ocultarMensagem()
+                            CustomToast().showCustomToast(this, resultado)
+                        }
+
+                        executorService.shutdown()
+                    }
+                }
             }
         }
     }
@@ -154,14 +221,42 @@ class configConta_Usuario : AppCompatActivity() {
 
         // Configurar ações para os botões
         btnConfirmarExclusao.setOnClickListener {
-            CustomToast().showCustomToast(this, "Conta excluída com sucesso.")
-            dialog.dismiss()
 
-            BancoDados(this).deletarUsuario(idUsuario)
+            var resultado = ""
 
-            val voltarTelaLogin = Intent(this, MainActivity::class.java)
-            startActivity(voltarTelaLogin)
-            finish()
+            val msgCarregando = MensagemCarregando(this)
+
+            msgCarregando.mostrarMensagem()
+
+            val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+            executorService.execute {
+                try {
+
+                    Metodos_BD_MySQL().deletarUsuario(idUsuario)
+
+                    resultado = "Conta excluída com sucesso."
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    resultado = "Erro ao deletar conta: ${e.message}"
+                } finally {
+
+                    // Atualizar a UI no thread principal
+                    runOnUiThread {
+                        msgCarregando.ocultarMensagem()
+                        dialog.dismiss()
+                        CustomToast().showCustomToast(this, resultado)
+
+                        val voltarTelaLogin = Intent(this, MainActivity::class.java)
+                        startActivity(voltarTelaLogin)
+                        finish()
+                    }
+
+                    executorService.shutdown()
+                }
+            }
+
+            //BancoDados(this).deletarUsuario(idUsuario)
         }
 
         btnCancelarExclusao.setOnClickListener {

@@ -4,14 +4,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.CheckBox
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.MsgCarregando.MensagemCarregando
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class cadastrar : AppCompatActivity() {
 
@@ -24,6 +29,11 @@ class cadastrar : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        //configurando o botão criar conta
+        val btnCriarConta: Button = findViewById(R.id.btn_cadastrarConta)
+
+        btnCriarConta.setOnClickListener { cadastrarConta() }
 
         //configurando o botão voltar do celular quando for prescionado p/ voltar na tela de login
         val voltarTelaLogin = Intent(this, MainActivity::class.java)
@@ -38,57 +48,95 @@ class cadastrar : AppCompatActivity() {
     }
 
     //função para recuperar os dados passados pela activity criarConta
-    private fun recuperarDados(): Boolean {
+    private fun cadastrarConta() {
         val nome = intent.getStringExtra("nome").toString()
         val email = intent.getStringExtra("email").toString()
         val cpf = intent.getStringExtra("cpf").toString()
         val senha = intent.getStringExtra("senha").toString()
 
-        var contaExistente: Boolean = false
-
         //Log.d("nome", nome.toString())
         //CustomToast().showCustomToast(this, nome.toString())
 
-        if (BancoDados(this).verificarDados(email)) {
-            contaExistente = true
-            //CustomToast().showCustomToast(this, "Esse usuário já existe")
-        }
-        else {
-            contaExistente = false
-            BancoDados(this).cadastrarConta(nome, email, cpf, senha)
+//        if (BancoDados(this).verificarDados(email)) {
+//            contaExistente = true
+//            //CustomToast().showCustomToast(this, "Esse usuário já existe")
+//        }
+//        else {
+//            contaExistente = false
+//            BancoDados(this).cadastrarConta(nome, email, cpf, senha)
+//
+//
+//            //CustomToast().showCustomToast(this, "Usuário adicionado com sucesso")
+//        }
 
-            //salva o nome do usuario logado
-            DadosUsuario_BD_Debts(this).salvarUsuarioLogado(nome)
-            //CustomToast().showCustomToast(this, "Usuário adicionado com sucesso")
-        }
+        if (termosUso()) {
 
-        return contaExistente
-    }
+            var contaExistente: String = ""
 
-    //configurando o evento de click no botão cadastrar
-    fun termosUso(v: View) {
-        val termosLidos: CheckBox = findViewById(R.id.checkBox_termoLido)
-        val autorizacaoUsoDados: CheckBox = findViewById(R.id.checkBox_AutorizarUsoDados)
+            val msgCarregando = MensagemCarregando(this)
 
-        //verificando se as checkboxs foram marcadas para prosseguir com a navegação para a tela Principal do App
-        if (termosLidos.isChecked && autorizacaoUsoDados.isChecked) {
+            msgCarregando.mostrarMensagem()
 
-            if (recuperarDados()) {
-                CustomToast().showCustomToast(this, "Essa conta já existe")
+            val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+            executorService.execute {
+                try {
+
+                    val conta = Metodos_BD_MySQL().cadastrarConta(nome, email, cpf, senha)
+
+                    //verifica se a conta existe para fazer o login
+                    if (conta){
+                        contaExistente = "Essa conta já existe"
+                    }
+
+                    else {
+
+                        contaExistente = "Conta Criada"
+
+                        //salva o nome do usuario logado
+                        DadosUsuario_BD_Debts(this).salvarUsuarioLogado(nome)
+                    }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+
+                    // Atualizar a UI no thread principal
+                    runOnUiThread {
+                        msgCarregando.ocultarMensagem()
+                        CustomToast().showCustomToast(this, contaExistente)
+
+                        val navegarTelaQuestionario = Intent(this, tela_Consulta_IA::class.java)
+                        startActivity(navegarTelaQuestionario)
+                        finish()
+                    }
+
+                    executorService.shutdown()
+                }
             }
-
-            else {
-                CustomToast().showCustomToast(this, "Conta Criada")
-
-                val navegarTelaQuestionario = Intent(this, tela_Consulta_IA::class.java)
-                startActivity(navegarTelaQuestionario)
-                finish()
-            }
-
         }
 
         else {
             CustomToast().showCustomToast(this, "Para continuar, aceite os Termos.")
         }
+
+    }
+
+    //configurando o evento de click no botão cadastrar
+    fun termosUso(): Boolean {
+        val termosLidos: CheckBox = findViewById(R.id.checkBox_termoLido)
+        val autorizacaoUsoDados: CheckBox = findViewById(R.id.checkBox_AutorizarUsoDados)
+
+        var termosAceitos: Boolean = false
+
+        //verificando se as checkboxs foram marcadas para prosseguir com a navegação para a tela Principal do App
+        if (termosLidos.isChecked && autorizacaoUsoDados.isChecked) {
+            termosAceitos = true
+        }
+
+        else {
+            termosAceitos = false
+        }
+
+        return termosAceitos
     }
 }

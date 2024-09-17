@@ -51,7 +51,7 @@
         android:paddingRight="15dp"
         android:text="Sim, excluir conta"
         android:textColor="#FFFFFF"
-        android:textSize="16sp"
+        android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView30"
@@ -61,6 +61,7 @@
         android:id="@+id/btn_CancelarExclusaoConta"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="30dp"
         android:backgroundTint="#42D547"
@@ -68,8 +69,9 @@
         android:paddingRight="15dp"
         android:text="Não, manter conta"
         android:textColor="#FFFFFF"
-        android:textSize="16sp"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btn_ConfirmarExclusaoConta"
         app:layout_constraintTop_toBottomOf="@+id/textView30" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

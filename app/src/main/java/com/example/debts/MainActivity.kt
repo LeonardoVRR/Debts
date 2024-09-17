@@ -174,10 +174,12 @@ class MainActivity : AppCompatActivity() {
                     //nome do usuario logado
                     usuarioLogado = nome
 
-                    msg_login = "Usuario: $usuarioLogado logado."
+                    //msg_login = "Usuario: $usuarioLogado logado."
+
+                    msg_login = "Usuário logado com sucesso."
 
                     //salva o nome do usuario logado
-                    //DadosUsuario_BD_Debts(this).salvarUsuarioLogado(usuarioLogado)
+                    DadosUsuario_BD_Debts(this).salvarUsuarioLogado(usuarioLogado)
                     //conexao.salvarDadosUsuario(usuarioLogado)
 
                     val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)
@@ -198,6 +200,7 @@ class MainActivity : AppCompatActivity() {
                 runOnUiThread {
                     msgCarregando.ocultarMensagem()
                     Log.d("lista dados SALVOS", "${Metodos_BD_MySQL.dadosUsuario.listaDados}")
+                    CustomToast().showCustomToast(this, msg_login)
                 }
 
                 executorService.shutdown()

@@ -53,7 +53,7 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
         val dados = Metodos_BD_MySQL.dadosUsuario.listaDados
 
-        if (dados != null) {
+        if (dados.isNotEmpty()) {
             idUsuario = dados[4].toInt()
         }
 
@@ -67,7 +67,7 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
         val dados = Metodos_BD_MySQL.dadosUsuario.listaDados
 
-        if (dados != null) {
+        if (dados.isNotEmpty()) {
             nomeUsuario = dados[0]
         }
 
@@ -80,7 +80,7 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
         val dados = Metodos_BD_MySQL.dadosUsuario.listaDados
 
-        if (dados != null) {
+        if (dados.isNotEmpty()) {
             senhaUsuario = dados[3]
         }
 
@@ -93,7 +93,7 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
         val dados = Metodos_BD_MySQL.dadosUsuario.listaDados
 
-        if (dados != null) {
+        if (dados.isNotEmpty()) {
             cpfUsuario = dados[2]
         }
 
@@ -106,7 +106,7 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
         val dados = Metodos_BD_MySQL.dadosUsuario.listaDados
 
-        if (dados != null) {
+        if (dados.isNotEmpty()) {
             emailUsuario = dados[1]
         }
 

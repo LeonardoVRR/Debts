@@ -848,7 +848,7 @@ class BancoDados(private var context: Context) {
         }
     }
 
-    fun salvarDivida(tipoMovimento: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int) {
+    fun salvarGasto(nomeGasto: String, tipoMovimento: String, valorGasto: Float, dataGasto: String, IDusuario: Int) {
         try {
 
             // Abre o banco de dados existente no caminho especificado
@@ -858,11 +858,11 @@ class BancoDados(private var context: Context) {
 
             //formatando a data
             //faz o fatiamento da data
-            val dia = dataRendimento.substring(0, 2)
-            val mes = dataRendimento.substring(3, 5)
-            val ano = dataRendimento.substring(6, 10)
+            val dia = dataGasto.substring(0, 2)
+            val mes = dataGasto.substring(3, 5)
+            val ano = dataGasto.substring(6, 10)
 
-            val mesBalanco = (dataRendimento.substring(3, 5)).toInt()
+            val mesBalanco = (dataGasto.substring(3, 5)).toInt()
 
             // Obtém o nome do mês atual para exibição
             val calendar = Calendar.getInstance()
@@ -872,12 +872,12 @@ class BancoDados(private var context: Context) {
             val dataFormatada = "$ano-$mes-$dia"
 
             // query para salvar uma nova meta do usuário
-            val query = "INSERT INTO Rendimentos (tp_movimento, dt_rendimento, mes, valor_rendimento, id_user_rendimento) VALUES ('$tipoMovimentoFormatado', '$dataFormatada', '$nomeMes', $valorRendimento, $IDusuario)"
+            val query = "INSERT INTO Dados_Financeiros (descricao_gasto, tp_transacao, valor_gasto, dt_gasto, mes, id_user_gasto) VALUES ('$nomeGasto', '$tipoMovimento', $valorGasto, '$dataFormatada', '$nomeMes', $IDusuario)"
 
             //executa a query
             bancoDados.execSQL(query)
 
-            CustomToast().showCustomToast(context, "Balanço salvo com sucesso!")
+            CustomToast().showCustomToast(context, "Divida salva com sucesso!")
 
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")

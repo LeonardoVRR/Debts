@@ -5,12 +5,17 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import com.example.debts.BD_SQLite_App.BancoDados
+import com.example.debts.Conexao_BD.DadosMetasFinanceiras_Usuario_BD_Debts
 import com.example.debts.CustomToast
+import com.example.debts.FormatarNome.FormatarNome
+import com.example.debts.layout_Item_lista.MyData
+import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
+import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Locale
 
@@ -560,12 +565,11 @@ class Metodos_BD_MySQL {
         return resultado
     }
 
-    fun clonarListaMetas_MySQL_para_SQLite(IDusuario: Int, context: Context): String {
+    fun listarMetas(IDusuario: Int, context: Context): List<dados_listaMeta_DebtMap> {
         // Inicializa a conexão com BD
         val con = ConnectionClass().CONN()
 
-        //resultado da operação
-        var resultado = ""
+        val listasItemsMetas = mutableListOf<dados_listaMeta_DebtMap>()
 
         // Verifica se a conexão foi estabelecida
         if (con != null){
@@ -576,7 +580,368 @@ class Metodos_BD_MySQL {
             // Defina a consulta SQL
             val sql = "SELECT * FROM metas_financeiras WHERE id_user_meta = $IDusuario"
 
-            //val update = "update questionario_usuario set nvl_conhecimeto_financ = ?, tps_investimentos = ?, tx_uso_ecommerce = ?, tx_uso_app_transporte = ?, tx_uso_app_entrega = ? where id_user_quest = ?"
+            try {
+
+                // Executa a consulta e obtém o resultado
+                val consultarMetas: ResultSet = statement.executeQuery(sql)
+
+                // Processa os resultados da consulta
+                while (consultarMetas.next()) {
+                    // Obtendo os resultados da consulta
+                    val idMeta: String = consultarMetas.getString("id_meta")
+                    val nomeMeta: String = consultarMetas.getString("nome_meta")
+                    val dataMeta: String = consultarMetas.getString("dt_meta")
+
+                    val listaMetasJSON = consultarMetas.getString("lista_metas")
+                    val listaMetasConcluidasJSON = consultarMetas.getString("metas_concluidas")
+
+                    // Convertendo os dados JSON em listas
+                    val listaSTR_type = object : TypeToken<List<String>>() {}.type
+                    val listaBool_type = object : TypeToken<List<Boolean>>() {}.type
+
+                    val listaMetas: List<String> = Gson().fromJson(listaMetasJSON, listaSTR_type)
+                    val listaMetasConcluidas: List<Boolean> = Gson().fromJson(listaMetasConcluidasJSON, listaBool_type)
+
+                    val progressoMeta: Float = consultarMetas.getFloat("progresso_meta")
+                    //val id_user_meta: Int = consultarMetas.getInt("id_user_meta")
+
+                    //formatando o nome da meta
+                    val nomeFormatado = FormatarNome().formatar(nomeMeta)
+
+                    // Converte a lista recuperada
+                    val listaConvertida = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas)
+
+                    //faz o fatiamento da data
+                    val dia = dataMeta.substring(8,10)
+                    val mes = (dataMeta.substring(5,7)).toInt()
+                    val ano = dataMeta.substring(0,4)
+
+                    // Obtém o nome do mês atual para exibição
+                    val calendar = Calendar.getInstance()
+                    calendar.set(Calendar.MONTH, mes)
+                    val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+
+                    val dataFormatada = "$dia de $nomeMes de $ano"
+
+                    // Cria o item DebtMap
+                    val itemDebtMap = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap(idMeta, nomeFormatado, progressoMeta, dataFormatada, listaConvertida)
+
+                    // Adiciona o item à lista de itens
+                    listasItemsMetas += itemDebtMap
+                }
+
+                // Fecha o ResultSet
+                consultarMetas.close()
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta", "Erro consulta MySQL: ${e.message}")
+
+            } finally {
+                // Feche os recursos
+                try {
+                    statement.close()
+                    con.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+
+        } else {
+            Log.e("ErroConexao", "Conexão não estabelecida")
+
+        }
+
+        return listasItemsMetas.toList()
+    }
+
+    fun listaRendimentos(IDusuario: Int): List<MyData> {
+        // Inicializa a conexão com BD
+        val con = ConnectionClass().CONN()
+
+        val listaRendimentos = mutableListOf<MyData>()
+
+        // Verifica se a conexão foi estabelecida
+        if (con != null){
+
+            // Crie um Statement para executar a consulta
+            val statement: Statement = con.createStatement()
+
+            // Defina a consulta SQL
+            val sql = "SELECT * FROM rendimentos WHERE id_user_rendimento = $IDusuario ORDER BY dt_rendimento ASC"
+
+            try {
+
+                // Executa a consulta e obtém o resultado
+                val consultarRendimentos: ResultSet = statement.executeQuery(sql)
+
+                // Processa os resultados da consulta
+                while (consultarRendimentos.next()) {
+                    // Obtendo os resultados da consulta
+                    val nomeRendimento: String = consultarRendimentos.getString("tp_movimento")
+                    val dataRendimento: String = consultarRendimentos.getString("dt_rendimento")
+                    val valorRendimento: Float = consultarRendimentos.getFloat("valor_rendimento")
+
+                    //formatando o nome do gasto
+                    val nomeRendimentoFormatado = FormatarNome().formatar(nomeRendimento)
+
+                    //formatando o a forma de pagamento
+                    val forma_pagamento_formatada = ""
+
+                    //formatando a data
+                    //faz o fatiamento da data
+                    val dia = dataRendimento.substring(8,10)
+                    val mes = (dataRendimento.substring(5,7)).toInt()
+                    val ano = dataRendimento.substring(0,4)
+
+                    // Obtém o nome do mês atual para exibição
+                    val calendar = Calendar.getInstance()
+                    calendar.set(Calendar.MONTH, mes)
+                    val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+
+                    val dataFormatada = "$dia de $nomeMes de $ano"
+
+                    //formatando o valor do gasto
+                    // Obtém a instância de NumberFormat para a localidade do Brasil
+                    val formatacaoReal = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+
+                    val valorRendimentoFormatado = (formatacaoReal.format(valorRendimento)).toString()
+
+
+                    val itemRendimento = MyData(nomeRendimentoFormatado, forma_pagamento_formatada, valorRendimentoFormatado, dataFormatada)
+
+                    // Adiciona o item à lista de itens
+                    listaRendimentos += itemRendimento
+                }
+
+                // Fecha o ResultSet
+                consultarRendimentos.close()
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta", "Erro consulta MySQL: ${e.message}")
+
+            } finally {
+                // Feche os recursos
+                try {
+                    statement.close()
+                    con.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+
+        } else {
+            Log.e("ErroConexao", "Conexão não estabelecida")
+
+        }
+
+        return listaRendimentos.toList()
+    }
+
+    fun listaGastos(IDusuario: Int): List<MyData> {
+        // Inicializa a conexão com BD
+        val con = ConnectionClass().CONN()
+
+        val listaGastos = mutableListOf<MyData>()
+
+        // Verifica se a conexão foi estabelecida
+        if (con != null){
+
+            // Crie um Statement para executar a consulta
+            val statement: Statement = con.createStatement()
+
+            // Defina a consulta SQL
+            val sql = "SELECT * FROM gastos WHERE id_user_gasto = $IDusuario ORDER BY dt_gasto ASC"
+
+            try {
+
+                // Executa a consulta e obtém o resultado
+                val consultarGastos: ResultSet = statement.executeQuery(sql)
+
+                // Processa os resultados da consulta
+                while (consultarGastos.next()) {
+                    // Obtendo os resultados da consulta
+                    val nomeGasto: String = consultarGastos.getString("descricao_gasto")
+                    val tipoMovimento: String = consultarGastos.getString("tp_transacao")
+                    val valorGasto: Float = consultarGastos.getFloat("valor_gasto")
+                    val dataGasto: String = consultarGastos.getString("dt_gasto")
+
+                    //formatando o nome do gasto
+                    val nomeGastoFormatado = FormatarNome().formatar(nomeGasto)
+
+                    //formatando o a forma de pagamento
+                    val forma_pagamento_formatada = FormatarNome().formatar(tipoMovimento)
+
+                    //formatando a data
+                    //faz o fatiamento da data
+                    val dia = dataGasto.substring(8,10)
+                    val mes = (dataGasto.substring(5,7)).toInt()
+                    val ano = dataGasto.substring(0,4)
+
+                    // Obtém o nome do mês atual para exibição
+                    val calendar = Calendar.getInstance()
+                    calendar.set(Calendar.MONTH, mes)
+                    val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+
+                    val dataFormatada = "$dia de $nomeMes de $ano"
+
+                    //formatando o valor do gasto
+                    // Obtém a instância de NumberFormat para a localidade do Brasil
+                    val formatacaoReal = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+
+                    val valorGastoFormatado = (formatacaoReal.format(valorGasto)).toString()
+
+
+                    val itemGasto = MyData(nomeGastoFormatado, forma_pagamento_formatada, valorGastoFormatado, dataFormatada)
+
+                    // Adiciona o item à lista de itens
+                    listaGastos += itemGasto
+
+                }
+
+                // Fecha o ResultSet
+                consultarGastos.close()
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta", "Erro consulta MySQL: ${e.message}")
+
+            } finally {
+                // Feche os recursos
+                try {
+                    statement.close()
+                    con.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+
+        } else {
+            Log.e("ErroConexao", "Conexão não estabelecida")
+
+        }
+
+        return listaGastos.toList()
+    }
+
+//------------------------------------------------ clonar dados do MySQL p/ SQLite -------------------------------------------------------//
+
+    fun clonarListaRendimentos_MySQL_para_SQLite(IDusuario: Int, context: Context) {
+        // Inicializa a conexão com BD
+        val con = ConnectionClass().CONN()
+
+        // Verifica se a conexão foi estabelecida
+        if (con != null){
+
+            // Crie um Statement para executar a consulta
+            val statement: Statement = con.createStatement()
+
+            // Defina a consulta SQL
+            val sql = "SELECT * FROM rendimentos WHERE id_user_rendimento = $IDusuario ORDER BY dt_rendimento ASC"
+
+            try {
+
+                // Executa a consulta e obtém o resultado
+                val consultarRendimentos: ResultSet = statement.executeQuery(sql)
+
+                // Processa os resultados da consulta
+                while (consultarRendimentos.next()) {
+                    // Obtendo os resultados da consulta
+                    val tipoMovimento: String = consultarRendimentos.getString("tp_movimento")
+                    val dataRendimento: String = consultarRendimentos.getString("dt_rendimento")
+                    val valorRendimento: Float = consultarRendimentos.getFloat("valor_rendimento")
+
+                    BancoDados(context).salvarRendimento(tipoMovimento, dataRendimento, valorRendimento, IDusuario)
+                }
+
+                // Fecha o ResultSet
+                consultarRendimentos.close()
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta", "Erro consulta MySQL: ${e.message}")
+
+            } finally {
+                // Feche os recursos
+                try {
+                    statement.close()
+                    con.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+
+        } else {
+            Log.e("ErroConexao", "Conexão não estabelecida")
+
+        }
+    }
+
+    fun clonarListaGastos_MySQL_para_SQLite(IDusuario: Int, context: Context) {
+        // Inicializa a conexão com BD
+        val con = ConnectionClass().CONN()
+
+        // Verifica se a conexão foi estabelecida
+        if (con != null){
+
+            // Crie um Statement para executar a consulta
+            val statement: Statement = con.createStatement()
+
+            // Defina a consulta SQL
+            val sql = "SELECT * FROM gastos WHERE id_user_gasto = $IDusuario ORDER BY dt_gasto ASC"
+
+            try {
+
+                // Executa a consulta e obtém o resultado
+                val consultarGastos: ResultSet = statement.executeQuery(sql)
+
+                // Processa os resultados da consulta
+                while (consultarGastos.next()) {
+                    // Obtendo os resultados da consulta
+                    val nomeGasto: String = consultarGastos.getString("descricao_gasto")
+                    val tipoMovimento: String = consultarGastos.getString("tp_transacao")
+                    val valorGasto: Float = consultarGastos.getFloat("valor_gasto")
+                    val dataGasto: String = consultarGastos.getString("dt_gasto")
+
+                    BancoDados(context).salvarGasto(nomeGasto, tipoMovimento, valorGasto, dataGasto, IDusuario)
+                }
+
+                // Fecha o ResultSet
+                consultarGastos.close()
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta", "Erro consulta MySQL: ${e.message}")
+
+            } finally {
+                // Feche os recursos
+                try {
+                    statement.close()
+                    con.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+
+        } else {
+            Log.e("ErroConexao", "Conexão não estabelecida")
+
+        }
+    }
+
+    fun clonarListaMetas_MySQL_para_SQLite(IDusuario: Int, context: Context) {
+        // Inicializa a conexão com BD
+        val con = ConnectionClass().CONN()
+
+        // Verifica se a conexão foi estabelecida
+        if (con != null){
+
+            // Crie um Statement para executar a consulta
+            val statement: Statement = con.createStatement()
+
+            // Defina a consulta SQL
+            val sql = "SELECT * FROM metas_financeiras WHERE id_user_meta = $IDusuario"
 
             try {
 
@@ -609,14 +974,10 @@ class Metodos_BD_MySQL {
                 // Fecha o ResultSet
                 consultarMetas.close()
 
-                // Define a mensagem de sucesso
-                resultado = "Metas clonadas com sucesso!"
-
             } catch (e: SQLException) {
                 e.printStackTrace()
                 Log.e("ErroConsulta", "Erro consulta MySQL: ${e.message}")
 
-                resultado = "Erro consulta MySQL: ${e.message}"
             } finally {
                 // Feche os recursos
                 try {
@@ -630,10 +991,8 @@ class Metodos_BD_MySQL {
         } else {
             Log.e("ErroConexao", "Conexão não estabelecida")
 
-            resultado = "Conexão não estabelecida"
         }
 
-        return resultado
     }
 
 }

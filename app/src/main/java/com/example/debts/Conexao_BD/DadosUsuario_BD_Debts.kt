@@ -5,6 +5,10 @@ import android.util.Log
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.CustomToast
+//import java.time.LocalDateTime
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.format.DateTimeFormatter
+import org.threeten.bp.format.DateTimeParseException
 
 class DadosUsuario_BD_Debts(private val context: Context) {
 
@@ -61,6 +65,40 @@ class DadosUsuario_BD_Debts(private val context: Context) {
         // Recupera o valor associado à chave "usuarioLogado". Retorna uma string vazia se não encontrado.
         return sharedPreferences.getString("usuarioLogado", "") ?: ""
     }
+
+    //função para salvar a ultima vez que foi feito a consulta na tabela Metas no BD
+    fun setLastUpdateTimestamp_Metas(timestamp: LocalDateTime) {
+
+        val formato = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")
+
+        val timestampConvertido: String = timestamp.format(formato)
+
+        val sharedPreferences = context.getSharedPreferences("timesTamp_Metas", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("lastUpdateTimestamp_Metas", timestampConvertido)
+        editor.apply() // Salva o timestamp
+    }
+
+    // Função para resgatar a última vez que foi feito a consulta na tabela Metas no BD
+    fun getLastUpdateTimestamp_Metas(): LocalDateTime {
+        val sharedPreferences = context.getSharedPreferences("timesTamp_Metas", Context.MODE_PRIVATE)
+        val formato = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")
+
+        val savedTimestamp = sharedPreferences.getString("lastUpdateTimestamp_Metas", null)
+
+        return try {
+            if (savedTimestamp != null) {
+                LocalDateTime.parse(savedTimestamp, formato)
+            } else {
+                // Define um valor padrão se não houver timestamp salvo
+                LocalDateTime.MIN
+            }
+        } catch (e: DateTimeParseException) {
+            // Caso a análise falhe, defina um valor padrão
+            LocalDateTime.MIN
+        }
+    }
+
 
     fun pegarIdUsuario(): Int {
 

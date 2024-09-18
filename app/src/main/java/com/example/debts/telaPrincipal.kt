@@ -20,6 +20,8 @@ import com.example.debts.databinding.ActivityCadastrarBinding
 import com.example.debts.databinding.ActivityTelaPrincipalBinding
 import com.example.debts.layout_Item_lista.MyData
 import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.format.DateTimeFormatter
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -80,15 +82,20 @@ class telaPrincipal : AppCompatActivity() {
             executorService.execute {
                 try {
 
+                    var salvarConsultaListaMetas_MySQL: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoMetas(IDusuario)
+
+                    DadosUsuario_BD_Debts(this).setLastUpdateTimestamp_Metas(salvarConsultaListaMetas_MySQL)
+
                     listaMeta_MySQL = Metodos_BD_MySQL().listarMetas(IDusuario, this)
-                    listaRendimentos_MySQL = Metodos_BD_MySQL().listaRendimentos(IDusuario)
-                    listaGastos_MySQL = Metodos_BD_MySQL().listaGastos(IDusuario)
+//                    listaRendimentos_MySQL = Metodos_BD_MySQL().listaRendimentos(IDusuario)
+//                    listaGastos_MySQL = Metodos_BD_MySQL().listaGastos(IDusuario)
 
                     resultado = "Dados carregados com sucesso!"
 
                 } catch (e: Exception) {
                     e.printStackTrace()
                     resultado = "Erro ao se conectar: ${e.message}"
+                    Log.d("Erro ao se conectar", "${e.message}")
                 } finally {
 
                     // Atualizar a UI no thread principal
@@ -103,21 +110,29 @@ class telaPrincipal : AppCompatActivity() {
         }
 
         else {
+            var ultimaConsultaListaMetas: LocalDateTime = DadosUsuario_BD_Debts(this).getLastUpdateTimestamp_Metas()
+
             val executorService: ExecutorService = Executors.newSingleThreadExecutor()
             executorService.execute {
                 try {
 
-                    if (listaMeta_MySQL.size < Metodos_BD_MySQL().listarMetas(IDusuario, this).size) {
+                    val novaConsultaListaMetas: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoMetas(IDusuario)
+
+                    // Verifica se há novas metas no BD MySQL
+                    if (novaConsultaListaMetas > ultimaConsultaListaMetas) {
                         listaMeta_MySQL = Metodos_BD_MySQL().listarMetas(IDusuario, this)
+
+                        var salvarConsultaListaMetas_MySQL: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoMetas(IDusuario)
+                        DadosUsuario_BD_Debts(this).setLastUpdateTimestamp_Metas(salvarConsultaListaMetas_MySQL)
                     }
 
-                    else if (listaRendimentos_MySQL.size < Metodos_BD_MySQL().listaRendimentos(IDusuario).size) {
-                        listaRendimentos_MySQL = Metodos_BD_MySQL().listaRendimentos(IDusuario)
-                    }
-
-                    else if (listaGastos_MySQL.size < Metodos_BD_MySQL().listaGastos(IDusuario).size) {
-                        listaGastos_MySQL = Metodos_BD_MySQL().listaGastos(IDusuario)
-                    }
+//                    else if (listaRendimentos_MySQL.size < Metodos_BD_MySQL().listaRendimentos(IDusuario).size) {
+//                        listaRendimentos_MySQL = Metodos_BD_MySQL().listaRendimentos(IDusuario)
+//                    }
+//
+//                    else if (listaGastos_MySQL.size < Metodos_BD_MySQL().listaGastos(IDusuario).size) {
+//                        listaGastos_MySQL = Metodos_BD_MySQL().listaGastos(IDusuario)
+//                    }
 
 
                     resultado = "Dados atualizados com sucesso!"
@@ -163,7 +178,7 @@ class telaPrincipal : AppCompatActivity() {
 
         val listaMeta_SQLite = BancoDados(this).listarMetas(IDusuario)
 
-        if (listaMeta_SQLite.size < listaMeta_MySQL.size && listaMeta_MySQL.isNotEmpty()) {
+        if ((listaMeta_SQLite.size < listaMeta_MySQL.size || listaMeta_SQLite.size > listaMeta_MySQL.size) && listaMeta_MySQL.isNotEmpty()) {
 
             var resultado = ""
 

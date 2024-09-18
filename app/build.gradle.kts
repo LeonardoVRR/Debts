@@ -75,6 +75,9 @@ dependencies {
     //GSON (JSON)
     implementation("com.google.code.gson:gson:2.10.1")
 
+    //ThreeTenABP
+    implementation ("com.jakewharton.threetenabp:threetenabp:1.4.7")
+
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.fragment.ktx)

@@ -105,8 +105,8 @@ class cadastrar : AppCompatActivity() {
                         msgCarregando.ocultarMensagem()
                         CustomToast().showCustomToast(this, contaExistente)
 
-                        val navegarTelaQuestionario = Intent(this, tela_Consulta_IA::class.java)
-                        startActivity(navegarTelaQuestionario)
+                        val navegarTelaLogin = Intent(this, MainActivity::class.java)
+                        startActivity(navegarTelaLogin)
                         finish()
                     }
 

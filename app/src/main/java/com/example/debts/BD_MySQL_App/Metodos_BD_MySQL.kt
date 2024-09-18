@@ -16,13 +16,67 @@ import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
 import java.text.NumberFormat
+//import java.time.LocalDateTime
 import java.util.Calendar
 import java.util.Locale
+import java.sql.Timestamp
+//import java.time.format.DateTimeFormatter
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.format.DateTimeFormatter
 
 class Metodos_BD_MySQL {
 
     object dadosUsuario {
         var listaDados: MutableList<String> = mutableListOf()
+    }
+
+    fun getUltimaAtualizacaoMetas(IDusuario: Int): LocalDateTime {
+        // Inicialize a conexão com BD
+        val con = ConnectionClass().CONN()
+
+        val formato = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")
+
+        var timesTamp: LocalDateTime = LocalDateTime.MIN
+
+        // Verifica se a conexão foi estabelecida
+        if (con != null) {
+            // Crie um Statement para executar a consulta
+            val statement: Statement = con.createStatement()
+
+            // Defina a consulta SQL
+            val sql = "select data_criacao from metas_financeiras where id_user_meta = $IDusuario order by data_criacao desc limit 1"
+
+            try {
+                // Execute a consulta e obtenha o resultado
+                val consultarUltimaEntrada: ResultSet = statement.executeQuery(sql)
+
+                // Processar o resultado
+                if (consultarUltimaEntrada.next()) {
+                    // Obtendo os resultados da consulta
+                    val dataCriacao: Timestamp = consultarUltimaEntrada.getTimestamp("data_criacao")
+
+                    timesTamp = LocalDateTime.parse(dataCriacao.toString(), formato)
+                }
+
+                consultarUltimaEntrada?.close()
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta", "Erro ao realizar a consulta: ${e.message}")
+            } finally {
+                // Feche os recursos
+                try {
+                    statement?.close()
+                    con?.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            Log.e("ErroConexao", "Conexão não estabelecida")
+        }
+
+        return timesTamp
     }
 
     //função para verificar se existe uma conta para fazer o login do usuario
@@ -163,6 +217,54 @@ class Metodos_BD_MySQL {
         }
 
         return contaExiste
+    }
+
+    fun verificarQuestionario(IDusuario: Int): Boolean {
+        // Inicialize a conexão com BD
+        val con = ConnectionClass().CONN()
+
+        var questionarioPreenchido: Boolean = false
+
+        // Verifica se a conexão foi estabelecida
+        if (con != null) {
+            // Crie um Statement para executar a consulta
+            val statement: Statement = con.createStatement()
+
+            // Defina a consulta SQL
+            val sql = "SELECT * FROM questionario_usuario WHERE id_user_quest = $IDusuario"
+
+            try {
+                // Execute a consulta e obtenha o resultado
+                val consultarQuestionario: ResultSet = statement.executeQuery(sql)
+
+                // Processar o resultado
+                if (consultarQuestionario.next()) {
+                    questionarioPreenchido = true
+                }
+
+                else {
+                    questionarioPreenchido = false
+                }
+
+                consultarQuestionario?.close()
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta", "Erro ao realizar a consulta: ${e.message}")
+            } finally {
+                // Feche os recursos
+                try {
+                    statement?.close()
+                    con?.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            Log.e("ErroConexao", "Conexão não estabelecida")
+        }
+
+        return questionarioPreenchido
     }
 
     //função para atualizar o nome ou email do usuario no BD
@@ -499,72 +601,6 @@ class Metodos_BD_MySQL {
         }
     }
 
-    fun clonarUsuario_MySQL_para_SQLite(IDusuario: Int, context:Context): String {
-        // Inicializa a conexão com BD
-        val con = ConnectionClass().CONN()
-
-        //resultado da operação
-        var resultado = ""
-
-        // Verifica se a conexão foi estabelecida
-        if (con != null){
-
-            // Crie um Statement para executar a consulta
-            val statement: Statement = con.createStatement()
-
-            // Defina a consulta SQL
-            val sql = "SELECT * FROM usuarios_debts WHERE id_usuario = $IDusuario"
-
-            //val update = "update questionario_usuario set nvl_conhecimeto_financ = ?, tps_investimentos = ?, tx_uso_ecommerce = ?, tx_uso_app_transporte = ?, tx_uso_app_entrega = ? where id_user_quest = ?"
-
-            try {
-
-                // Executa a consulta e obtém o resultado
-                val consultarUsuario: ResultSet = statement.executeQuery(sql)
-
-                // Processa os resultados da consulta
-                if (consultarUsuario.next()) {
-                    // Obtendo os resultados da consulta
-                    //val idUsuario = consultarUsuario.getInt("id_usuario")
-                    val nome = consultarUsuario.getString("nome_usuario")
-                    val emailUsuario = consultarUsuario.getString("email_usuario")
-                    val cpfUsuario = consultarUsuario.getString("cpf_usuario")
-                    val senhaUsuario = consultarUsuario.getString("senha_usuario")
-
-                    // Salva os dados no banco de dados SQLite local
-                    BancoDados(context).cadastrarConta(nome, emailUsuario, cpfUsuario, senhaUsuario)
-                }
-
-                // Fecha o ResultSet
-                consultarUsuario.close()
-
-                // Define a mensagem de sucesso
-                resultado = "Dados do usuário clonadas com sucesso!"
-
-            } catch (e: SQLException) {
-                e.printStackTrace()
-                Log.e("ErroConsulta", "Erro ao realizar a consulta: ${e.message}")
-
-                resultado = "Erro ao realizar a consulta: ${e.message}"
-            } finally {
-                // Feche os recursos
-                try {
-                    statement.close()
-                    con.close()
-                } catch (e: SQLException) {
-                    e.printStackTrace()
-                }
-            }
-
-        } else {
-            Log.e("ErroConexao", "Conexão não estabelecida")
-
-            resultado = "Conexão não estabelecida"
-        }
-
-        return resultado
-    }
-
     fun listarMetas(IDusuario: Int, context: Context): List<dados_listaMeta_DebtMap> {
         // Inicializa a conexão com BD
         val con = ConnectionClass().CONN()
@@ -826,6 +862,72 @@ class Metodos_BD_MySQL {
     }
 
 //------------------------------------------------ clonar dados do MySQL p/ SQLite -------------------------------------------------------//
+
+    fun clonarUsuario_MySQL_para_SQLite(IDusuario: Int, context:Context): String {
+        // Inicializa a conexão com BD
+        val con = ConnectionClass().CONN()
+
+        //resultado da operação
+        var resultado = ""
+
+        // Verifica se a conexão foi estabelecida
+        if (con != null){
+
+            // Crie um Statement para executar a consulta
+            val statement: Statement = con.createStatement()
+
+            // Defina a consulta SQL
+            val sql = "SELECT * FROM usuarios_debts WHERE id_usuario = $IDusuario"
+
+            //val update = "update questionario_usuario set nvl_conhecimeto_financ = ?, tps_investimentos = ?, tx_uso_ecommerce = ?, tx_uso_app_transporte = ?, tx_uso_app_entrega = ? where id_user_quest = ?"
+
+            try {
+
+                // Executa a consulta e obtém o resultado
+                val consultarUsuario: ResultSet = statement.executeQuery(sql)
+
+                // Processa os resultados da consulta
+                if (consultarUsuario.next()) {
+                    // Obtendo os resultados da consulta
+                    //val idUsuario = consultarUsuario.getInt("id_usuario")
+                    val nome = consultarUsuario.getString("nome_usuario")
+                    val emailUsuario = consultarUsuario.getString("email_usuario")
+                    val cpfUsuario = consultarUsuario.getString("cpf_usuario")
+                    val senhaUsuario = consultarUsuario.getString("senha_usuario")
+
+                    // Salva os dados no banco de dados SQLite local
+                    BancoDados(context).cadastrarConta(nome, emailUsuario, cpfUsuario, senhaUsuario)
+                }
+
+                // Fecha o ResultSet
+                consultarUsuario.close()
+
+                // Define a mensagem de sucesso
+                resultado = "Dados do usuário clonadas com sucesso!"
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta", "Erro ao realizar a consulta: ${e.message}")
+
+                resultado = "Erro ao realizar a consulta: ${e.message}"
+            } finally {
+                // Feche os recursos
+                try {
+                    statement.close()
+                    con.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+
+        } else {
+            Log.e("ErroConexao", "Conexão não estabelecida")
+
+            resultado = "Conexão não estabelecida"
+        }
+
+        return resultado
+    }
 
     fun clonarListaRendimentos_MySQL_para_SQLite(IDusuario: Int, context: Context) {
         // Inicializa a conexão com BD

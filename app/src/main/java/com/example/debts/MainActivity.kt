@@ -74,44 +74,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    //configurando a navegação para a tela principal
-    fun login() {
-
-        val inputNome: EditText = findViewById(R.id.input_nomeUsuarioLogin)
-        val inputSenha: EditText = findViewById(R.id.input_senhaLogin)
-
-        val limparEntradaNome = inputNome.text.toString().lowercase().trim()
-        val limparEntradaSenha = inputSenha.text.toString().trim()
-
-        //verificando se o nome de usuario ou senha conferem estão vazios
-        if (limparEntradaSenha.isEmpty() || limparEntradaNome.isEmpty()) {
-
-            CustomToast().showCustomToast(this, "Preencha todos os campos.")
-        }
-
-        else {
-
-            //verifica se a conta existe para fazer o login
-            if (BancoDados(this).validarLogin(limparEntradaNome, limparEntradaSenha)){
-
-                //nome do usuario logado
-                usuarioLogado = limparEntradaNome
-
-                //salva o nome do usuario logado
-                DadosUsuario_BD_Debts(this).salvarUsuarioLogado(limparEntradaNome)
-
-                val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)
-                startActivity(navegarTelaPrincipal)
-                finish()
-            }
-
-            else {
-                CustomToast().showCustomToast(this, "Usuario ou Senha incorreto.")
-            }
-        }
-
-    }
-
     fun criarConta(v: View) {
         val navegarCadastrarConta = Intent(this, criarConta::class.java)
         startActivity(navegarCadastrarConta)
@@ -185,9 +147,21 @@ class MainActivity : AppCompatActivity() {
                     DadosUsuario_BD_Debts(this).salvarUsuarioLogado(usuarioLogado)
                     //conexao.salvarDadosUsuario(usuarioLogado)
 
-                    val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)
-                    startActivity(navegarTelaPrincipal)
-                    finish()
+                    val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+
+                    val questionarioPreenchido = Metodos_BD_MySQL().verificarQuestionario(IDusuario)
+
+                    if (questionarioPreenchido) {
+                        val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)
+                        startActivity(navegarTelaPrincipal)
+                        finish()
+                    }
+
+                    else {
+                        val navegarTelaQuestionario = Intent(this, tela_Consulta_IA::class.java)
+                        startActivity(navegarTelaQuestionario)
+                        finish()
+                    }
                 }
 
                 else {

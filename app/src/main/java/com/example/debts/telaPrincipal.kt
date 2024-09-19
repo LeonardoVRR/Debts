@@ -14,6 +14,8 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.ConsultaBD_MySQL.AgendarConsulta_MySQL
+import com.example.debts.ConsultaBD_MySQL.CompararListas_MySQL_SQLite
 import com.example.debts.FormatarNome.FormatarNome
 import com.example.debts.MsgCarregando.MensagemCarregando
 import com.example.debts.databinding.ActivityCadastrarBinding
@@ -56,6 +58,8 @@ class telaPrincipal : AppCompatActivity() {
 
                 //Log.v("Voltar", "Botão voltar Presscionado")
 
+                AgendarConsulta_MySQL(this@telaPrincipal).cancelarAlarme()
+
                 startActivity(voltarTelaLogin)
                 finish()
             }
@@ -63,7 +67,9 @@ class telaPrincipal : AppCompatActivity() {
 
         //------------ config. salvar dados do usurio do MySQL p/ o SQLite -----------------------//
 
-        var listaMeta_MySQL: List<dados_listaMeta_DebtMap> = listOf()
+        BancoDados(this).acessarBancoDados()
+
+        //var listaMeta_MySQL: List<dados_listaMeta_DebtMap> = listOf()
         var listaRendimentos_MySQL: List<MyData> = listOf()
         var listaGastos_MySQL: List<MyData> = listOf()
 
@@ -82,13 +88,22 @@ class telaPrincipal : AppCompatActivity() {
             executorService.execute {
                 try {
 
+                    // ativa um alarme para fazer consultas ao BD na Tabela metas de 30seg em 30seg
+                    AgendarConsulta_MySQL(this).agendarAlarme()
+
+                    //salva o tempo da ultima consulta a lista metas do BD MySQL
                     var salvarConsultaListaMetas_MySQL: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoMetas(IDusuario)
 
                     DadosUsuario_BD_Debts(this).setLastUpdateTimestamp_Metas(salvarConsultaListaMetas_MySQL)
 
-                    listaMeta_MySQL = Metodos_BD_MySQL().listarMetas(IDusuario, this)
+                    //salvando a lista de metas
+                    DadosUsuario_BD_Debts.listaMetas_MySQL.metasUsuario = Metodos_BD_MySQL().listarMetas(IDusuario, this)
 //                    listaRendimentos_MySQL = Metodos_BD_MySQL().listaRendimentos(IDusuario)
 //                    listaGastos_MySQL = Metodos_BD_MySQL().listaGastos(IDusuario)
+
+                    Log.d("Lista Metas SQLite", "${BancoDados(this).listarMetas(IDusuario)}")
+                    Log.d("Lista Metas MySQL", "${DadosUsuario_BD_Debts.listaMetas_MySQL.metasUsuario}")
+
 
                     resultado = "Dados carregados com sucesso!"
 
@@ -101,49 +116,9 @@ class telaPrincipal : AppCompatActivity() {
                     // Atualizar a UI no thread principal
                     runOnUiThread {
                         msgCarregando.ocultarMensagem()
-                        CustomToast().showCustomToast(this, resultado)
-                    }
 
-                    executorService.shutdown()
-                }
-            }
-        }
+                        CompararListas_MySQL_SQLite(this).adicionar_remover_Metas(DadosUsuario_BD_Debts.listaMetas_MySQL.metasUsuario, BancoDados(this).listarMetas(IDusuario))
 
-        else {
-            var ultimaConsultaListaMetas: LocalDateTime = DadosUsuario_BD_Debts(this).getLastUpdateTimestamp_Metas()
-
-            val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-            executorService.execute {
-                try {
-
-                    val novaConsultaListaMetas: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoMetas(IDusuario)
-
-                    // Verifica se há novas metas no BD MySQL
-                    if (novaConsultaListaMetas > ultimaConsultaListaMetas) {
-                        listaMeta_MySQL = Metodos_BD_MySQL().listarMetas(IDusuario, this)
-
-                        var salvarConsultaListaMetas_MySQL: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoMetas(IDusuario)
-                        DadosUsuario_BD_Debts(this).setLastUpdateTimestamp_Metas(salvarConsultaListaMetas_MySQL)
-                    }
-
-//                    else if (listaRendimentos_MySQL.size < Metodos_BD_MySQL().listaRendimentos(IDusuario).size) {
-//                        listaRendimentos_MySQL = Metodos_BD_MySQL().listaRendimentos(IDusuario)
-//                    }
-//
-//                    else if (listaGastos_MySQL.size < Metodos_BD_MySQL().listaGastos(IDusuario).size) {
-//                        listaGastos_MySQL = Metodos_BD_MySQL().listaGastos(IDusuario)
-//                    }
-
-
-                    resultado = "Dados atualizados com sucesso!"
-
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    resultado = "Erro ao se conectar: ${e.message}"
-                } finally {
-
-                    // Atualizar a UI no thread principal
-                    runOnUiThread {
                         CustomToast().showCustomToast(this, resultado)
                     }
 
@@ -156,7 +131,7 @@ class telaPrincipal : AppCompatActivity() {
 
         val btn_DebtMap: Button = findViewById(R.id.btn_DebtMap)
 
-        btn_DebtMap.setOnClickListener { telaDebtMap(listaMeta_MySQL) }
+        btn_DebtMap.setOnClickListener { telaDebtMap() }
 
         val btn_RelatorioGastos: Button = findViewById(R.id.btn_RelatorioGastos)
 
@@ -172,57 +147,67 @@ class telaPrincipal : AppCompatActivity() {
     }
 
     //configurando o evento de click no botão do DebtMap
-    fun telaDebtMap(listaMeta_MySQL: List<dados_listaMeta_DebtMap>) {
-
+    fun telaDebtMap() {
         val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
-
         val listaMeta_SQLite = BancoDados(this).listarMetas(IDusuario)
 
-        if ((listaMeta_SQLite.size < listaMeta_MySQL.size || listaMeta_SQLite.size > listaMeta_MySQL.size) && listaMeta_MySQL.isNotEmpty()) {
-
-            var resultado = ""
-
-            val msgCarregando = MensagemCarregando(this)
-
-            msgCarregando.mostrarMensagem()
-
-            val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-            executorService.execute {
-                try {
-
-                    Metodos_BD_MySQL().clonarListaMetas_MySQL_para_SQLite(IDusuario, this)
-
-                    resultado = "Metas clonadas com sucesso!"
-
-                } catch (e: Exception) {
-                    e.printStackTrace()
-
-                    Log.e("Erro conexão MySQL", "${e.message}")
-                    resultado = "Erro ao se conectar: ${e.message}"
-                } finally {
-
-                    // Atualizar a UI no thread principal
-                    runOnUiThread {
-                        msgCarregando.ocultarMensagem()
-                        //CustomToast().showCustomToast(this, resultado)
-
-                        val navegartelaDebtMap = Intent(this, tela_DebtMap::class.java)
-                        startActivity(navegartelaDebtMap)
-                        finish()
-                    }
-
-                    executorService.shutdown()
-                }
-            }
-        }
-
-        else {
-            val navegartelaDebtMap = Intent(this, tela_DebtMap::class.java)
-            startActivity(navegartelaDebtMap)
-            finish()
-        }
-
+        val navegartelaDebtMap = Intent(this, tela_DebtMap::class.java)
+        startActivity(navegartelaDebtMap)
+        finish()
     }
+
+//    //configurando o evento de click no botão do DebtMap
+//    fun telaDebtMap(listaMeta_MySQL: List<dados_listaMeta_DebtMap>) {
+//
+//        val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+//
+//        val listaMeta_SQLite = BancoDados(this).listarMetas(IDusuario)
+//
+//        if ((listaMeta_SQLite.size < listaMeta_MySQL.size || listaMeta_SQLite.size > listaMeta_MySQL.size) && listaMeta_MySQL.isNotEmpty()) {
+//
+//            var resultado = ""
+//
+//            val msgCarregando = MensagemCarregando(this)
+//
+//            msgCarregando.mostrarMensagem()
+//
+//            val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+//            executorService.execute {
+//                try {
+//
+//                    Metodos_BD_MySQL().clonarListaMetas_MySQL_para_SQLite(IDusuario, this)
+//
+//                    resultado = "Metas clonadas com sucesso!"
+//
+//                } catch (e: Exception) {
+//                    e.printStackTrace()
+//
+//                    Log.e("Erro conexão MySQL", "${e.message}")
+//                    resultado = "Erro ao se conectar: ${e.message}"
+//                } finally {
+//
+//                    // Atualizar a UI no thread principal
+//                    runOnUiThread {
+//                        msgCarregando.ocultarMensagem()
+//                        //CustomToast().showCustomToast(this, resultado)
+//
+//                        val navegartelaDebtMap = Intent(this, tela_DebtMap::class.java)
+//                        startActivity(navegartelaDebtMap)
+//                        finish()
+//                    }
+//
+//                    executorService.shutdown()
+//                }
+//            }
+//        }
+//
+//        else {
+//            val navegartelaDebtMap = Intent(this, tela_DebtMap::class.java)
+//            startActivity(navegartelaDebtMap)
+//            finish()
+//        }
+//
+//    }
 
     //configurando o evento de click no botão do perfil do usuario
     fun telaPerfilUsuario(v: View) {

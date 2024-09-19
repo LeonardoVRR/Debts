@@ -1032,69 +1032,69 @@ class Metodos_BD_MySQL {
         }
     }
 
-    fun clonarListaMetas_MySQL_para_SQLite(IDusuario: Int, context: Context) {
-        // Inicializa a conexão com BD
-        val con = ConnectionClass().CONN()
-
-        // Verifica se a conexão foi estabelecida
-        if (con != null){
-
-            // Crie um Statement para executar a consulta
-            val statement: Statement = con.createStatement()
-
-            // Defina a consulta SQL
-            val sql = "SELECT * FROM metas_financeiras WHERE id_user_meta = $IDusuario"
-
-            try {
-
-                // Executa a consulta e obtém o resultado
-                val consultarMetas: ResultSet = statement.executeQuery(sql)
-
-                // Processa os resultados da consulta
-                while (consultarMetas.next()) {
-                    // Obtendo os resultados da consulta
-                    val nomeMeta: String = consultarMetas.getString("nome_meta")
-                    val dataMeta: String = consultarMetas.getString("dt_meta")
-
-                    val listaMetasJSON = consultarMetas.getString("lista_metas")
-                    val listaMetasConcluidasJSON = consultarMetas.getString("metas_concluidas")
-
-                    // Convertendo os dados JSON em listas
-                    val listaSTR_type = object : TypeToken<List<String>>() {}.type
-                    val listaBool_type = object : TypeToken<List<Boolean>>() {}.type
-
-                    val listaMetas: List<String> = Gson().fromJson(listaMetasJSON, listaSTR_type)
-                    val listaMetasConcluidas: List<Boolean> = Gson().fromJson(listaMetasConcluidasJSON, listaBool_type)
-
-                    val progressoMeta: Float = consultarMetas.getFloat("progresso_meta")
-                    val id_user_meta: Int = consultarMetas.getInt("id_user_meta")
-
-                    // Salva os dados no banco de dados SQLite local
-                    BancoDados(context).salvarMeta(nomeMeta, dataMeta, listaMetas, listaMetasConcluidas, progressoMeta, id_user_meta)
-                }
-
-                // Fecha o ResultSet
-                consultarMetas.close()
-
-            } catch (e: SQLException) {
-                e.printStackTrace()
-                Log.e("ErroConsulta", "Erro consulta MySQL: ${e.message}")
-
-            } finally {
-                // Feche os recursos
-                try {
-                    statement.close()
-                    con.close()
-                } catch (e: SQLException) {
-                    e.printStackTrace()
-                }
-            }
-
-        } else {
-            Log.e("ErroConexao", "Conexão não estabelecida")
-
-        }
-
-    }
+//    fun clonarListaMetas_MySQL_para_SQLite(IDusuario: Int, idMeta: Int, context: Context) {
+//        // Inicializa a conexão com BD
+//        val con = ConnectionClass().CONN()
+//
+//        // Verifica se a conexão foi estabelecida
+//        if (con != null){
+//
+//            // Crie um Statement para executar a consulta
+//            val statement: Statement = con.createStatement()
+//
+//            // Defina a consulta SQL
+//            val sql = "SELECT * FROM metas_financeiras WHERE id_user_meta = $IDusuario AND id_meta = $idMeta"
+//
+//            try {
+//
+//                // Executa a consulta e obtém o resultado
+//                val consultarMetas: ResultSet = statement.executeQuery(sql)
+//
+//                // Processa os resultados da consulta
+//                while (consultarMetas.next()) {
+//                    // Obtendo os resultados da consulta
+//                    val nomeMeta: String = consultarMetas.getString("nome_meta")
+//                    val dataMeta: String = consultarMetas.getString("dt_meta")
+//
+//                    val listaMetasJSON = consultarMetas.getString("lista_metas")
+//                    val listaMetasConcluidasJSON = consultarMetas.getString("metas_concluidas")
+//
+//                    // Convertendo os dados JSON em listas
+//                    val listaSTR_type = object : TypeToken<List<String>>() {}.type
+//                    val listaBool_type = object : TypeToken<List<Boolean>>() {}.type
+//
+//                    val listaMetas: List<String> = Gson().fromJson(listaMetasJSON, listaSTR_type)
+//                    val listaMetasConcluidas: List<Boolean> = Gson().fromJson(listaMetasConcluidasJSON, listaBool_type)
+//
+//                    val progressoMeta: Float = consultarMetas.getFloat("progresso_meta")
+//                    val id_user_meta: Int = consultarMetas.getInt("id_user_meta")
+//
+//                    // Salva os dados no banco de dados SQLite local
+//                    BancoDados(context).salvarMeta(nomeMeta, dataMeta, listaMetas, listaMetasConcluidas, progressoMeta, id_user_meta)
+//                }
+//
+//                // Fecha o ResultSet
+//                consultarMetas.close()
+//
+//            } catch (e: SQLException) {
+//                e.printStackTrace()
+//                Log.e("ErroConsulta", "Erro consulta MySQL: ${e.message}")
+//
+//            } finally {
+//                // Feche os recursos
+//                try {
+//                    statement.close()
+//                    con.close()
+//                } catch (e: SQLException) {
+//                    e.printStackTrace()
+//                }
+//            }
+//
+//        } else {
+//            Log.e("ErroConexao", "Conexão não estabelecida")
+//
+//        }
+//
+//    }
 
 }

@@ -152,6 +152,8 @@ class MainActivity : AppCompatActivity() {
                     val questionarioPreenchido = Metodos_BD_MySQL().verificarQuestionario(IDusuario)
 
                     if (questionarioPreenchido) {
+                        //DadosUsuario_BD_Debts.listaMetas_MySQL.metasUsuario = listOf()
+
                         val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)
                         startActivity(navegarTelaPrincipal)
                         finish()

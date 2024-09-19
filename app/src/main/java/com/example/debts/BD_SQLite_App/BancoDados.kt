@@ -579,7 +579,7 @@ class BancoDados(private var context: Context) {
     }
 
     //função para salvar uma nova meta
-    fun salvarMeta(nomeMeta: String, dataMeta: String, listaMetas:List<String>, listaMetasEstados: List<Boolean>, progressoMeta: Float, IDusuario: Int) {
+    fun salvarMeta(nomeMeta: String, dataMeta: String, listaMetas:List<String>, listaMetasEstados: List<Boolean>, progressoMeta: Float, IDusuario: Int, idMeta: Int) {
 
         try {
 
@@ -595,7 +595,7 @@ class BancoDados(private var context: Context) {
             val nomeMetaFormatado = nomeMeta.lowercase()
 
             // query para salvar uma nova meta do usuário
-            val query = "INSERT INTO Metas_Financeiras (nome_meta, dt_meta, lista_metas, metas_concluidas, progresso_meta, id_user_meta) VALUES ('$nomeMetaFormatado', '$dataMeta', '$listaMetasJSON', '$listaMetasEstadosJSON', $progressoMeta, $IDusuario)"
+            val query = "INSERT INTO Metas_Financeiras (id_meta, nome_meta, dt_meta, lista_metas, metas_concluidas, progresso_meta, id_user_meta) VALUES ($idMeta, '$nomeMetaFormatado', '$dataMeta', '$listaMetasJSON', '$listaMetasEstadosJSON', $progressoMeta, $IDusuario)"
 
             //executa a query
             bancoDados.execSQL(query)

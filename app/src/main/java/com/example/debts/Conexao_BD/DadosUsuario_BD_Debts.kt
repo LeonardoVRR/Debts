@@ -5,12 +5,17 @@ import android.util.Log
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.CustomToast
+import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
 //import java.time.LocalDateTime
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.DateTimeParseException
 
 class DadosUsuario_BD_Debts(private val context: Context) {
+
+    object listaMetas_MySQL {
+        var metasUsuario: List<dados_listaMeta_DebtMap> = listOf()
+    }
 
     object listaMetaEstados {
         var estados: MutableList<Boolean> = mutableListOf()

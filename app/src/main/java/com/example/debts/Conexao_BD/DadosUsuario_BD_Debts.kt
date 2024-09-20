@@ -14,7 +14,7 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
     object listas_MySQL {
         var metasUsuario: List<dados_listaMeta_DebtMap> = listOf()
-        var rendimentosUsuario: List<Float> = listOf()
+        var rendimentosUsuario: List<OperacaoFinanceira> = listOf()
         var gastosUsuario: List<OperacaoFinanceira> = listOf()
     }
 

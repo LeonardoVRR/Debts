@@ -54,8 +54,6 @@ class telaPrincipal : AppCompatActivity() {
 
                 //Log.v("Voltar", "Botão voltar Presscionado")
 
-                AgendarConsulta_MySQL(this@telaPrincipal).cancelarAlarme()
-
                 startActivity(voltarTelaLogin)
                 finish()
             }
@@ -64,10 +62,6 @@ class telaPrincipal : AppCompatActivity() {
         //------------ config. salvar dados do usurio do MySQL p/ o SQLite -----------------------//
 
         BancoDados(this).acessarBancoDados()
-
-        //var listaMeta_MySQL: List<dados_listaMeta_DebtMap> = listOf()
-        var listaRendimentos_MySQL: List<OperacaoFinanceira> = listOf()
-        var listaGastos_MySQL: List<OperacaoFinanceira> = listOf()
 
         val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
 
@@ -84,21 +78,28 @@ class telaPrincipal : AppCompatActivity() {
             executorService.execute {
                 try {
 
-                    // ativa um alarme para fazer consultas ao BD na Tabela metas de 30seg em 30seg
-                    AgendarConsulta_MySQL(this).agendarAlarmeConsultaLista("listaMetas", 1, 60)
-
                     //salva o tempo da ultima consulta a lista metas do BD MySQL
-                    var salvarConsultaListaMetas_MySQL: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoListas_MySQL(IDusuario, "metas_financeiras")
-
+                    val salvarConsultaListaMetas_MySQL: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoListas_MySQL(IDusuario, "metas_financeiras")
                     DadosUsuario_BD_Debts(this).setLastUpdateTimestamp_ListaMySQL(salvarConsultaListaMetas_MySQL, "Metas")
+
+                    //salva o tempo da ultima consulta a lista gastos do BD MySQL
+                    val salvarConsultaListaGasto_MySQL: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoListas_MySQL(IDusuario, "gastos")
+                    DadosUsuario_BD_Debts(this).setLastUpdateTimestamp_ListaMySQL(salvarConsultaListaGasto_MySQL, "Gastos")
+
+                    //salva o tempo da ultima consulta a lista rendimentos do BD MySQL
+                    val salvarConsultaListaRendimento_MySQL: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoListas_MySQL(IDusuario, "rendimentos")
+                    DadosUsuario_BD_Debts(this).setLastUpdateTimestamp_ListaMySQL(salvarConsultaListaRendimento_MySQL, "Rendimentos")
+
 
                     //salvando a lista de metas
                     DadosUsuario_BD_Debts.listas_MySQL.metasUsuario = Metodos_BD_MySQL().listarMetas(IDusuario, this)
-//                    listaRendimentos_MySQL = Metodos_BD_MySQL().listaRendimentos(IDusuario)
-//                    listaGastos_MySQL = Metodos_BD_MySQL().listaGastos(IDusuario)
+                    //salvando a lista de gastos
+                    DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario = Metodos_BD_MySQL().listaGastos(IDusuario)
+                    //salvando a lista de rendimentos
+                    DadosUsuario_BD_Debts.listas_MySQL.rendimentosUsuario = Metodos_BD_MySQL().listaRendimentos(IDusuario)
 
-                    Log.d("Lista Metas SQLite", "${BancoDados(this).listarMetas(IDusuario)}")
-                    Log.d("Lista Metas MySQL", "${DadosUsuario_BD_Debts.listas_MySQL.metasUsuario}")
+                    Log.d("Lista Rendimentos SQLite", "${BancoDados(this).listaRendimentosMes(IDusuario)}")
+                    Log.d("Lista Rendimentos MySQL", "${DadosUsuario_BD_Debts.listas_MySQL.rendimentosUsuario}")
 
 
                     resultado = "Dados carregados com sucesso!"
@@ -113,7 +114,24 @@ class telaPrincipal : AppCompatActivity() {
                     runOnUiThread {
                         msgCarregando.ocultarMensagem()
 
+                        // ativa um alarme para fazer consultas ao BD na Tabela metas de 1 min em 1 min
+                        AgendarConsulta_MySQL(this).agendarAlarmeConsultaLista("listaMetas", 1, 60)
+
+                        // ativa um alarme para fazer consultas ao BD na Tabela Gastos de 30seg em 30seg
+                        AgendarConsulta_MySQL(this).agendarAlarmeConsultaLista("listaGastos", 2, 30)
+
+                        // ativa um alarme para fazer consultas ao BD na Tabela Gastos de 30seg em 30seg
+                        AgendarConsulta_MySQL(this).agendarAlarmeConsultaLista("listaRendimentos", 3, 30)
+
+
+                        //lista Metas
                         CompararListas_MySQL_SQLite(this).adicionarNovasMetas(DadosUsuario_BD_Debts.listas_MySQL.metasUsuario, BancoDados(this).listarMetas(IDusuario))
+
+                        //lista Gastos
+                        CompararListas_MySQL_SQLite(this).adicionarNovosGastos(DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario, BancoDados(this).listaGastosMes(IDusuario))
+
+                        //lista Rendimentos
+                        CompararListas_MySQL_SQLite(this).adicionarNovosRendimentos(DadosUsuario_BD_Debts.listas_MySQL.rendimentosUsuario, BancoDados(this).listaRendimentosMes(IDusuario))
 
                         CustomToast().showCustomToast(this, resultado)
                     }

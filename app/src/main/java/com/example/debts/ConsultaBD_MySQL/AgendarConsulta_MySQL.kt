@@ -28,11 +28,15 @@ class AgendarConsulta_MySQL(private val context: Context) {
         )
     }
 
-    fun cancelarAlarme() {
+    fun cancelarAlarme(nomeAlarme: String, requestCode: Int) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        // Criando um Intent com o nome do alarme como extra para identificar
         val intent = Intent(context, BroadcastReceiver_ConsultarLista::class.java)
+        intent.putExtra("nomeAlarme", nomeAlarme)
+
         val pendingIntent = PendingIntent.getBroadcast(
-            context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         alarmManager.cancel(pendingIntent)
     }

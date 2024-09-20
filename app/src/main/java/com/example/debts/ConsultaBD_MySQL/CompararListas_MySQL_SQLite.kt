@@ -14,9 +14,9 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
 
     fun formatarDataString(data: String): String {
 
-        val dia = data.split("-")[0].trim()
-        val mes = data.split("-")[1].trim()
-        val ano = data.split("-")[2].trim()
+        val dia = data.split("de")[0].trim()
+        val mes = data.split("de")[1].trim()
+        val ano = data.split("de")[2].trim()
 
         val numeroMes = when (mes.lowercase()) {
             "janeiro" -> 1
@@ -46,6 +46,18 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
 
         // Retorna a data formatada
         return dataFormatada
+    }
+
+    fun formatarValor(valorString: String): Float {
+        // Remover o símbolo de moeda "R$", remover os espaços e os separadores de milhar.
+        val valorLimpo = valorString
+            .replace("R$", "") // Remove o símbolo "R$"
+            .replace(".", "")  // Remove os separadores de milhar
+            .replace(",", ".") // Substitui a vírgula decimal por ponto
+            .trim()            // Remove espaços em branco extras
+
+        // Converte a string limpa para Float
+        return valorLimpo.toFloat()
     }
 
     fun adicionarNovasMetas(listaMeta_MySQL: List<dados_listaMeta_DebtMap>, listaMeta_SQLite: List<dados_listaMeta_DebtMap>) {
@@ -125,6 +137,8 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
             }
         }
 
+        Log.d("LISTA NOVOS GASTOS", "$listaNovosGastos")
+
         listaNovosGastos.forEach { gasto ->
 
             val idGasto = gasto.id
@@ -132,13 +146,13 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
 
             // formatando a data
             val dataGasto = gasto.data
-            val dataGastoFormatada = formatarDataString(dataGasto)
+//            val dataGastoFormatada = formatarDataString(dataGasto)
 
             val tipoMovimento = gasto.tipo_movimento
-            val valorGasto = gasto.valor.toFloat()
+            val valorGasto = formatarValor(gasto.valor)
 
 
-            BancoDados(context).salvarGasto(nomeGasto, tipoMovimento, valorGasto, dataGastoFormatada, IDusuario, idGasto)
+            BancoDados(context).salvarGasto(nomeGasto, tipoMovimento, valorGasto, dataGasto, IDusuario, idGasto)
 
         }
 
@@ -149,35 +163,40 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
 
     fun adicionarNovosRendimentos(listaRendimentos_MySQL: List<OperacaoFinanceira>, listaRendimentos_SQLite: List<OperacaoFinanceira>) {
 
+        Log.d("LISTA MySQL", "$listaRendimentos_MySQL")
+        Log.d("LISTA SQLite", "$listaRendimentos_SQLite")
+
         val IDusuario = DadosUsuario_BD_Debts(context).pegarIdUsuario()
 
-        val listaNovosGastos: MutableList<OperacaoFinanceira> = mutableListOf()
+        val listaNovosRendimentos: MutableList<OperacaoFinanceira> = mutableListOf()
 
         for (rendimento in listaRendimentos_MySQL) {
             // Comparar apenas o ID da meta
             if (listaRendimentos_SQLite.none { it.id == rendimento.id }) {
-                listaNovosGastos.add(rendimento)
+                listaNovosRendimentos.add(rendimento)
             }
         }
 
-        listaNovosGastos.forEach { rendimento ->
+        Log.d("LISTA NOVOS RENDIMENTOS", "$listaNovosRendimentos")
+
+        listaNovosRendimentos.forEach { rendimento ->
 
             val idRendimento = rendimento.id
             val nomeRendimento = rendimento.descricao
 
             // formatando a data
             val dataRendimento = rendimento.data
-            val dataRendimentoFormatada = formatarDataString(dataRendimento)
+            //val dataRendimentoFormatada = formatarDataString(dataRendimento)
 
             val tipoMovimento = rendimento.tipo_movimento
-            val valorRendimento = rendimento.valor.toFloat()
+            val valorRendimento = formatarValor(rendimento.valor)
 
 
-            BancoDados(context).salvarRendimento(tipoMovimento, dataRendimentoFormatada, valorRendimento, IDusuario, idRendimento)
+            BancoDados(context).salvarRendimento(nomeRendimento, dataRendimento, valorRendimento, IDusuario, idRendimento)
 
         }
 
-        listaNovosGastos.clear()
+        listaNovosRendimentos.clear()
 
         Log.d("RESULTADO RENDIMENTOS", "Novos Rendimentos SQLite")
     }

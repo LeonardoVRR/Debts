@@ -8,6 +8,7 @@ import android.util.Log
 import com.example.debts.Conexao_BD.DadosMetasFinanceiras_Usuario_BD_Debts
 import com.example.debts.CustomToast
 import com.example.debts.FormatarNome.FormatarNome
+import com.example.debts.ManipularData.ManipularData
 import com.example.debts.layout_Item_lista.OperacaoFinanceira
 import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
 import java.io.FileOutputStream
@@ -348,7 +349,7 @@ class BancoDados(private var context: Context) {
             // Verifica se há resultados e processa todos
             if (regatarGastos.moveToFirst()) {
                 do {
-                    val idGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("id_gasto")).toInt()
+                    val idRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("id_rendimento")).toInt()
                     val nomeRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("tp_movimento")).toString()
                     //val forma_pagamento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("tp_transacao"))
                     val dataRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("dt_rendimento")).toString()
@@ -360,16 +361,23 @@ class BancoDados(private var context: Context) {
                     //formatando o a forma de pagamento
                     val forma_pagamento_formatada = ""
 
-                    //formatando a data
-                    //faz o fatiamento da data
-                    val dia = dataRendimento.substring(8,10)
-                    val mes = (dataRendimento.substring(5,7)).toInt()
-                    val ano = dataRendimento.substring(0,4)
+//                    //formatando a data
+//                    //faz o fatiamento da data
+//                    val dia = dataRendimento.substring(8,10)
+//                    val mes = (dataRendimento.substring(5,7)).toInt()
+//                    val ano = dataRendimento.substring(0,4)
+//
+//                    // Obtém o nome do mês atual para exibição
+//                    val calendar = Calendar.getInstance()
+//                    calendar.set(Calendar.MONTH, mes)
+//                    val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
 
-                    // Obtém o nome do mês atual para exibição
-                    val calendar = Calendar.getInstance()
-                    calendar.set(Calendar.MONTH, mes)
-                    val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+                    //faz o fatiamento da data
+                    val dia = dataRendimento.split("-")[2].trim()
+                    val mes = dataRendimento.split("-")[1].trim().toInt()
+                    val ano = dataRendimento.split("-")[0].trim()
+
+                    val nomeMes = ManipularData().pegarNomeMes(mes)
 
                     val dataFormatada = "$dia de $nomeMes de $ano"
 
@@ -380,7 +388,7 @@ class BancoDados(private var context: Context) {
                     val valorRendimentoFormatado = (formatacaoReal.format(valorRendimento.toFloat())).toString()
 
 
-                    val itemGasto = OperacaoFinanceira(idGasto, nomeRendimentoFormatado, forma_pagamento_formatada, valorRendimentoFormatado, dataFormatada)
+                    val itemGasto = OperacaoFinanceira(idRendimento, nomeRendimentoFormatado, forma_pagamento_formatada, valorRendimentoFormatado, dataFormatada)
 
                     // Adiciona o item à lista de itens
                     listaRendimentosMes += itemGasto
@@ -390,8 +398,8 @@ class BancoDados(private var context: Context) {
             regatarGastos.close()
 
         } catch (e: Exception) {
-            CustomToast().showCustomToast(context, "Erro recuper metas: ${e.message}")
-            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+            CustomToast().showCustomToast(context, "Erro recuper listaRendimentosMes: ${e.message}")
+            Log.e("Erro Consulta listaRendimentosMes:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
             if (::bancoDados.isInitialized) {
@@ -427,7 +435,7 @@ class BancoDados(private var context: Context) {
 
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro recuper metas: ${e.message}")
-            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+            Log.e("Erro Consulta rendimentosMes:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
             if (::bancoDados.isInitialized) {
@@ -464,16 +472,25 @@ class BancoDados(private var context: Context) {
                     //formatando o a forma de pagamento
                     val forma_pagamento_formatada = FormatarNome().formatar(forma_pagamento)
 
-                    //formatando a data
-                    //faz o fatiamento da data
-                    val dia = dataGasto.substring(8,10)
-                    val mes = (dataGasto.substring(5,7)).toInt()
-                    val ano = dataGasto.substring(0,4)
+//                    //formatando a data
+//                    //faz o fatiamento da data
+//                    val dia = dataGasto.substring(8,10)
+//                    val mes = (dataGasto.substring(5,7)).toInt()
+//                    val ano = dataGasto.substring(0,4)
+//
+//                    // Obtém o nome do mês atual para exibição
+//                    val calendar = Calendar.getInstance()
+//                    calendar.set(Calendar.MONTH, mes)
+//                    val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+//
 
-                    // Obtém o nome do mês atual para exibição
-                    val calendar = Calendar.getInstance()
-                    calendar.set(Calendar.MONTH, mes)
-                    val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+
+                    //faz o fatiamento da data
+                    val dia = dataGasto.split("-")[2].trim()
+                    val mes = dataGasto.split("-")[1].trim().toInt()
+                    val ano = dataGasto.split("-")[0].trim()
+
+                    val nomeMes = ManipularData().pegarNomeMes(mes)
 
                     val dataFormatada = "$dia de $nomeMes de $ano"
 
@@ -495,7 +512,7 @@ class BancoDados(private var context: Context) {
 
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro recuper metas: ${e.message}")
-            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+            Log.e("Erro Consulta Gasto Mes:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
             if (::bancoDados.isInitialized) {
@@ -562,8 +579,8 @@ class BancoDados(private var context: Context) {
             regatarGastos.close()
 
         } catch (e: Exception) {
-            CustomToast().showCustomToast(context, "Erro recuper metas: ${e.message}")
-            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+            CustomToast().showCustomToast(context, "Erro recuper Gasto Recente: ${e.message}")
+            Log.e("Erro Consulta Gasto Recente:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
             if (::bancoDados.isInitialized) {
@@ -672,21 +689,7 @@ class BancoDados(private var context: Context) {
                     val mes = dataMeta.split("-")[1].trim().toInt()
                     val ano = dataMeta.split("-")[0].trim()
 
-                    val nomeMes = when (mes) {
-                        1 -> "janeiro"
-                        2 -> "fevereiro"
-                        3 -> "março"
-                        4 -> "abril"
-                        5 -> "maio"
-                        6 -> "junho"
-                        7 -> "julho"
-                        8 -> "agosto"
-                        9 -> "setembro"
-                        10 -> "outubro"
-                        11 -> "novembro"
-                        12 -> "dezembro"
-                        else -> throw IllegalArgumentException("Número do mês inválido")
-                    }
+                    val nomeMes = ManipularData().pegarNomeMes(mes)
 
                     val dataFormatada = "$dia de $nomeMes de $ano"
 
@@ -735,7 +738,7 @@ class BancoDados(private var context: Context) {
             }
 
         } catch (e: Exception) {
-            CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")
+            CustomToast().showCustomToast(context, "Erro Consulta Meta Concluida: ${e.message}")
             Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
@@ -769,7 +772,7 @@ class BancoDados(private var context: Context) {
             progressoMetaSalvo.close()
 
         } catch (e: Exception) {
-            CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")
+            CustomToast().showCustomToast(context, "Erro Consulta Prog. Meta: ${e.message}")
             Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
@@ -814,6 +817,8 @@ class BancoDados(private var context: Context) {
     }
 
     fun salvarRendimento(tipoMovimento: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int, idRendimento: Int) {
+        Log.d("SALVANDO RENDIMENTO", "FUNÇÂO CHAMADA")
+
         try {
 
             // Abre o banco de dados existente no caminho especificado
@@ -823,30 +828,36 @@ class BancoDados(private var context: Context) {
 
             //formatando a data
             //faz o fatiamento da data
-            val dia = dataRendimento.substring(0, 2)
-            val mes = dataRendimento.substring(3, 5)
-            val ano = dataRendimento.substring(6, 10)
+//            val dia = dataRendimento.substring(0, 2)
+//            val mes = dataRendimento.substring(3, 5)
+//            val ano = dataRendimento.substring(6, 10)
+//
+//            val mesBalanco = (dataRendimento.substring(3, 5)).toInt()
+//
+//            // Obtém o nome do mês atual para exibição
+//            val calendar = Calendar.getInstance()
+//            calendar.set(Calendar.MONTH, mesBalanco)
+//            val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
 
-            val mesBalanco = (dataRendimento.substring(3, 5)).toInt()
-
-            // Obtém o nome do mês atual para exibição
-            val calendar = Calendar.getInstance()
-            calendar.set(Calendar.MONTH, mesBalanco)
-            val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+            val dia = dataRendimento.split("-")[2].trim()
+            val mes = dataRendimento.split("-")[1].trim().toInt()
+            val ano = dataRendimento.split("-")[0].trim()
 
             val dataFormatada = "$ano-$mes-$dia"
 
+            val nomeMes = ManipularData().pegarNomeMes(mes)
+
             // query para salvar uma nova meta do usuário
-            val query = "INSERT INTO Rendimentos (id_rendimento, tp_movimento, dt_rendimento, mes, valor_rendimento, id_user_rendimento) VALUES ('$idRendimento, $tipoMovimentoFormatado', '$dataFormatada', '$nomeMes', $valorRendimento, $IDusuario)"
+            val query = "INSERT INTO Rendimentos (id_rendimento, tp_movimento, dt_rendimento, mes, valor_rendimento, id_user_rendimento) VALUES ($idRendimento, '$tipoMovimentoFormatado', '$dataFormatada', '$nomeMes', $valorRendimento, $IDusuario)"
 
             //executa a query
             bancoDados.execSQL(query)
 
-            CustomToast().showCustomToast(context, "Balanço salvo com sucesso!")
+            CustomToast().showCustomToast(context, "Rendimento salvo com sucesso!")
 
         } catch (e: Exception) {
-            CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")
-            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+            CustomToast().showCustomToast(context, "Erro Consulta Rendimento: ${e.message}")
+            Log.e("Erro Consulta Rendimento:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
             if (::bancoDados.isInitialized) {
@@ -865,21 +876,25 @@ class BancoDados(private var context: Context) {
 
             //formatando a data
             //faz o fatiamento da data
-            val dia = dataGasto.substring(0, 2)
-            val mes = dataGasto.substring(3, 5)
-            val ano = dataGasto.substring(6, 10)
+//            val dia = dataGasto.substring(0, 2)
+//            val mes = (dataGasto.substring(3, 5))
+//            val ano = dataGasto.substring(6, 10)
 
-            val mesBalanco = (dataGasto.substring(3, 5)).toInt()
+            val dia = dataGasto.split("-")[2].trim()
+            val mes = dataGasto.split("-")[1].trim().toInt()
+            val ano = dataGasto.split("-")[0].trim()
 
             // Obtém o nome do mês atual para exibição
-            val calendar = Calendar.getInstance()
-            calendar.set(Calendar.MONTH, mesBalanco)
-            val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+//            val calendar = Calendar.getInstance()
+//            calendar.set(Calendar.MONTH, mesBalanco)
+            //val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+
+            val nomeMes = ManipularData().pegarNomeMes(mes)
 
             val dataFormatada = "$ano-$mes-$dia"
 
             // query para salvar uma nova meta do usuário
-            val query = "INSERT INTO Gastos (id_gasto, descricao_gasto, tp_transacao, valor_gasto, dt_gasto, mes, id_user_gasto) VALUES ($idGasto, '$nomeGasto', '$tipoMovimento', $valorGasto, '$dataFormatada', '$nomeMes', $IDusuario)"
+            val query = "INSERT INTO Gastos (id_gasto, descricao_gasto, tp_transacao, valor_gasto, dt_gasto, mes, id_user_gasto) VALUES ($idGasto, '$nomeGasto', '$tipoMovimento', $valorGasto, '$dataGasto', '$nomeMes', $IDusuario)"
 
             //executa a query
             bancoDados.execSQL(query)
@@ -887,7 +902,7 @@ class BancoDados(private var context: Context) {
             CustomToast().showCustomToast(context, "Divida salva com sucesso!")
 
         } catch (e: Exception) {
-            CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")
+            CustomToast().showCustomToast(context, "Erro Consulta Gasto: ${e.message}")
             Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção

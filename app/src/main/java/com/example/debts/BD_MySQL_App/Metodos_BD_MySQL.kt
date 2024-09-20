@@ -693,7 +693,7 @@ class Metodos_BD_MySQL {
                     val valorRendimentoFormatado = (formatacaoReal.format(valorRendimento)).toString()
 
 
-                    val itemRendimento = OperacaoFinanceira(idRendimento, nomeRendimentoFormatado, forma_pagamento_formatada, valorRendimentoFormatado, dataFormatada)
+                    val itemRendimento = OperacaoFinanceira(idRendimento, nomeRendimentoFormatado, forma_pagamento_formatada, valorRendimentoFormatado, dataRendimento)
 
                     // Adiciona o item à lista de itens
                     listaRendimentos += itemRendimento
@@ -779,7 +779,7 @@ class Metodos_BD_MySQL {
                     val valorGastoFormatado = (formatacaoReal.format(valorGasto)).toString()
 
 
-                    val itemGasto = OperacaoFinanceira(idGasto, nomeGastoFormatado, forma_pagamento_formatada, valorGastoFormatado, dataFormatada)
+                    val itemGasto = OperacaoFinanceira(idGasto, nomeGastoFormatado, forma_pagamento_formatada, valorGastoFormatado, dataGasto)
 
                     // Adiciona o item à lista de itens
                     listaGastos += itemGasto
@@ -817,6 +817,14 @@ class Metodos_BD_MySQL {
         // Inicialize a conexão com BD
         val con = ConnectionClass().CONN()
 
+        val id_user_tabela = when (consultarLista.lowercase()) {
+            "metas_financeiras" -> "meta"
+            "gastos" -> "gasto"
+            "rendimentos" -> "rendimento"
+            else -> ""
+        }
+
+
         val formato = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")
 
         var timesTamp: LocalDateTime = LocalDateTime.MIN
@@ -827,7 +835,7 @@ class Metodos_BD_MySQL {
             val statement: Statement = con.createStatement()
 
             // Defina a consulta SQL
-            var sql = "select data_criacao from ${consultarLista.lowercase()} where id_user_meta = $IDusuario order by data_criacao desc limit 1"
+            var sql = "select data_criacao from ${consultarLista.lowercase()} where id_user_$id_user_tabela = $IDusuario order by data_criacao desc limit 1"
 
             try {
                 // Execute a consulta e obtenha o resultado
@@ -845,7 +853,7 @@ class Metodos_BD_MySQL {
 
             } catch (e: SQLException) {
                 e.printStackTrace()
-                Log.e("ErroConsulta", "Erro ao realizar a consulta: ${e.message}")
+                Log.e("ErroConsulta", "Erro ao realizar a consulta MySQL: ${e.message}")
             } finally {
                 // Feche os recursos
                 try {

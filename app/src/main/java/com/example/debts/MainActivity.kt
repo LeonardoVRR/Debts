@@ -18,6 +18,7 @@ import com.example.debts.BD_MySQL_App.ConnectionClass
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.ConsultaBD_MySQL.AgendarConsulta_MySQL
 import com.example.debts.MsgCarregando.MensagemCarregando
 import com.example.debts.visibilidadeSenha.AlterarVisibilidade
 import java.sql.Connection
@@ -50,6 +51,11 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        // Cancela os alarmes
+        AgendarConsulta_MySQL(this).cancelarAlarme("listaMetas", 1)
+        AgendarConsulta_MySQL(this).cancelarAlarme("listaGastos", 2)
+        AgendarConsulta_MySQL(this).cancelarAlarme("listaRendimentos", 3)
 
         //definindo o estado do login do usuário
         DadosUsuario_BD_Debts(this).salvarEstadoLogin(false)
@@ -183,6 +189,16 @@ class MainActivity : AppCompatActivity() {
                 executorService.shutdown()
             }
         }
+    }
+
+    // Cancela os alarmes quando o app for fechado
+    override fun onDestroy() {
+        super.onDestroy()
+
+        AgendarConsulta_MySQL(this).cancelarAlarme("listaMetas", 1)
+        AgendarConsulta_MySQL(this).cancelarAlarme("listaGastos", 2)
+        AgendarConsulta_MySQL(this).cancelarAlarme("listaRendimentos", 3)
+
     }
 
 }

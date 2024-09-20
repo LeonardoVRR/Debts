@@ -1,10 +1,9 @@
 package com.example.debts.Conexao_BD
 
 import android.content.Context
-import android.util.Log
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
-import com.example.debts.CustomToast
+import com.example.debts.layout_Item_lista.OperacaoFinanceira
 import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
 //import java.time.LocalDateTime
 import org.threeten.bp.LocalDateTime
@@ -13,8 +12,10 @@ import org.threeten.bp.format.DateTimeParseException
 
 class DadosUsuario_BD_Debts(private val context: Context) {
 
-    object listaMetas_MySQL {
+    object listas_MySQL {
         var metasUsuario: List<dados_listaMeta_DebtMap> = listOf()
+        var rendimentosUsuario: List<Float> = listOf()
+        var gastosUsuario: List<OperacaoFinanceira> = listOf()
     }
 
     object listaMetaEstados {
@@ -71,25 +72,25 @@ class DadosUsuario_BD_Debts(private val context: Context) {
         return sharedPreferences.getString("usuarioLogado", "") ?: ""
     }
 
-    //função para salvar a ultima vez que foi feito a consulta na tabela Metas no BD
-    fun setLastUpdateTimestamp_Metas(timestamp: LocalDateTime) {
+    //função para salvar a ultima vez que foi feito a consulta em uma tabela no BD
+    fun setLastUpdateTimestamp_ListaMySQL(timestamp: LocalDateTime, salvarConsultaLista: String) {
 
         val formato = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")
 
         val timestampConvertido: String = timestamp.format(formato)
 
-        val sharedPreferences = context.getSharedPreferences("timesTamp_Metas", Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences("timesTamp_$salvarConsultaLista", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
-        editor.putString("lastUpdateTimestamp_Metas", timestampConvertido)
+        editor.putString("lastUpdateTimestamp_$salvarConsultaLista", timestampConvertido)
         editor.apply() // Salva o timestamp
     }
 
-    // Função para resgatar a última vez que foi feito a consulta na tabela Metas no BD
-    fun getLastUpdateTimestamp_Metas(): LocalDateTime {
-        val sharedPreferences = context.getSharedPreferences("timesTamp_Metas", Context.MODE_PRIVATE)
+    // Função para resgatar a última vez que foi feito a consulta em uma tabela no BD
+    fun getLastUpdateTimestamp_ListaMySQL(obterConsultaLista: String): LocalDateTime {
+        val sharedPreferences = context.getSharedPreferences("timesTamp_$obterConsultaLista", Context.MODE_PRIVATE)
         val formato = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")
 
-        val savedTimestamp = sharedPreferences.getString("lastUpdateTimestamp_Metas", null)
+        val savedTimestamp = sharedPreferences.getString("lastUpdateTimestamp_$obterConsultaLista", null)
 
         return try {
             if (savedTimestamp != null) {
@@ -103,7 +104,6 @@ class DadosUsuario_BD_Debts(private val context: Context) {
             LocalDateTime.MIN
         }
     }
-
 
     fun pegarIdUsuario(): Int {
 

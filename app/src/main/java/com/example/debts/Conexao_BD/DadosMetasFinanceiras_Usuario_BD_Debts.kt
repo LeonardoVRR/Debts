@@ -1,7 +1,6 @@
 package com.example.debts.Conexao_BD
 
 
-import com.example.debts.layout_Item_lista.MyData
 import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
 import com.example.debts.lista_DebtMap.dados_listaMeta_Item_DebtMap
 

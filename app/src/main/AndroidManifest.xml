@@ -71,7 +71,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".ConsultaBD_MySQL.BroadcastReceiver_Metas" />
+        <receiver android:name=".ConsultaBD_MySQL.BroadcastReceiver_ConsultarLista" />
     </application>
 
 </manifest>

@@ -1,31 +1,25 @@
 package com.example.debts
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ImageButton
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import java.util.Locale
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosFinanceiros_Usuario_BD_Debts
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.layoutExpandivel.criarListaItems
 import com.example.debts.layoutExpandivel.removerListaItems
-import com.example.debts.layout_Item_lista.ItemSpacingDecoration
 import com.example.debts.layout_Item_lista.MyConstraintAdapter
-import com.example.debts.layout_Item_lista.MyData
+import com.example.debts.layout_Item_lista.OperacaoFinanceira
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
@@ -33,12 +27,9 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import kotlin.random.Random
 
 class tela_RelatorioGastos : AppCompatActivity() {
@@ -603,20 +594,21 @@ class tela_RelatorioGastos : AppCompatActivity() {
     }
 
     //função que pega os dados do BD para colocar nas listas de items
-    private fun pegarDados(listaItems: List<MyData> = emptyList()): List<MyData> {
+    private fun pegarDados(listaItems: List<OperacaoFinanceira> = emptyList()): List<OperacaoFinanceira> {
 
         // Lista que será preenchida com os itens formatados
-        val items: MutableList<MyData> = mutableListOf()
+        val items: MutableList<OperacaoFinanceira> = mutableListOf()
 
         // Itera sobre cada item da lista de entrada e cria novos itens formatados
-        listaItems.forEach { myData ->
+        listaItems.forEach { item ->
             // Adiciona um novo item à lista 'items' com os valores formatados
             items.add(
-                MyData(
-                    myData.Descr_Compra,  // Descrição da compra
-                    myData.forma_pagamento,  // Forma de pagamento
-                    formatToCurrency(myData.valor_compra.toFloat()),  // Valor formatado
-                    myData.data_compra  // Data formatada
+                OperacaoFinanceira(
+                    item.id,
+                    item.descricao,  // Descrição da compra
+                    item.tipo_movimento,  // Forma de pagamento
+                    formatToCurrency(item.valor.toFloat()),  // Valor formatado
+                    item.data  // Data formatada
                 )
             )
         }
@@ -632,12 +624,12 @@ class tela_RelatorioGastos : AppCompatActivity() {
     }
 
     //função para somar o valor total dos gastos ou custos do campo
-    private fun somarValoresCampo(listaItems: List<MyData> = emptyList()): Float {
+    private fun somarValoresCampo(listaItems: List<OperacaoFinanceira> = emptyList()): Float {
 
         // Mapeia cada item para o valor numérico após remover caracteres de formatação
         val valorTotal = listaItems
             .map {
-                it.valor_compra
+                it.valor
                     .replace("R$", "")  // Remove símbolo de moeda
                     .replace(".", "")   // Remove separador de milhares
                     .replace(",", ".") // Substitui vírgula por ponto decimal

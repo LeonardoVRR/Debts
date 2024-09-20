@@ -8,26 +8,29 @@ import android.os.SystemClock
 
 class AgendarConsulta_MySQL(private val context: Context) {
 
-    fun agendarAlarme() {
+    fun agendarAlarmeConsultaLista(nomeAlarme: String, requestCode: Int, intervalo: Long) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        val intent = Intent(context, BroadcastReceiver_Metas::class.java)
+        // Criando um Intent com o nome do alarme como extra para identificar
+        val intent = Intent(context, BroadcastReceiver_ConsultarLista::class.java)
+        intent.putExtra("nomeAlarme", nomeAlarme)
+
         val pendingIntent = PendingIntent.getBroadcast(
-            context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Define o alarme para repetir a cada 1 minuto (60.000 milissegundos)
+        // Define o alarme para repetir com o intervalo fornecido
         alarmManager.setRepeating(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            SystemClock.elapsedRealtime() + 30 * 1000, // O tempo inicial
-            30 * 1000, // Repetição a cada 1 minuto
+            SystemClock.elapsedRealtime() + intervalo * 1000, // Primeiro disparo
+            intervalo * 1000, // Repetição a cada X minutos
             pendingIntent
         )
     }
 
     fun cancelarAlarme() {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, BroadcastReceiver_Metas::class.java)
+        val intent = Intent(context, BroadcastReceiver_ConsultarLista::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
             context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )

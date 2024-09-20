@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.debts.R
 
-class MyConstraintAdapter(private val items: List<MyData>):
+class MyConstraintAdapter(private val items: List<OperacaoFinanceira>):
     RecyclerView.Adapter<MyConstraintAdapter.MyViewHolder>() {
 
     //Este método é chamado quando o RecyclerView precisa criar uma nova ViewHolder. Ele infla o layout do item e cria um novo ViewHolder.
@@ -22,10 +22,10 @@ class MyConstraintAdapter(private val items: List<MyData>):
     //Este método é chamado pelo RecyclerView para vincular os dados do item às Views no activity_item_layout.
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val item = items[position]
-        holder.txt_infoGasto.text = item.Descr_Compra                // Define o texto da Descrição da Compra
-        holder.txt_tpTransacao.text = item.forma_pagamento          // Define o texto da forma de pagamento
-        holder.txt_ValorGasto.text = item.valor_compra                // Define o texto do valor compra
-        holder.txt_dtGasto.text = item.data_compra                  // Define o texto da data da compra
+        holder.txt_infoGasto.text = item.descricao                // Define o texto da Descrição da Compra
+        holder.txt_tpTransacao.text = item.tipo_movimento          // Define o texto da forma de pagamento
+        holder.txt_ValorGasto.text = item.valor                // Define o texto do valor compra
+        holder.txt_dtGasto.text = item.data                  // Define o texto da data da compra
     }
 
     //Este método retorna o número total de itens na lista, o que informa ao RecyclerView quantos itens ele deve exibir.

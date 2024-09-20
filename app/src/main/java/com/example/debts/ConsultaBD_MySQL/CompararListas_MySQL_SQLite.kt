@@ -4,29 +4,51 @@ import android.content.Context
 import android.util.Log
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.layout_Item_lista.OperacaoFinanceira
 import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
-import com.jakewharton.threetenabp.AndroidThreeTen
-import org.threeten.bp.LocalDate
-import org.threeten.bp.format.DateTimeFormatter
-import org.threeten.bp.format.DateTimeParseException
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class CompararListas_MySQL_SQLite (private val context: Context) {
 
-    fun formatDateString(dateString: String): String {
-        // Define o formato de entrada
-        val inputFormatter = DateTimeFormatter.ofPattern("dd 'de' MMMM 'de' yyyy")
+    fun formatarDataString(data: String): String {
 
-        // Converte a string para LocalDate
-        val date = LocalDate.parse(dateString, inputFormatter)
+        val dia = data.split("-")[0].trim()
+        val mes = data.split("-")[1].trim()
+        val ano = data.split("-")[2].trim()
 
-        // Define o formato de saída
-        val outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val numeroMes = when (mes.lowercase()) {
+            "janeiro" -> 1
+            "fevereiro" -> 2
+            "março" -> 3
+            "abril" -> 4
+            "maio" -> 5
+            "junho" -> 6
+            "julho" -> 7
+            "agosto" -> 8
+            "setembro" -> 9
+            "outubro" -> 10
+            "novembro" -> 11
+            "dezembro" -> 12
+            else -> 0 // Retorna 0 se o mês não for válido
+        }
+
+        // Criar um objeto Calendar para a data
+        val calendario = Calendar.getInstance()
+        calendario.set(ano.toInt(), numeroMes - 1, dia.toInt())
+
+        // Formatar a data
+        val formatoData = SimpleDateFormat("yyyy-MM-dd")
+        val dataFormatada = formatoData.format(calendario.time)
+
+        Log.d("DATA FORMATADA", "Dia: $dia, Mês: $mes, Ano: $ano, NumeroMes: $numeroMes")
 
         // Retorna a data formatada
-        return date.format(outputFormatter)
+        return dataFormatada
     }
 
-    fun adicionar_remover_Metas(listaMeta_MySQL: List<dados_listaMeta_DebtMap>, listaMeta_SQLite: List<dados_listaMeta_DebtMap>) {
+    fun adicionarNovasMetas(listaMeta_MySQL: List<dados_listaMeta_DebtMap>, listaMeta_SQLite: List<dados_listaMeta_DebtMap>) {
 
         val IDusuario = DadosUsuario_BD_Debts(context).pegarIdUsuario()
 
@@ -42,6 +64,9 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
                 }
             }
 
+//            Log.d("LISTA METAS MySQL", "$listaMeta_MySQL")
+//            Log.d("LISTA METAS SQLite", "$listaMeta_SQLite")
+
             listaMetasNovas.forEach { meta ->
 
                 val idMeta = meta.idMeta.toInt()
@@ -50,7 +75,9 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
                 // formatando a data
                 val dataMeta = meta.dataCriacaoMeta
 
-                val dataMetaFormatada = formatDateString(dataMeta)
+                //Log.d("DATA CRIAÇÂO META", "$dataMeta")
+
+                //val dataMetaFormatada = formatarDataString(dataMeta)
 
                 val listaMetas = meta.listaMetas_Item
                 val listaMetasConvertida = mutableListOf<String>()
@@ -62,7 +89,7 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
 
                 val progressoMeta = meta.progressoMeta
 
-                BancoDados(context).salvarMeta(nomeMeta, dataMetaFormatada, listaMetasConvertida.toList(), listaMetaEstados.toList(), progressoMeta, IDusuario, idMeta)
+                BancoDados(context).salvarMeta(nomeMeta, dataMeta, listaMetasConvertida.toList(), listaMetaEstados.toList(), progressoMeta, IDusuario, idMeta)
 
                 resultado = "Novas Metas SQLite"
             }
@@ -82,6 +109,76 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
             resultado = "Metas Removidas do SQLite"
         }
 
-        Log.d("RESULTADO", resultado)
+        Log.d("RESULTADO METAS", resultado)
+    }
+
+    fun adicionarNovosGastos(listaGasto_MySQL: List<OperacaoFinanceira>, listaGasto_SQLite: List<OperacaoFinanceira>) {
+
+        val IDusuario = DadosUsuario_BD_Debts(context).pegarIdUsuario()
+
+        val listaNovosGastos: MutableList<OperacaoFinanceira> = mutableListOf()
+
+        for (gasto in listaGasto_MySQL) {
+            // Comparar apenas o ID da meta
+            if (listaGasto_SQLite.none { it.id == gasto.id }) {
+                listaNovosGastos.add(gasto)
+            }
+        }
+
+        listaNovosGastos.forEach { gasto ->
+
+            val idGasto = gasto.id
+            val nomeGasto = gasto.descricao
+
+            // formatando a data
+            val dataGasto = gasto.data
+            val dataGastoFormatada = formatarDataString(dataGasto)
+
+            val tipoMovimento = gasto.tipo_movimento
+            val valorGasto = gasto.valor.toFloat()
+
+
+            BancoDados(context).salvarGasto(nomeGasto, tipoMovimento, valorGasto, dataGastoFormatada, IDusuario, idGasto)
+
+        }
+
+        listaNovosGastos.clear()
+
+        Log.d("RESULTADO GASTOS", "Novos Gastos SQLite")
+    }
+
+    fun adicionarNovosRendimentos(listaRendimentos_MySQL: List<OperacaoFinanceira>, listaRendimentos_SQLite: List<OperacaoFinanceira>) {
+
+        val IDusuario = DadosUsuario_BD_Debts(context).pegarIdUsuario()
+
+        val listaNovosGastos: MutableList<OperacaoFinanceira> = mutableListOf()
+
+        for (rendimento in listaRendimentos_MySQL) {
+            // Comparar apenas o ID da meta
+            if (listaRendimentos_SQLite.none { it.id == rendimento.id }) {
+                listaNovosGastos.add(rendimento)
+            }
+        }
+
+        listaNovosGastos.forEach { rendimento ->
+
+            val idRendimento = rendimento.id
+            val nomeRendimento = rendimento.descricao
+
+            // formatando a data
+            val dataRendimento = rendimento.data
+            val dataRendimentoFormatada = formatarDataString(dataRendimento)
+
+            val tipoMovimento = rendimento.tipo_movimento
+            val valorRendimento = rendimento.valor.toFloat()
+
+
+            BancoDados(context).salvarRendimento(tipoMovimento, dataRendimentoFormatada, valorRendimento, IDusuario, idRendimento)
+
+        }
+
+        listaNovosGastos.clear()
+
+        Log.d("RESULTADO RENDIMENTOS", "Novos Rendimentos SQLite")
     }
 }

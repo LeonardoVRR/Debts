@@ -4,16 +4,12 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteStatement
 import android.util.Log
-import android.widget.ArrayAdapter
-import androidx.recyclerview.widget.ListAdapter
 import com.example.debts.Conexao_BD.DadosMetasFinanceiras_Usuario_BD_Debts
 import com.example.debts.CustomToast
 import com.example.debts.FormatarNome.FormatarNome
-import com.example.debts.layout_Item_lista.MyData
+import com.example.debts.layout_Item_lista.OperacaoFinanceira
 import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
-import com.example.debts.lista_DebtMap.dados_listaMeta_Item_DebtMap
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -311,7 +307,7 @@ class BancoDados(private var context: Context) {
         try {
             // Consulta para obter os dados do usuário com base no id
             val gastos = bancoDados.rawQuery(
-                "SELECT SUM(valor_gasto) AS total_gasto FROM Dados_Financeiros WHERE id_user_gasto = ? AND mes = ? GROUP BY dt_gasto ORDER BY dt_gasto ASC",
+                "SELECT SUM(valor_gasto) AS total_gasto FROM Gastos WHERE id_user_gasto = ? AND mes = ? GROUP BY dt_gasto ORDER BY dt_gasto ASC",
                 arrayOf(IdUsuario.toString(), mesGasto)
             )
 
@@ -338,9 +334,9 @@ class BancoDados(private var context: Context) {
         return listaGastos.toList()
     }
 
-    fun listaRendimentosMes(IdUsuario: Int): List<MyData> {
+    fun listaRendimentosMes(IdUsuario: Int): List<OperacaoFinanceira> {
 
-        var listaRendimentosMes: MutableList<MyData> = mutableListOf()
+        var listaRendimentosMes: MutableList<OperacaoFinanceira> = mutableListOf()
 
         try {
             // Abre o banco de dados existente no caminho especificado
@@ -352,7 +348,7 @@ class BancoDados(private var context: Context) {
             // Verifica se há resultados e processa todos
             if (regatarGastos.moveToFirst()) {
                 do {
-                    //val idMeta = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("id_meta")).toString()
+                    val idGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("id_gasto")).toInt()
                     val nomeRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("tp_movimento")).toString()
                     //val forma_pagamento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("tp_transacao"))
                     val dataRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("dt_rendimento")).toString()
@@ -384,7 +380,7 @@ class BancoDados(private var context: Context) {
                     val valorRendimentoFormatado = (formatacaoReal.format(valorRendimento.toFloat())).toString()
 
 
-                    val itemGasto = MyData(nomeRendimentoFormatado, forma_pagamento_formatada, valorRendimentoFormatado, dataFormatada)
+                    val itemGasto = OperacaoFinanceira(idGasto, nomeRendimentoFormatado, forma_pagamento_formatada, valorRendimentoFormatado, dataFormatada)
 
                     // Adiciona o item à lista de itens
                     listaRendimentosMes += itemGasto
@@ -442,21 +438,21 @@ class BancoDados(private var context: Context) {
         return listaRendimentosMes.toList()
     }
 
-    fun listaGastosMes(IdUsuario: Int): List<MyData> {
+    fun listaGastosMes(IdUsuario: Int): List<OperacaoFinanceira> {
 
-        var listaGastosMes: MutableList<MyData> = mutableListOf()
+        var listaGastosMes: MutableList<OperacaoFinanceira> = mutableListOf()
 
         try {
             // Abre o banco de dados existente no caminho especificado
             bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
             // Consulta para obter as metas do usuário
-            val regatarGastos: Cursor = bancoDados.rawQuery("SELECT descricao_gasto, tp_transacao, dt_gasto, valor_gasto FROM Dados_Financeiros WHERE id_user_gasto = ? ORDER BY dt_gasto DESC", arrayOf(IdUsuario.toString()))
+            val regatarGastos: Cursor = bancoDados.rawQuery("SELECT * FROM Gastos WHERE id_user_gasto = ? ORDER BY dt_gasto DESC", arrayOf(IdUsuario.toString()))
 
             // Verifica se há resultados e processa todos
             if (regatarGastos.moveToFirst()) {
                 do {
-                    //val idMeta = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("id_meta")).toString()
+                    val idGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("id_gasto")).toInt()
                     val nomeGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("descricao_gasto")).toString()
                     val forma_pagamento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("tp_transacao"))
                     val dataGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("dt_gasto")).toString()
@@ -488,7 +484,7 @@ class BancoDados(private var context: Context) {
                     val valorGastoFormatado = (formatacaoReal.format(valor_compra.toFloat())).toString()
 
 
-                    val itemGasto = MyData(nomeGastoFormatado, forma_pagamento_formatada, valorGastoFormatado, dataFormatada)
+                    val itemGasto = OperacaoFinanceira(idGasto, nomeGastoFormatado, forma_pagamento_formatada, valorGastoFormatado, dataFormatada)
 
                     // Adiciona o item à lista de itens
                     listaGastosMes += itemGasto
@@ -510,21 +506,21 @@ class BancoDados(private var context: Context) {
         return listaGastosMes.toList()
     }
 
-    fun listaGastosRecentes(IdUsuario: Int): List<MyData> {
+    fun listaGastosRecentes(IdUsuario: Int): List<OperacaoFinanceira> {
 
-        var listaGastosMes: MutableList<MyData> = mutableListOf()
+        var listaGastosMes: MutableList<OperacaoFinanceira> = mutableListOf()
 
         try {
             // Abre o banco de dados existente no caminho especificado
             bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
             // Consulta para obter as metas do usuário
-            val regatarGastos: Cursor = bancoDados.rawQuery("SELECT descricao_gasto, tp_transacao, dt_gasto, valor_gasto FROM Dados_Financeiros WHERE id_user_gasto = ? ORDER BY dt_gasto DESC LIMIT 7", arrayOf(IdUsuario.toString()))
+            val regatarGastos: Cursor = bancoDados.rawQuery("SELECT * FROM Gastos WHERE id_user_gasto = ? ORDER BY dt_gasto DESC LIMIT 7", arrayOf(IdUsuario.toString()))
 
             // Verifica se há resultados e processa todos
             if (regatarGastos.moveToFirst()) {
                 do {
-                    //val idMeta = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("id_meta")).toString()
+                    val idGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("id_gasto")).toInt()
                     val nomeGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("descricao_gasto")).toString()
                     val forma_pagamento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("tp_transacao"))
                     val dataGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("dt_gasto")).toString()
@@ -556,7 +552,7 @@ class BancoDados(private var context: Context) {
                     val valorGastoFormatado = (formatacaoReal.format(valor_compra.toFloat())).toString()
 
 
-                    val itemGasto = MyData(nomeGastoFormatado, forma_pagamento_formatada, valorGastoFormatado, dataFormatada)
+                    val itemGasto = OperacaoFinanceira(idGasto, nomeGastoFormatado, forma_pagamento_formatada, valorGastoFormatado, dataFormatada)
 
                     // Adiciona o item à lista de itens
                     listaGastosMes += itemGasto
@@ -672,14 +668,25 @@ class BancoDados(private var context: Context) {
                     val listaConvertida = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas)
 
                     //faz o fatiamento da data
-                    val dia = dataMeta.substring(8,10)
-                    val mes = (dataMeta.substring(5,7)).toInt()
-                    val ano = dataMeta.substring(0,4)
+                    val dia = dataMeta.split("-")[2].trim()
+                    val mes = dataMeta.split("-")[1].trim().toInt()
+                    val ano = dataMeta.split("-")[0].trim()
 
-                    // Obtém o nome do mês atual para exibição
-                    val calendar = Calendar.getInstance()
-                    calendar.set(Calendar.MONTH, mes)
-                    val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+                    val nomeMes = when (mes) {
+                        1 -> "janeiro"
+                        2 -> "fevereiro"
+                        3 -> "março"
+                        4 -> "abril"
+                        5 -> "maio"
+                        6 -> "junho"
+                        7 -> "julho"
+                        8 -> "agosto"
+                        9 -> "setembro"
+                        10 -> "outubro"
+                        11 -> "novembro"
+                        12 -> "dezembro"
+                        else -> throw IllegalArgumentException("Número do mês inválido")
+                    }
 
                     val dataFormatada = "$dia de $nomeMes de $ano"
 
@@ -806,7 +813,7 @@ class BancoDados(private var context: Context) {
         }
     }
 
-    fun salvarRendimento(tipoMovimento: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int) {
+    fun salvarRendimento(tipoMovimento: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int, idRendimento: Int) {
         try {
 
             // Abre o banco de dados existente no caminho especificado
@@ -830,7 +837,7 @@ class BancoDados(private var context: Context) {
             val dataFormatada = "$ano-$mes-$dia"
 
             // query para salvar uma nova meta do usuário
-            val query = "INSERT INTO Rendimentos (tp_movimento, dt_rendimento, mes, valor_rendimento, id_user_rendimento) VALUES ('$tipoMovimentoFormatado', '$dataFormatada', '$nomeMes', $valorRendimento, $IDusuario)"
+            val query = "INSERT INTO Rendimentos (id_rendimento, tp_movimento, dt_rendimento, mes, valor_rendimento, id_user_rendimento) VALUES ('$idRendimento, $tipoMovimentoFormatado', '$dataFormatada', '$nomeMes', $valorRendimento, $IDusuario)"
 
             //executa a query
             bancoDados.execSQL(query)
@@ -848,7 +855,7 @@ class BancoDados(private var context: Context) {
         }
     }
 
-    fun salvarGasto(nomeGasto: String, tipoMovimento: String, valorGasto: Float, dataGasto: String, IDusuario: Int) {
+    fun salvarGasto(nomeGasto: String, tipoMovimento: String, valorGasto: Float, dataGasto: String, IDusuario: Int, idGasto: Int) {
         try {
 
             // Abre o banco de dados existente no caminho especificado
@@ -872,7 +879,7 @@ class BancoDados(private var context: Context) {
             val dataFormatada = "$ano-$mes-$dia"
 
             // query para salvar uma nova meta do usuário
-            val query = "INSERT INTO Dados_Financeiros (descricao_gasto, tp_transacao, valor_gasto, dt_gasto, mes, id_user_gasto) VALUES ('$nomeGasto', '$tipoMovimento', $valorGasto, '$dataFormatada', '$nomeMes', $IDusuario)"
+            val query = "INSERT INTO Gastos (id_gasto, descricao_gasto, tp_transacao, valor_gasto, dt_gasto, mes, id_user_gasto) VALUES ($idGasto, '$nomeGasto', '$tipoMovimento', $valorGasto, '$dataFormatada', '$nomeMes', $IDusuario)"
 
             //executa a query
             bancoDados.execSQL(query)

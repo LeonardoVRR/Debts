@@ -519,7 +519,7 @@ class Metodos_BD_MySQL {
                     val nomeFormatado = FormatarNome().formatar(nomeMeta)
 
                     // Converte a lista recuperada
-                    val listaConvertida = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas)
+                    val listaConvertida = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas, listaMetasConcluidas)
 
                     //faz o fatiamento da data
 //                    val dia = dataMeta.split("-")[2].trim()
@@ -563,6 +563,182 @@ class Metodos_BD_MySQL {
         }
 
         return listasItemsMetas.toList()
+    }
+
+    fun salvarMeta(IDusuario: Int, nome_meta: String, dt_meta: String, lista_metas: List<String>, metas_concluidas: List<Boolean>, progresso_meta: Float): String {
+        // Inicialize a conexão com BD
+        val con = ConnectionClass().CONN()
+
+        //convertendo a lista para JSON para poder salvar no banco de dados
+        val listaMetasJSON = Gson().toJson(lista_metas)
+        val listaMetasConcluidasJSON = Gson().toJson(metas_concluidas)
+
+        //resultado da operação
+        var resultado = ""
+
+        // Verifica se a conexão foi estabelecida
+        if (con != null){
+
+            // Crie um Statement para executar a consulta
+            val statement: Statement = con.createStatement()
+
+            val insert = "INSERT INTO metas_financeiras (nome_meta, dt_meta, lista_metas, metas_concluidas, progresso_meta, id_user_meta) VALUES (?, ?, ?, ?, ?, ?)"
+
+            try {
+
+                // Preparar a instrução SQL
+                val salvarMeta = con.prepareStatement(insert)
+
+                // Definir os parâmetros da consulta
+                salvarMeta.setString(1, nome_meta)
+                salvarMeta.setString(2, dt_meta)
+                salvarMeta.setString(3, listaMetasJSON)
+                salvarMeta.setString(4, listaMetasConcluidasJSON)
+                salvarMeta.setFloat(5, progresso_meta)
+                salvarMeta.setInt(6, IDusuario)
+
+                // Executar a instrução de update
+                val rowsInserted = salvarMeta.executeUpdate()
+
+                // Verificar se a inserção foi bem-sucedida
+                if (rowsInserted > 0) {
+                    resultado = "Meta salva com sucesso!"
+                } else {
+                    resultado = "Falha ao salvar a meta."
+                }
+
+                salvarMeta.close()
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta Salvar Meta", "Erro ao realizar a consulta: ${e.message}")
+
+                resultado = "Erro ao salvar meta: ${e.message}"
+            } finally {
+                // Feche os recursos
+                try {
+                    statement?.close()
+                    con?.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+
+        } else {
+            Log.e("ErroConexao Salvar Meta", "Conexão não estabelecida")
+
+            resultado = "Conexão não estabelecida"
+        }
+
+        return resultado
+    }
+
+    fun atualizarMeta(IDusuario: Int, IdMeta: Int, metas_concluidas: List<Boolean>, progresso_meta: Float): String {
+        var metaAtualizada = ""
+
+        //convertendo a lista para JSON para poder salvar no banco de dados
+        val listaMetasConcluidasJSON = Gson().toJson(metas_concluidas)
+
+        // Inicializa a conexão com BD
+        val con = ConnectionClass().CONN()
+
+        val prog_formatado = String.format("%.1f", progresso_meta).replace(",", ".").toFloat()
+
+        // query para excluir um usuário
+        val query = "update metas_financeiras set metas_concluidas = ?, progresso_meta = ? where id_user_meta = ? and id_meta = ?"
+
+        if (con != null) {
+            try {
+
+                Log.d("INICIANDO ATUALIZAÇÃO", "Atualizando...")
+
+                // Preparar a instrução SQL
+                val atualizarMeta = con.prepareStatement(query)
+
+                // Definir o parâmetro ID do usuário
+                atualizarMeta.setString(1, listaMetasConcluidasJSON)
+                atualizarMeta.setFloat(2, prog_formatado)
+                atualizarMeta.setInt(3, IDusuario)
+                atualizarMeta.setInt(4, IdMeta)
+
+                // Executa a consulta
+                val rowsUpdate = atualizarMeta.executeUpdate()
+
+                // Verificar se a inserção foi bem-sucedida
+                if (rowsUpdate > 0) {
+                    Log.d("ATUALIZAÇÃO", "Meta Atualizada")
+                } else {
+                    Log.d("ATUALIZAÇÃO", "Nada atualizado")
+                }
+
+                atualizarMeta.close()
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta atualizar meta", "Erro ao atualizar meta: ${e.message}")
+
+                metaAtualizada = "Erro ao atualizar meta: ${e.message}"
+            } finally {
+                // Feche os recursos
+                try {
+                    con?.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            Log.e("ErroConexao atualizar meta", "Conexão não estabelecida")
+
+            metaAtualizada = "Conexão não estabelecida atualizar meta"
+        }
+
+        return metaAtualizada
+    }
+
+    fun deletarMeta(IDusuario: Int, IdMeta: Int): Boolean {
+        var metaExcluida: Boolean = false
+
+        // Inicializa a conexão com BD
+        val con = ConnectionClass().CONN()
+
+        // query para excluir um usuário
+        val query = "DELETE FROM metas_financeiras WHERE id_meta = ? AND id_user_meta = ?"
+
+        if (con !== null) {
+            try {
+
+                // Preparar a instrução SQL
+                val deletarMeta = con.prepareStatement(query)
+
+                // Definir o parâmetro ID do usuário
+                deletarMeta.setInt(1, IdMeta)
+                deletarMeta.setInt(2, IDusuario)
+
+                // Executa a consulta
+                deletarMeta.executeUpdate()
+
+                deletarMeta.close()
+
+                metaExcluida = true
+
+            } catch (e: SQLException) {
+                e.printStackTrace()
+                Log.e("ErroConsulta deletar meta", "Erro ao deletar meta: ${e.message}")
+
+                metaExcluida = false
+            } finally {
+                // Feche os recursos
+                try {
+                    con?.close()
+                } catch (e: SQLException) {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            Log.e("ErroConexao deletar meta", "Conexão não estabelecida")
+        }
+
+        return metaExcluida
     }
 
     fun salvarRendimento(tipoMovimento: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int): String {

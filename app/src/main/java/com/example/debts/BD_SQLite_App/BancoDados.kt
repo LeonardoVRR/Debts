@@ -434,7 +434,7 @@ class BancoDados(private var context: Context) {
             regatarGastos.close()
 
         } catch (e: Exception) {
-            CustomToast().showCustomToast(context, "Erro recuper metas: ${e.message}")
+            CustomToast().showCustomToast(context, "Erro recuper rendimentos: ${e.message}")
             Log.e("Erro Consulta rendimentosMes:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
@@ -511,7 +511,7 @@ class BancoDados(private var context: Context) {
             regatarGastos.close()
 
         } catch (e: Exception) {
-            CustomToast().showCustomToast(context, "Erro recuper metas: ${e.message}")
+            CustomToast().showCustomToast(context, "Erro recuper gastos: ${e.message}")
             Log.e("Erro Consulta Gasto Mes:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
@@ -671,18 +671,21 @@ class BancoDados(private var context: Context) {
                     val dataMeta = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("dt_meta")).toString()
                     val listaMetasJSON = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("lista_metas"))
                     val progressoMeta = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("progresso_meta"))
+                    val listaMetasConcluidasJSON = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("metas_concluidas"))
 
                     //formatando o nome da meta
                     val nomeFormatado = FormatarNome().formatar(nomeMeta)
 
                     // Especifica o tipo da lista para deserialização
                     val tipoLista = object : TypeToken<List<String>>() {}.type
+                    val tipoBool = object : TypeToken<List<Boolean>>() {}.type
 
                     // Converte a lista JSON resgatada do BD para o tipo "List<String>"
                     val listaMetas: List<String> = Gson().fromJson(listaMetasJSON, tipoLista)
+                    val listaMetasConcluidas: List<Boolean> = Gson().fromJson(listaMetasConcluidasJSON, tipoBool)
 
                     // Converte a lista recuperada
-                    val listaConvertida = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas)
+                    val listaConvertida = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas, listaMetasConcluidas)
 
                     //faz o fatiamento da data
                     val dia = dataMeta.split("-")[2].trim()
@@ -703,7 +706,7 @@ class BancoDados(private var context: Context) {
 
             regatarMetas.close()
         } catch (e: Exception) {
-            CustomToast().showCustomToast(context, "Erro recuper metas: ${e.message}")
+            CustomToast().showCustomToast(context, "Erro recuper lista metas: ${e.message}")
             Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
@@ -816,8 +819,10 @@ class BancoDados(private var context: Context) {
         }
     }
 
-    fun salvarRendimento(tipoMovimento: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int, idRendimento: Int) {
+    fun salvarRendimento(tipoMovimento: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int, idRendimento: Int): Boolean {
         Log.d("SALVANDO RENDIMENTO", "FUNÇÂO CHAMADA")
+
+        var rendimentoSalvo: Boolean = false
 
         try {
 
@@ -853,20 +858,28 @@ class BancoDados(private var context: Context) {
             //executa a query
             bancoDados.execSQL(query)
 
-            CustomToast().showCustomToast(context, "Rendimento salvo com sucesso!")
+            //CustomToast().showCustomToast(context, "Rendimento salvo com sucesso!")
+
+            rendimentoSalvo = true
 
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro Consulta Rendimento: ${e.message}")
             Log.e("Erro Consulta Rendimento:", e.message ?: "Erro desconhecido")
+
+            rendimentoSalvo = false
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
             if (::bancoDados.isInitialized) {
                 bancoDados.close()
             }
         }
+
+        return rendimentoSalvo
     }
 
-    fun salvarGasto(nomeGasto: String, tipoMovimento: String, valorGasto: Float, dataGasto: String, IDusuario: Int, idGasto: Int) {
+    fun salvarGasto(nomeGasto: String, tipoMovimento: String, valorGasto: Float, dataGasto: String, IDusuario: Int, idGasto: Int): Boolean {
+        var gastoSalvo: Boolean = false
+
         try {
 
             // Abre o banco de dados existente no caminho especificado
@@ -899,17 +912,23 @@ class BancoDados(private var context: Context) {
             //executa a query
             bancoDados.execSQL(query)
 
-            CustomToast().showCustomToast(context, "Divida salva com sucesso!")
+            //CustomToast().showCustomToast(context, "Divida salva com sucesso!")
+
+            gastoSalvo = true
 
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro Consulta Gasto: ${e.message}")
             Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+
+            gastoSalvo = false
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
             if (::bancoDados.isInitialized) {
                 bancoDados.close()
             }
         }
+
+        return gastoSalvo
     }
 
     fun deletarUsuario(IDusuario: Int) {
@@ -924,7 +943,7 @@ class BancoDados(private var context: Context) {
             //executa a query
             bancoDados.execSQL(query)
 
-            //CustomToast().showCustomToast(context, "Meta deletada com sucesso!")
+            //CustomToast().showCustomToast(context, "Usuário deletado com sucesso!")
 
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro ao salvar meta: ${e.message}")

@@ -78,6 +78,7 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
 
 //            Log.d("LISTA METAS MySQL", "$listaMeta_MySQL")
 //            Log.d("LISTA METAS SQLite", "$listaMeta_SQLite")
+            Log.d("LISTA NOVAS METAS", "$listaMetasNovas")
 
             listaMetasNovas.forEach { meta ->
 
@@ -93,11 +94,12 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
 
                 val listaMetas = meta.listaMetas_Item
                 val listaMetasConvertida = mutableListOf<String>()
+                val listaMetaEstados = mutableListOf<Boolean>()
 
-                listaMetas.forEach { item ->  listaMetasConvertida.add(item.nomeMeta.toString())}
-
-                // Criando a lista de estados (inicialmente todos false)
-                val listaMetaEstados = MutableList(listaMetasConvertida.size) { false }
+                listaMetas.forEach { item ->
+                    listaMetasConvertida.add(item.nomeMeta)
+                    listaMetaEstados.add(item.isChecked)
+                }
 
                 val progressoMeta = meta.progressoMeta
 
@@ -122,6 +124,22 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
         }
 
         Log.d("RESULTADO METAS", resultado)
+    }
+
+    fun atualizarMetas(listaMeta_MySQL: List<dados_listaMeta_DebtMap>, listaMeta_SQLite: List<dados_listaMeta_DebtMap>): List<dados_listaMeta_DebtMap> {
+
+        val listaAtualizarMetas: MutableList<dados_listaMeta_DebtMap> = mutableListOf()
+
+        for (meta in listaMeta_SQLite) {
+            // Comparar o progresso da meta e a lista de itens
+            if (listaMeta_MySQL.any { it.progressoMeta != meta.progressoMeta || it.listaMetas_Item != meta.listaMetas_Item }) {
+                listaAtualizarMetas.add(meta)
+            }
+        }
+
+        Log.d("RESULTADO METAS ATUALIZADAS", "$listaAtualizarMetas")
+
+        return listaAtualizarMetas.toList()
     }
 
     fun adicionarNovosGastos(listaGasto_MySQL: List<OperacaoFinanceira>, listaGasto_SQLite: List<OperacaoFinanceira>) {

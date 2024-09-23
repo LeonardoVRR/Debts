@@ -3,14 +3,23 @@ package com.example.debts.aviso_Deletar_Meta
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
+import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.CustomToast
+import com.example.debts.MsgCarregando.MensagemCarregando
 import com.example.debts.R
+import android.os.Handler
+import android.os.Looper
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class avisoDeletarMeta(private val context: Context, private val lista_Meta_ID:String, private val IDusuario: Int, private val nomeMeta: String) {
     // Configurando a função que vai exibir a mensagem de aviso ao clicar em "Deletar Meta"
@@ -37,14 +46,41 @@ class avisoDeletarMeta(private val context: Context, private val lista_Meta_ID:S
 
         // Configurar ações para os botões
         btnConfirmarExclusao.setOnClickListener {
-            //CustomToast().showCustomToast(context, "Meta excluída com sucesso.")
-            dialog.dismiss()
 
-            BancoDados(context).excluirMeta(IDusuario, lista_Meta_ID)
+            val msgCarregando = MensagemCarregando(context)
 
-            // Isso faz com que a atividade atual seja destruída e recriada, essencialmente funcionando como um "refresh" completo da atividade.
-            context as Activity
-            context.recreate()
+            msgCarregando.mostrarMensagem()
+
+            // Usando ExecutorService para tarefas em segundo plano
+            val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+            executorService.execute {
+                try {
+                    // Fazendo uma nova consulta ao banco de dados
+                    val metaDeletada: Boolean = Metodos_BD_MySQL().deletarMeta(IDusuario, lista_Meta_ID.toInt())
+
+                    // Verifica se a meta foi excluida no BD MySQL
+                    if (metaDeletada) {
+                        BancoDados(context).excluirMeta(IDusuario, lista_Meta_ID)
+                    }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Log.e("BroadcastReceiver_Excluir Meta", "Erro ao executar consulta: ${e.message}")
+                } finally {
+                    // Handler para rodar na UI thread
+                    val handler = Handler(Looper.getMainLooper())
+                    handler.post {
+                        msgCarregando.ocultarMensagem()
+                        dialog.dismiss()
+                        CustomToast().showCustomToast(context, "Meta excluida com sucesso.")
+
+                        // Isso faz com que a atividade atual seja destruída e recriada, essencialmente funcionando como um "refresh" completo da atividade.
+                        context as Activity
+                        context.recreate()
+                    }
+                    executorService.shutdown()
+                }
+            }
         }
 
         btnCancelarExclusao.setOnClickListener {

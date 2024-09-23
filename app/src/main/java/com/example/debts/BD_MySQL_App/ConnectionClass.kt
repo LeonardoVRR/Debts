@@ -7,7 +7,7 @@ import java.util.Objects
 
 class ConnectionClass {
     private val dbName: String = "debts"
-    private val ip: String = "192.168.0.25"
+    private val ip: String = "192.168.0.22"
     private val port: String = "3306"
     private val user: String = "debts_app"
     private val password: String = "debts2024"

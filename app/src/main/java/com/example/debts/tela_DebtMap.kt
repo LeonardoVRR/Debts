@@ -12,13 +12,19 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.size
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosMetasFinanceiras_Usuario_BD_Debts
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.ConsultaBD_MySQL.AgendarConsulta_MySQL
+import com.example.debts.ConsultaBD_MySQL.CompararListas_MySQL_SQLite
+import com.example.debts.MsgCarregando.MensagemCarregando
 import com.example.debts.layout_Item_lista.ItemSpacingDecoration
 import com.example.debts.lista_DebtMap.adapter_DebtMap
 import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
 import java.util.Calendar
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class tela_DebtMap : AppCompatActivity() {
 
@@ -51,10 +57,10 @@ class tela_DebtMap : AppCompatActivity() {
     var listasMetas_STR: MutableList<String> = mutableListOf()
 
     //chama a função para converter uma lista de metas do tipo "String" para o tipo "dados_listaMeta_Item_DebtMap"
-    val listaMetas = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas_STR)
+    //val listaMetas = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas_STR)
 
     //chama a função para converter uma lista de metas do tipo "String" para o tipo "dados_listaMeta_Item_DebtMap"
-    val listaMetas2 = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas2_STR)
+    //val listaMetas2 = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas2_STR)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -169,8 +175,110 @@ class tela_DebtMap : AppCompatActivity() {
 
     //função para voltar a tela inicial do aplicativo
     fun voltarTelaInicial(v: View){
+
         val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)
         startActivity(navegarTelaPrincipal)
         finish()
+    }
+
+    //salvas as alterações feitas nas metas quando a activity for destruida
+    override fun onDestroy() {
+        super.onDestroy()
+
+        CustomToast().showCustomToast(this@tela_DebtMap, "Atualizando Metas...")
+
+        var resultado = ""
+
+        val IDusuario = DadosUsuario_BD_Debts(this@tela_DebtMap).pegarIdUsuario()
+
+        val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+        executorService.execute {
+            try {
+
+                val listaAtualizarMetas = CompararListas_MySQL_SQLite(this@tela_DebtMap).atualizarMetas(DadosUsuario_BD_Debts.listas_MySQL.metasUsuario, BancoDados(this@tela_DebtMap).listarMetas(IDusuario))
+
+                listaAtualizarMetas.forEach { meta ->
+                    val idMeta = meta.idMeta.toInt()
+
+                    // Converte os estados da lista de metas
+                    val listaMetaEstados: MutableList<Boolean> = meta.listaMetas_Item.map { it.isChecked }.toMutableList()
+
+                    val progressoMeta = meta.progressoMeta
+
+                    resultado = Metodos_BD_MySQL().atualizarMeta(IDusuario, idMeta, listaMetaEstados, progressoMeta)
+
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Log.e("Erro salvar alteração meta", "${e.message}")
+
+                resultado = "Erro salvar alteração meta: ${e.message}"
+            } finally {
+
+                // Atualizar a UI no thread principal
+                runOnUiThread {
+                    Log.d("lista metas atualizada", resultado)
+                    CustomToast().showCustomToast(this@tela_DebtMap, "Metas MySQL Atualizadas")
+                }
+
+                executorService.shutdown()
+            }
+        }
+        /*
+
+                        CustomToast().showCustomToast(this@tela_DebtMap, "Atualizando Metas...")
+
+                var resultado = ""
+
+                val IDusuario = DadosUsuario_BD_Debts(this@tela_DebtMap).pegarIdUsuario()
+
+                val msgCarregando = MensagemCarregando(this@tela_DebtMap)
+
+                msgCarregando.mostrarMensagem()
+
+                val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+                executorService.execute {
+                    try {
+
+                        val listaAtualizarMetas = CompararListas_MySQL_SQLite(this@tela_DebtMap).atualizarMetas(DadosUsuario_BD_Debts.listas_MySQL.metasUsuario, BancoDados(this@tela_DebtMap).listarMetas(IDusuario))
+
+                        listaAtualizarMetas.forEach { meta ->
+                            val idMeta = meta.idMeta.toInt()
+
+                            // Converte os estados da lista de metas
+                            val listaMetaEstados: MutableList<Boolean> = meta.listaMetas_Item.map { it.isChecked }.toMutableList()
+
+                            val progressoMeta = meta.progressoMeta
+
+                            resultado = Metodos_BD_MySQL().atualizarMeta(IDusuario, idMeta, listaMetaEstados, progressoMeta)
+
+                            Log.d("RESULTADO METAS ATUALIZADAS 2", "$listaAtualizarMetas")
+
+                        }
+
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Log.e("Erro salvar alteração meta", "${e.message}")
+
+                        resultado = "Erro salvar alteração meta: ${e.message}"
+                    } finally {
+
+                        // Atualizar a UI no thread principal
+                        runOnUiThread {
+                            msgCarregando.ocultarMensagem()
+
+                            Log.d("lista metas atualizada", resultado)
+                            CustomToast().showCustomToast(this@tela_DebtMap, "Metas MySQL Atualizadas")
+
+
+                        }
+
+                        executorService.shutdown()
+                    }
+                }
+
+        */
+
     }
 }

@@ -38,6 +38,23 @@ class adapter_Item_DebtMap(private val items: List<dados_listaMeta_Item_DebtMap>
         }
     }
 
+    fun riscarMeta(item: CheckBox, checked: Boolean) {
+        if (checked) {
+            //risca o texto se o checkBox tiver sido marcado
+            item.paintFlags = item.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+            //colorindo o texto de preto com 50% de tranparencia da cor
+            item.setTextColor(Color.argb(128, 0, 0, 0))
+        }
+
+        else {
+            //colorindo o texto de preto
+            item.setTextColor(Color.argb(255, 0, 0, 0))
+            //tira o risco do texto
+            item.paintFlags = item.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+        }
+    }
+
+
     //Este método é chamado quando o RecyclerView precisa criar uma nova ViewHolder. Ele infla o layout do item e cria um novo ViewHolder.
     //Isso cria a estrutura de View que será usada para cada item.
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): adapter_Item_DebtMap.MyViewHolder {
@@ -54,16 +71,16 @@ class adapter_Item_DebtMap(private val items: List<dados_listaMeta_Item_DebtMap>
         holder.checkBox_Meta_Item.text = item.nomeMeta
         holder.checkBox_Meta_Item.isChecked = listaEstadoMetas.getOrElse(position) {false}
 
+        // Risca a meta se a checkbox estiver marcada
+        riscarMeta(holder.checkBox_Meta_Item, holder.checkBox_Meta_Item.isChecked)
+
         //configurando o click no checkBox
         holder.checkBox_Meta_Item.setOnCheckedChangeListener { _, isChecked ->
             listaEstadoMetas[position] = isChecked
 
-            if (listaEstadoMetas[position]) {
-                //risca o texto se o checkBox tiver sido marcado
-                holder.checkBox_Meta_Item.paintFlags = holder.checkBox_Meta_Item.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                //colorindo o texto de preto com 50% de tranparencia da cor
-                holder.checkBox_Meta_Item.setTextColor(Color.argb(128, 0, 0, 0))
+            riscarMeta(holder.checkBox_Meta_Item, listaEstadoMetas[position])
 
+            if (holder.checkBox_Meta_Item.isChecked) {
                 //faz o indicador de progresso aumentar conforme os checkBox forem marcados
                 progressoAtual_IndicadorProgresso += 100f / getItemCount().toFloat()
             }
@@ -71,11 +88,6 @@ class adapter_Item_DebtMap(private val items: List<dados_listaMeta_Item_DebtMap>
             else {
                 //faz o indicador de progresso diminuir conforme os checkBox forem desmarcados
                 progressoAtual_IndicadorProgresso -= 100f / getItemCount().toFloat()
-
-                //colorindo o texto de preto
-                holder.checkBox_Meta_Item.setTextColor(Color.argb(255, 0, 0, 0))
-                //tira o risco do texto
-                holder.checkBox_Meta_Item.paintFlags = holder.checkBox_Meta_Item.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
             }
 
             //configurando a visibilidade do botão excluir meta
@@ -92,9 +104,9 @@ class adapter_Item_DebtMap(private val items: List<dados_listaMeta_Item_DebtMap>
 
             //Log.d("EstadoCheckBox", "$listaEstadoMetas")
 
-            BancoDados(context).salvarEstadoMetas(IDusuario, listaEstadoMetas, lista_Meta_ID, progressoAtual_IndicadorProgresso)
-
             obterIndicadorProgressoCircular()
+
+            BancoDados(context).salvarEstadoMetas(IDusuario, listaEstadoMetas, lista_Meta_ID, progressoAtual_IndicadorProgresso)
         }
 
     }

@@ -20,6 +20,7 @@ import com.example.debts.layoutExpandivel.criarListaItems
 import com.example.debts.layoutExpandivel.removerListaItems
 import com.example.debts.layout_Item_lista.MyConstraintAdapter
 import com.example.debts.layout_Item_lista.OperacaoFinanceira
+import com.example.debts.models.MovintoDia
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
@@ -519,32 +520,50 @@ class tela_RelatorioGastos : AppCompatActivity() {
         }
     }
 
+    fun formatarValor(valorString: String): Float {
+        // Remover o símbolo de moeda "R$", remover os espaços e os separadores de milhar.
+        val valorLimpo = valorString
+            .replace("R$", "") // Remove o símbolo "R$"
+            .replace(".", "")  // Remove os separadores de milhar
+            .replace(",", ".") // Substitui a vírgula decimal por ponto
+            .trim()            // Remove espaços em branco extras
+
+        // Converte a string limpa para Float
+        return valorLimpo.toFloat()
+    }
+
     //função que cria as colunas do grafico
     private fun criarColunasGraf(entries: MutableList<BarEntry>, qtdDiasMes: Int, nomeMes: String, usuarioID: Int) {
         entries.clear()
 
         // Recuperar a lista de valores do banco de dados
-        val listaValores: List<Float> = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID)
-        val listaEntradas: List<Float> = BancoDados(this).rendimentosMes(usuarioID, nomeMes.lowercase())
+        val listaGastos = BancoDados(this).gastosDiariosMesGraf(nomeMes, usuarioID)
+        val listaRendimentos = BancoDados(this).rendimentosDiariosMesGraf(nomeMes, usuarioID)
 
-        // Se uma lista for menor, preencha com zeros
-        val maxSize = maxOf(listaValores.size, listaEntradas.size)
-        val listaValoresAjustada = listaValores + List(maxSize - listaValores.size) { 0f }
-        val listaEntradasAjustada = listaEntradas + List(maxSize - listaEntradas.size) { 0f }
+        // lista preenchida com zeros
+        val listaGastosAjustados = MutableList(qtdDiasMes) { 0f }
+        val listaRendimentosAjustadas = MutableList(qtdDiasMes) { 0f }
+
+        listaGastos.forEach { item ->
+            val dia = item.dia
+            val valor = item.valor
+
+            listaGastosAjustados.add(dia, valor)
+        }
+
+        listaRendimentos.forEach { item ->
+            val dia = item.dia
+            val valor = item.valor
+
+            listaRendimentosAjustadas.add(dia, valor)
+        }
 
         // Iterar e adicionar os valores ao gráfico
         for (i in 0 until qtdDiasMes) {
-            val valorGasto = if (i < listaValoresAjustada.size) listaValoresAjustada[i] else 0f
-            val valorEntrada = if (i < listaEntradasAjustada.size) listaEntradasAjustada[i] else 0f
+            val valorGasto = listaGastosAjustados[i]
+            val valorEntrada = listaRendimentosAjustadas[i]
 
             entries.add(BarEntry(i.toFloat(), floatArrayOf(valorGasto, valorEntrada)))
-        }
-
-        // Preenchendo os dias restantes com valores 0 se necessário
-        if (qtdDiasMes > maxSize) {
-            for (i in maxSize until qtdDiasMes) {
-                entries.add(BarEntry(i.toFloat(), floatArrayOf(0f, 0f)))
-            }
         }
 
         // Atualizar o gráfico
@@ -572,6 +591,63 @@ class tela_RelatorioGastos : AppCompatActivity() {
         grafico.data = barData
         grafico.invalidate() // Atualiza o gráfico
     }
+
+//    //função que cria as colunas do grafico
+//    private fun criarColunasGraf(entries: MutableList<BarEntry>, qtdDiasMes: Int, nomeMes: String, usuarioID: Int) {
+//        entries.clear()
+//
+//        // Recuperar a lista de valores do banco de dados
+//        val listaValores: List<Float> = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID)
+//        val listaEntradas: List<Float> = BancoDados(this).rendimentosMes(usuarioID, nomeMes.lowercase())
+//
+//        Log.d("LISTA GASTOS", "$listaValores")
+//        Log.d("LISTA RENDIMENTOS", "$listaEntradas")
+//
+//        // Se uma lista for menor, preencha com zeros
+//        val maxSize = maxOf(listaValores.size, listaEntradas.size)
+//        val listaValoresAjustada = listaValores + List(maxSize - listaValores.size) { 0f }
+//        val listaEntradasAjustada = listaEntradas + List(maxSize - listaEntradas.size) { 0f }
+//
+//        // Iterar e adicionar os valores ao gráfico
+//        for (i in 0 until qtdDiasMes) {
+//            val valorGasto = if (i < listaValoresAjustada.size) listaValoresAjustada[i] else 0f
+//            val valorEntrada = if (i < listaEntradasAjustada.size) listaEntradasAjustada[i] else 0f
+//
+//            entries.add(BarEntry(i.toFloat(), floatArrayOf(valorGasto, valorEntrada)))
+//        }
+//
+//        // Preenchendo os dias restantes com valores 0 se necessário
+//        if (qtdDiasMes > maxSize) {
+//            for (i in maxSize until qtdDiasMes) {
+//                entries.add(BarEntry(i.toFloat(), floatArrayOf(0f, 0f)))
+//            }
+//        }
+//
+//        // Atualizar o gráfico
+//        val barDataSet = BarDataSet(entries, "")
+//
+//        //lista de cores das colunas
+//        val coresColunas = listOf<Int>(android.graphics.Color.rgb(255, 50, 50), android.graphics.Color.rgb(109, 251, 114))
+//
+//        //colorindo as colunas do grafico
+//        barDataSet.setColors(coresColunas)
+//
+//        //colorindo as colunas do grafico
+//        //barDataSet.color = android.graphics.Color.rgb(255, 50, 50) // colorindo as colunas da tabela de vermelho
+//
+//        //aplicando a formatação criada em "valueFormatter" nos textos que ficam acima de cada coluna
+//        barDataSet.valueFormatter = createValueFormatter()
+//
+//        // Configurar o tamanho do texto dos valores nas colunas
+//        barDataSet.valueTextSize = 14f // Exemplo: Tamanho 14sp
+//
+//        // Definindo os rótulos para as legenda das cores do grafico
+//        barDataSet.stackLabels = arrayOf("Despesas", "Rendimentos")
+//
+//        val barData = BarData(barDataSet)
+//        grafico.data = barData
+//        grafico.invalidate() // Atualiza o gráfico
+//    }
 
 
     // função que cria as legendas das colunas

@@ -11,6 +11,7 @@ import com.example.debts.FormatarNome.FormatarNome
 import com.example.debts.ManipularData.ManipularData
 import com.example.debts.layout_Item_lista.OperacaoFinanceira
 import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
+import com.example.debts.models.MovintoDia
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -335,6 +336,92 @@ class BancoDados(private var context: Context) {
         return listaGastos.toList()
     }
 
+    //função que retorna todos os gastos do mes do usuario para usar no grafico
+    fun gastosDiariosMesGraf(mesGasto: String, IdUsuario: Int): List<MovintoDia> {
+        // Abre o banco de dados existente no caminho especificado
+        bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+        var listaGastos = mutableListOf<MovintoDia>()
+
+        try {
+            // Consulta para obter os dados do usuário com base no id
+            val gastos = bancoDados.rawQuery(
+                "SELECT dt_gasto, SUM(valor_gasto) AS total_gasto FROM Gastos WHERE id_user_gasto = ? AND mes = ? GROUP BY dt_gasto ORDER BY dt_gasto ASC",
+                arrayOf(IdUsuario.toString(), mesGasto)
+            )
+
+            // Processa todos os resultados da consulta
+            while (gastos.moveToNext()) {
+                val valorGasto = gastos.getString(gastos.getColumnIndexOrThrow("total_gasto"))
+                val diaGasto = gastos.getString(gastos.getColumnIndexOrThrow("dt_gasto"))
+                listaGastos.add(
+                    MovintoDia(
+                        diaGasto.split("-")[2].trim().toInt() - 1,
+                        valorGasto.toFloat()
+                    )
+                )
+            }
+
+            gastos.close()
+        } catch (e: Exception) {
+            // Mostra uma mensagem de erro ao usuário
+            CustomToast().showCustomToast(context, "Erro ao recuperar os gastos: ${e.message}")
+            // Loga o erro
+            Log.e("Erro Inserção", e.message ?: "Erro desconhecido")
+
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+
+        return listaGastos.toList()
+    }
+
+    //função que retorna todos os gastos do mes do usuario para usar no grafico
+    fun rendimentosDiariosMesGraf(mesRendimento: String, IdUsuario: Int): List<MovintoDia> {
+        // Abre o banco de dados existente no caminho especificado
+        bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+        var listaRendimentos = mutableListOf<MovintoDia>()
+
+        try {
+            // Consulta para obter os dados do usuário com base no id
+            val rendimentos = bancoDados.rawQuery(
+                "SELECT dt_rendimento, SUM(valor_rendimento) AS total_rendimento FROM Rendimentos WHERE id_user_rendimento = ? AND mes = ? GROUP BY dt_rendimento ORDER BY dt_rendimento ASC",
+                arrayOf(IdUsuario.toString(), mesRendimento)
+            )
+
+            // Processa todos os resultados da consulta
+            while (rendimentos.moveToNext()) {
+                val valorRendimento = rendimentos.getString(rendimentos.getColumnIndexOrThrow("total_rendimento"))
+                val diaRendimento = rendimentos.getString(rendimentos.getColumnIndexOrThrow("dt_rendimento"))
+                listaRendimentos.add(
+                    MovintoDia(
+                        diaRendimento.split("-")[2].trim().toInt() - 1,
+                        valorRendimento.toFloat()
+                    )
+                )
+            }
+
+            rendimentos.close()
+        } catch (e: Exception) {
+            // Mostra uma mensagem de erro ao usuário
+            CustomToast().showCustomToast(context, "Erro ao recuperar os gastos: ${e.message}")
+            // Loga o erro
+            Log.e("Erro Inserção", e.message ?: "Erro desconhecido")
+
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+
+        return listaRendimentos.toList()
+    }
+
     fun listaRendimentosMes(IdUsuario: Int): List<OperacaoFinanceira> {
 
         var listaRendimentosMes: MutableList<OperacaoFinanceira> = mutableListOf()
@@ -410,41 +497,41 @@ class BancoDados(private var context: Context) {
         return listaRendimentosMes.toList()
     }
 
-    fun rendimentosMes(IdUsuario: Int, mesRendimento: String): List<Float> {
-
-        var listaRendimentosMes: MutableList<Float> = mutableListOf()
-
-        try {
-            // Abre o banco de dados existente no caminho especificado
-            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
-
-            // Consulta para obter as metas do usuário
-            val regatarGastos: Cursor = bancoDados.rawQuery(" SELECT SUM(valor_rendimento) AS total_rendimento FROM Rendimentos WHERE id_user_rendimento = ? AND mes = ? GROUP BY dt_rendimento ORDER BY dt_rendimento ASC", arrayOf(IdUsuario.toString(), mesRendimento))
-
-            // Verifica se há resultados e processa todos
-            if (regatarGastos.moveToFirst()) {
-                do {
-                    val valorRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("total_rendimento"))
-
-                    // Adiciona o item à lista de itens
-                    listaRendimentosMes += valorRendimento.toFloat()
-                } while (regatarGastos.moveToNext()) // Continua para o próximo item
-            }
-
-            regatarGastos.close()
-
-        } catch (e: Exception) {
-            CustomToast().showCustomToast(context, "Erro recuper rendimentos: ${e.message}")
-            Log.e("Erro Consulta rendimentosMes:", e.message ?: "Erro desconhecido")
-        } finally {
-            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
-            if (::bancoDados.isInitialized) {
-                bancoDados.close()
-            }
-        }
-
-        return listaRendimentosMes.toList()
-    }
+//    fun rendimentosMes(IdUsuario: Int, mesRendimento: String): List<Float> {
+//
+//        var listaRendimentosMes: MutableList<Float> = mutableListOf()
+//
+//        try {
+//            // Abre o banco de dados existente no caminho especificado
+//            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+//
+//            // Consulta para obter as metas do usuário
+//            val regatarGastos: Cursor = bancoDados.rawQuery("SELECT SUM(valor_rendimento) AS total_rendimento FROM Rendimentos WHERE id_user_rendimento = ? AND mes = ? GROUP BY dt_rendimento ORDER BY dt_rendimento ASC", arrayOf(IdUsuario.toString(), mesRendimento))
+//
+//            // Verifica se há resultados e processa todos
+//            if (regatarGastos.moveToFirst()) {
+//                do {
+//                    val valorRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("total_rendimento"))
+//
+//                    // Adiciona o item à lista de itens
+//                    listaRendimentosMes += valorRendimento.toFloat()
+//                } while (regatarGastos.moveToNext()) // Continua para o próximo item
+//            }
+//
+//            regatarGastos.close()
+//
+//        } catch (e: Exception) {
+//            CustomToast().showCustomToast(context, "Erro recuper rendimentos: ${e.message}")
+//            Log.e("Erro Consulta rendimentosMes:", e.message ?: "Erro desconhecido")
+//        } finally {
+//            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+//            if (::bancoDados.isInitialized) {
+//                bancoDados.close()
+//            }
+//        }
+//
+//        return listaRendimentosMes.toList()
+//    }
 
     fun listaGastosMes(IdUsuario: Int): List<OperacaoFinanceira> {
 
@@ -613,7 +700,7 @@ class BancoDados(private var context: Context) {
             //executa a query
             bancoDados.execSQL(query)
 
-            CustomToast().showCustomToast(context, "Meta salva com sucesso!")
+            //CustomToast().showCustomToast(context, "Meta salva com sucesso!")
 
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro ao salvar meta: ${e.message}")
@@ -848,7 +935,9 @@ class BancoDados(private var context: Context) {
             val mes = dataRendimento.split("-")[1].trim().toInt()
             val ano = dataRendimento.split("-")[0].trim()
 
-            val dataFormatada = "$ano-$mes-$dia"
+            val mesFormatado = String.format("%02d", mes)
+
+            val dataFormatada = "$ano-$mesFormatado-$dia"
 
             val nomeMes = ManipularData().pegarNomeMes(mes)
 

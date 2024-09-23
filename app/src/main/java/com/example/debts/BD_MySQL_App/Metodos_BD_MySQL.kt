@@ -5,6 +5,7 @@ import android.util.Log
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosMetasFinanceiras_Usuario_BD_Debts
 import com.example.debts.FormatarNome.FormatarNome
+import com.example.debts.ManipularData.ManipularData
 import com.example.debts.layout_Item_lista.OperacaoFinanceira
 import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
 import com.google.gson.Gson
@@ -753,18 +754,20 @@ class Metodos_BD_MySQL {
 
             //formatando a data
             //faz o fatiamento da data
-            val dia = dataRendimento.substring(0, 2)
-            val mes = dataRendimento.substring(3, 5)
-            val ano = dataRendimento.substring(6, 10)
+            val dia = dataRendimento.split("/")[0].trim()
+            val mes = dataRendimento.split("/")[1].trim().toInt()
+            val ano = dataRendimento.split("/")[2].trim()
 
-            val mesBalanco = (dataRendimento.substring(3, 5)).toInt()
+            val nomeMes = ManipularData().pegarNomeMes(mes)
 
             // Obtém o nome do mês atual para exibição
-            val calendar = Calendar.getInstance()
-            calendar.set(Calendar.MONTH, mesBalanco)
-            val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+//            val calendar = Calendar.getInstance()
+//            calendar.set(Calendar.MONTH, mesBalanco)
+//            val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
 
-            val dataFormatada = "$ano-$mes-$dia"
+            val mesFormatado = String.format("%02d", mes)
+
+            val dataFormatada = "$ano-$mesFormatado-$dia"
 
             // Crie um Statement para executar a consulta
             val statement: Statement = con.createStatement()

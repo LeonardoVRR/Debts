@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
 
         //chamando a função para acessar o BD
         BancoDados(this).copyDatabase()
-        //BancoDados(this).acessarBancoDados()
+        BancoDados(this).limparBancoDados()
 
         //configurando o click do botão logar
 

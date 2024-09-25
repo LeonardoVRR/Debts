@@ -37,7 +37,7 @@ class BancoDados(private var context: Context) {
 
         // Verifica se o arquivo do banco de dados já existe no armazenamento interno
         // Se o arquivo não existir, chama o método para copiar o banco de dados da pasta assets para o armazenamento interno
-        if (File(dbPath).exists()) {
+        if (!File(dbPath).exists()) {
 
             // Abre o arquivo do banco de dados localizado na pasta assets
             val inputStream: InputStream = context.assets.open(dbName)
@@ -108,6 +108,40 @@ class BancoDados(private var context: Context) {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
             if (::bancoDados.isInitialized) {
                 //bancoDados.close()
+            }
+        }
+    }
+
+    fun limparBancoDados() {
+        try {
+
+            // Abre o banco de dados existente no caminho especificado
+            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+            val cursor = bancoDados.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null)
+
+            if (cursor.moveToFirst()) {
+                do {
+                    val tableName = cursor.getString(0)
+                    if (tableName != "android_metadata" && tableName != "sqlite_sequence") {
+                        bancoDados.execSQL("DELETE FROM $tableName")
+                    }
+                } while (cursor.moveToNext())
+            }
+            cursor.close()
+
+            // Liberar o espaço usado
+            bancoDados.execSQL("VACUUM")
+
+            //CustomToast().showCustomToast(context, "BD totalmente Limpo!")
+
+        } catch (e: Exception) {
+            CustomToast().showCustomToast(context, "Erro resetar o BD: ${e.message}")
+            Log.e("Erro resetar o BD:", e.message ?: "Erro desconhecido")
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
             }
         }
     }

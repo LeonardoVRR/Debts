@@ -107,7 +107,14 @@ class telaPerfilUsuario : AppCompatActivity() {
         //--------------------- config. Texto Relatoiro Resumo Mes -------------------------------//
         val somarItemsListaEntradas = somarValoresCampo(listaEntradas)
         val somarItemsListaGastos = somarValoresCampo(listaGastos)
-        val valorTotal = somarItemsListaEntradas - somarItemsListaGastos
+
+        var valorTotal = 0f
+
+        if (somarItemsListaEntradas > somarItemsListaGastos) {
+            valorTotal = somarItemsListaEntradas - somarItemsListaGastos
+        } else {
+            valorTotal = somarItemsListaGastos - somarItemsListaEntradas
+        }
 
         val txtValorOrçamento: TextView = findViewById(R.id.txtValor_Orcamento)
         val txtValorDespesasMes: TextView = findViewById(R.id.txt_valorDespesasMes)
@@ -115,7 +122,7 @@ class telaPerfilUsuario : AppCompatActivity() {
 
         txtValorOrçamento.text = "${formatToCurrency(somarItemsListaEntradas)}"
         txtValorDespesasMes.text = "${formatToCurrency(somarItemsListaGastos)}"
-        txtValorTotal.text = "${formatToCurrency(valorTotal)}"
+        txtValorTotal.text = "${formatToCurrency(valorTotal*-1)}"
 
         //-------------------------- config. grafico pizza ---------------------------------------//
 

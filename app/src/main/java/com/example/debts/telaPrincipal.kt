@@ -61,7 +61,7 @@ class telaPrincipal : AppCompatActivity() {
 
         //------------ config. salvar dados do usurio do MySQL p/ o SQLite -----------------------//
 
-        BancoDados(this).acessarBancoDados()
+        //BancoDados(this).acessarBancoDados()
 
         val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
 

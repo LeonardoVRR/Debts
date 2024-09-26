@@ -672,6 +672,8 @@ class Metodos_BD_MySQL {
                     Log.d("ATUALIZAÇÃO", "Nada atualizado")
                 }
 
+                metaAtualizada = "Meta MySQL atualiza"
+
                 atualizarMeta.close()
 
             } catch (e: SQLException) {

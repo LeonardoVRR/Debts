@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosFinanceiros_Usuario_BD_Debts
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.SomarValoresCampo.Somar
 import com.example.debts.layoutExpandivel.criarListaItems
 import com.example.debts.layoutExpandivel.removerListaItems
 import com.example.debts.layout_Item_lista.MyConstraintAdapter
@@ -449,9 +450,9 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
         //-------------------- config. somas dos gastos dos items de cada campo ------------------//
 
-        val somarItemsListaEntradas = somarValoresCampo(listaEntradas)
+        val somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
         //val somarItemsListaDespesas = somarValoresCampo(pegarDados(listaDespesas))
-        val somarItemsListaGastos = somarValoresCampo(listaGastos)
+        val somarItemsListaGastos = Somar().valoresCampo(listaGastos)
 
         val txt_valorEntradas: TextView = findViewById(R.id.txt_valorEntradas)
         //val txt_valorDespesas: TextView = findViewById(R.id.txt_valorDespesas)
@@ -697,23 +698,5 @@ class tela_RelatorioGastos : AppCompatActivity() {
         val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)
         startActivity(navegarTelaPrincipal)
         finish()
-    }
-
-    //função para somar o valor total dos gastos ou custos do campo
-    private fun somarValoresCampo(listaItems: List<OperacaoFinanceira> = emptyList()): Float {
-
-        // Mapeia cada item para o valor numérico após remover caracteres de formatação
-        val valorTotal = listaItems
-            .map {
-                it.valor
-                    .replace("R$", "")  // Remove símbolo de moeda
-                    .replace(".", "")   // Remove separador de milhares
-                    .replace(",", ".") // Substitui vírgula por ponto decimal
-                    .trim()
-                    .toFloat()
-            }
-            .sum()  // Soma todos os valores
-
-        return valorTotal
     }
 }

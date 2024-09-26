@@ -28,6 +28,8 @@ import java.util.concurrent.Executors
 
 class tela_DebtMap : AppCompatActivity() {
 
+    var resultado = ""
+
     //manipulando data
     var calendar = Calendar.getInstance() // Cria uma instância de Calendar
     var diaAtual = calendar.get(Calendar.DAY_OF_MONTH) //pegando o dia do mes atual
@@ -187,8 +189,6 @@ class tela_DebtMap : AppCompatActivity() {
 
         CustomToast().showCustomToast(this@tela_DebtMap, "Atualizando Metas...")
 
-        var resultado = ""
-
         val IDusuario = DadosUsuario_BD_Debts(this@tela_DebtMap).pegarIdUsuario()
 
         val executorService: ExecutorService = Executors.newSingleThreadExecutor()
@@ -197,16 +197,10 @@ class tela_DebtMap : AppCompatActivity() {
 
                 val listaAtualizarMetas = CompararListas_MySQL_SQLite(this@tela_DebtMap).atualizarMetas(DadosUsuario_BD_Debts.listas_MySQL.metasUsuario, BancoDados(this@tela_DebtMap).listarMetas(IDusuario))
 
-                listaAtualizarMetas.forEach { meta ->
-                    val idMeta = meta.idMeta.toInt()
-
-                    // Converte os estados da lista de metas
-                    val listaMetaEstados: MutableList<Boolean> = meta.listaMetas_Item.map { it.isChecked }.toMutableList()
-
-                    val progressoMeta = meta.progressoMeta
-
-                    resultado = Metodos_BD_MySQL().atualizarMeta(IDusuario, idMeta, listaMetaEstados, progressoMeta)
-
+                if (listaAtualizarMetas) {
+                    resultado = "Metas MySQL atualizadas"
+                } else {
+                    resultado = "Nenhuma meta atualizada"
                 }
 
             } catch (e: Exception) {

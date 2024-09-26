@@ -2,6 +2,7 @@ package com.example.debts.ConsultaBD_MySQL
 
 import android.content.Context
 import android.util.Log
+import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.layout_Item_lista.OperacaoFinanceira
@@ -111,24 +112,28 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
             listaMetasNovas.clear()
         }
 
-        else {
-            val listaRemoverMetas = listaMeta_SQLite.filterNot { sqliteMeta ->
-                listaMeta_MySQL.any { mysqlMeta ->
-                    mysqlMeta.idMeta == sqliteMeta.idMeta
-                }
-            }
-
-            listaRemoverMetas.forEach { item -> BancoDados(context).excluirMeta(IDusuario, item.idMeta) }
-
-            resultado = "Metas Removidas do SQLite"
-        }
+//        else {
+//            val listaRemoverMetas = listaMeta_SQLite.filterNot { sqliteMeta ->
+//                listaMeta_MySQL.any { mysqlMeta ->
+//                    mysqlMeta.idMeta == sqliteMeta.idMeta
+//                }
+//            }
+//
+//            listaRemoverMetas.forEach { item -> BancoDados(context).excluirMeta(IDusuario, item.idMeta) }
+//
+//            resultado = "Metas Removidas do SQLite"
+//        }
 
         Log.d("RESULTADO METAS", resultado)
     }
 
-    fun atualizarMetas(listaMeta_MySQL: List<dados_listaMeta_DebtMap>, listaMeta_SQLite: List<dados_listaMeta_DebtMap>): List<dados_listaMeta_DebtMap> {
+    fun atualizarMetas(listaMeta_MySQL: List<dados_listaMeta_DebtMap>, listaMeta_SQLite: List<dados_listaMeta_DebtMap>): Boolean {
 
         val listaAtualizarMetas: MutableList<dados_listaMeta_DebtMap> = mutableListOf()
+
+        val IDusuario = DadosUsuario_BD_Debts(context).pegarIdUsuario()
+
+        var metaAtualizada = false
 
         for (meta in listaMeta_SQLite) {
             // Comparar o progresso da meta e a lista de itens
@@ -137,9 +142,35 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
             }
         }
 
+        if (listaAtualizarMetas.isNotEmpty()) {
+
+            listaAtualizarMetas.forEach { meta ->
+                val idMeta = meta.idMeta.toInt()
+
+                // Converte os estados da lista de metas
+                val listaMetaEstados: MutableList<Boolean> = meta.listaMetas_Item.map { it.isChecked }.toMutableList()
+
+                val progressoMeta = meta.progressoMeta
+
+                Metodos_BD_MySQL().atualizarMeta(
+                    IDusuario,
+                    idMeta,
+                    listaMetaEstados,
+                    progressoMeta
+                )
+
+            }
+
+            metaAtualizada = true
+        } else {
+            metaAtualizada = false
+        }
+
         Log.d("RESULTADO METAS ATUALIZADAS", "$listaAtualizarMetas")
 
-        return listaAtualizarMetas.toList()
+        listaAtualizarMetas.clear()
+
+        return metaAtualizada
     }
 
     fun adicionarNovosGastos(listaGasto_MySQL: List<OperacaoFinanceira>, listaGasto_SQLite: List<OperacaoFinanceira>) {

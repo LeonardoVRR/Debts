@@ -8,8 +8,11 @@ import android.os.Looper
 import android.util.Log
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
+import com.example.debts.Conexao_BD.DadosFinanceiros_Usuario_BD_Debts
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.Config_Notificacoes.NotificationHelper
 import com.example.debts.CustomToast
+import com.example.debts.SomarValoresCampo.Somar
 import org.threeten.bp.LocalDateTime
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -121,6 +124,24 @@ class BroadcastReceiver_ConsultarLista : BroadcastReceiver() {
                         if (gastosNovos) {
                             CompararListas_MySQL_SQLite(context).adicionarNovosGastos(DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario, BancoDados(context).listaGastosMes(IDusuario))
                             CustomToast().showCustomToast(context, "Novos gastos disponíveis!")
+
+                            //-------------------------------------- config. Notificação -------------------------------------------------//
+
+                            val listaEntradas = DadosFinanceiros_Usuario_BD_Debts(context, IDusuario).pegarListaEntradasMes()
+                            val listaGastos = DadosFinanceiros_Usuario_BD_Debts(context, IDusuario).pegarListaGastosMes()
+
+                            val somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
+                            val somarItemsListaGastos = Somar().valoresCampo(listaGastos)
+
+                            if (somarItemsListaGastos > somarItemsListaEntradas) {
+                                val notificacaoGasto = NotificationHelper(context)
+
+                                notificacaoGasto.criarCanal()
+                                notificacaoGasto.enviarNotificacao("Cuidado", "Você está gastando muito!")
+                            }
+
+                            //-------------------------------------- fim config. Notificação ---------------------------------------------//
+
                         } else {
                             CustomToast().showCustomToast(context, "Nenhuma novo gasto.")
                         }

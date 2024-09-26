@@ -14,11 +14,11 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.Config_Notificacoes.NotificationHelper
 import com.example.debts.ConsultaBD_MySQL.AgendarConsulta_MySQL
 import com.example.debts.ConsultaBD_MySQL.CompararListas_MySQL_SQLite
 import com.example.debts.FormatarNome.FormatarNome
 import com.example.debts.MsgCarregando.MensagemCarregando
-import com.example.debts.layout_Item_lista.OperacaoFinanceira
 import org.threeten.bp.LocalDateTime
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -149,7 +149,12 @@ class telaPrincipal : AppCompatActivity() {
 
         val btn_RelatorioGastos: Button = findViewById(R.id.btn_RelatorioGastos)
 
-        btn_RelatorioGastos.setOnClickListener { teleRelatorioGastos() }
+        //btn_RelatorioGastos.setOnClickListener { teleRelatorioGastos() }
+
+        btn_RelatorioGastos.setOnClickListener {
+            NotificationHelper(this).criarCanal()
+            NotificationHelper(this).enviarNotificacao("Cuidado", "Você está gastando muito!")
+        }
 
     }
 
@@ -162,8 +167,8 @@ class telaPrincipal : AppCompatActivity() {
 
     //configurando o evento de click no botão do DebtMap
     fun telaDebtMap() {
-        val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
-        val listaMeta_SQLite = BancoDados(this).listarMetas(IDusuario)
+//        val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+//        val listaMeta_SQLite = BancoDados(this).listarMetas(IDusuario)
 
         val navegartelaDebtMap = Intent(this, tela_DebtMap::class.java)
         startActivity(navegartelaDebtMap)

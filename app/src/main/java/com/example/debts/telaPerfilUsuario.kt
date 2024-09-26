@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.debts.Conexao_BD.DadosFinanceiros_Usuario_BD_Debts
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.FormatarNome.FormatarNome
+import com.example.debts.SomarValoresCampo.Somar
 import com.example.debts.layout_Item_lista.ItemSpacingDecoration
 import com.example.debts.layout_Item_lista.MyConstraintAdapter
 import com.example.debts.layout_Item_lista.OperacaoFinanceira
@@ -105,8 +106,8 @@ class telaPerfilUsuario : AppCompatActivity() {
 //        }
 
         //--------------------- config. Texto Relatoiro Resumo Mes -------------------------------//
-        val somarItemsListaEntradas = somarValoresCampo(listaEntradas)
-        val somarItemsListaGastos = somarValoresCampo(listaGastos)
+        val somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
+        val somarItemsListaGastos = Somar().valoresCampo(listaGastos)
 
         var valorTotal = 0f
 
@@ -206,24 +207,6 @@ class telaPerfilUsuario : AppCompatActivity() {
         }
 
         return items
-    }
-
-    //função para somar o valor total dos gastos ou custos do campo
-    private fun somarValoresCampo(listaItems: List<OperacaoFinanceira> = emptyList()): Float {
-
-        // Mapeia cada item para o valor numérico após remover caracteres de formatação
-        val valorTotal = listaItems
-            .map {
-                it.valor
-                    .replace("R$", "")  // Remove símbolo de moeda
-                    .replace(".", "")   // Remove separador de milhares
-                    .replace(",", ".") // Substitui vírgula por ponto decimal
-                    .trim()
-                    .toFloat()
-            }
-            .sum()  // Soma todos os valores
-
-        return valorTotal
     }
 
     //função para ir a tela de rendimentos

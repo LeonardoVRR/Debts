@@ -43,62 +43,89 @@ android {
 }
 
 dependencies {
-
+    // Biblioteca padrão do Kotlin
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
-    //implementation("com.microsoft.sqlserver:mssql-jdbc:11.2.2.jre11") // driver SQL Server
-    implementation (libs.kotlinx.coroutines.core)
-    //implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-    //implementation(files("C:\\Users\\Leo\\AndroidStudioProjects\\debts\\app\\libs\\mssql-jdbc-12.8.0.jre11.jar"))
-    //implementation(files("C:\\Users\\Leo\\AndroidStudioProjects\\debts\\app\\libs\\jtds-1.3.1.jar"))
 
-    //JDBC
+    // Biblioteca de corrotinas do Kotlin (para programação assíncrona)
+    implementation(libs.kotlinx.coroutines.core)
+
+    // Driver JDBC para SQL Server (comentar caso não esteja sendo usado)
+    // implementation("com.microsoft.sqlserver:mssql-jdbc:11.2.2.jre11")
+
+    // Driver jTDS para acesso a bancos de dados (incluindo SQL Server)
     implementation(libs.jtds)
 
+    // Biblioteca para gráficos e visualizações de dados
     implementation(libs.charts)
-    implementation (libs.mpandroidchart)
+
+    // Biblioteca para gráficos específicos do Android
+    implementation(libs.mpandroidchart)
+
+    // Extensões do Kotlin para Android (facilitam o uso da API Android)
     implementation("androidx.core:core-ktx:1.13.1")
+
+    // Biblioteca de compatibilidade para versões anteriores do Android
     implementation("androidx.appcompat:appcompat:1.7.0")
+
+    // Material Design Components versão 190 (para UI)
     implementation(libs.material.v190)
+
+    // Biblioteca para layout com ConstraintLayout
     implementation(libs.androidx.constraintlayout)
 
-    implementation ("androidx.recyclerview:recyclerview:1.3.2")
+    // Biblioteca para RecyclerView (lista de itens que podem ser rolados)
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
 
-    //Circular ProgressBar
+    // Biblioteca para ProgressBar circular (indica progresso em tarefas)
     implementation("com.mikhaellopez:circularprogressbar:3.1.0")
 
-    //maskara (formatação de texto de input) - https://github.com/santalu/maskara
+    // Biblioteca Maskara para formatação de texto de entrada
     implementation("com.github.santalu:maskara:1.0.0")
 
-    //JSON
+    // Biblioteca Gson para manipulação de JSON
     implementation("com.google.code.gson:gson:2.10.1")
 
-    //GSON (JSON)
-    implementation("com.google.code.gson:gson:2.10.1")
+    // Biblioteca ThreeTenABP para manipulação de datas e horários
+    implementation("com.jakewharton.threetenabp:threetenabp:1.4.7")
 
-    //ThreeTenABP
-    implementation ("com.jakewharton.threetenabp:threetenabp:1.4.7")
+    // Retrofit para realizar requisições HTTP
+    implementation(libs.retrofit)
+    // Conversor de JSON para objetos com Retrofit
+    implementation(libs.converter.gson)
 
+    // Extensões do LiveData do AndroidX
     implementation(libs.androidx.lifecycle.livedata.ktx)
+    // Extensões do ViewModel do AndroidX
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    // Extensões para Fragment do AndroidX
     implementation(libs.androidx.fragment.ktx)
+    // Biblioteca legacy de suporte para compatibilidade
     implementation(libs.androidx.legacy.support.v4)
 
-    //Room
+    // Biblioteca OkHttp para fazer requisições HTTP
+    implementation(libs.okhttp)
+
+    // Room: biblioteca para persistência de dados
     val room_version = "2.6.1"
+    // Dependência de runtime do Room
     implementation("androidx.room:room-runtime:$room_version")
+    // Extensões do Room para Kotlin
     implementation("androidx.room:room-ktx:$room_version")
+    // Compilador do Room (usado apenas no tempo de compilação)
     kapt("androidx.room:room-compiler:$room_version")
 
-    //Inject
-    implementation ("com.google.dagger:dagger:2.52")
-    annotationProcessor ("com.google.dagger:dagger-compiler:2.52")
+    // Dagger: biblioteca para injeção de dependência
+    implementation("com.google.dagger:dagger:2.52")
+    // Processador de anotação do Dagger (para gerar o código necessário)
+    annotationProcessor("com.google.dagger:dagger-compiler:2.52")
 
-    //Koin
-    implementation ("io.insert-koin:koin-android:3.2.0")
+    // Koin: biblioteca para injeção de dependência no Android
+    implementation("io.insert-koin:koin-android:3.2.0")
 
-    // https://mvnrepository.com/artifact/mysql/mysql-connector-java
+    // Conector MySQL (para interações com banco de dados MySQL)
     implementation("mysql:mysql-connector-java:5.1.49")
 
+    // Mais dependências do AndroidX (apenas se necessário)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -106,7 +133,10 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.runtime.android)
     implementation(libs.androidx.ui.android)
+
+    // Dependência para testes unitários
     testImplementation(libs.junit)
+    // Dependência para testes instrumentais
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

@@ -3,7 +3,6 @@ package com.example.debts
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -14,6 +13,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.API_Flask.Flask_Consultar_MySQL
+import com.example.debts.API_Flask.LoginRequest
 import com.example.debts.BD_MySQL_App.ConnectionClass
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
@@ -21,6 +22,7 @@ import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.ConsultaBD_MySQL.AgendarConsulta_MySQL
 import com.example.debts.MsgCarregando.MensagemCarregando
 import com.example.debts.visibilidadeSenha.AlterarVisibilidade
+import com.google.gson.Gson
 import java.sql.Connection
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -35,8 +37,6 @@ class MainActivity : AppCompatActivity() {
     var con: Connection? = null
 
     lateinit var str: String
-
-    lateinit var msg_login: String
 
     //configurando o crud no BD
 //    private var userDB = DadosUsuario_BD_Debts().pegarNomeUsuario()
@@ -129,6 +129,8 @@ class MainActivity : AppCompatActivity() {
 
     fun validarLogin_MySQL(nome: String, senha: String) {
 
+        var msg_login: String = ""
+
         val msgCarregando = MensagemCarregando(this)
 
         msgCarregando.mostrarMensagem()
@@ -138,6 +140,10 @@ class MainActivity : AppCompatActivity() {
             try {
 
                 val login = Metodos_BD_MySQL().validarLogin(nome, senha)
+
+                val loginRequest = LoginRequest(nome, senha)
+                val jsonRequest = Gson().toJson(loginRequest)
+                //val login = Flask_Consultar_MySQL(this).validarLogin(nome, senha)
 
                 //verifica se a conta existe para fazer o login
                 if (login){

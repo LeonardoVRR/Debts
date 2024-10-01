@@ -149,12 +149,13 @@ class telaPrincipal : AppCompatActivity() {
 
         val btn_RelatorioGastos: Button = findViewById(R.id.btn_RelatorioGastos)
 
-        //btn_RelatorioGastos.setOnClickListener { teleRelatorioGastos() }
+        btn_RelatorioGastos.setOnClickListener { teleRelatorioGastos() }
 
-        btn_RelatorioGastos.setOnClickListener {
-            NotificationHelper(this).criarCanal()
-            NotificationHelper(this).enviarNotificacao("Cuidado", "Você está gastando muito!")
-        }
+        //testar notificação
+//        btn_RelatorioGastos.setOnClickListener {
+//            NotificationHelper(this).criarCanal()
+//            NotificationHelper(this).enviarNotificacao("Cuidado", "Você está gastando muito!")
+//        }
 
     }
 

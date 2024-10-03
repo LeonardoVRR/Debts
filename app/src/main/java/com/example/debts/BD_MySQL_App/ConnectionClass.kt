@@ -1,13 +1,13 @@
 package com.example.debts.BD_MySQL_App
 
 import android.util.Log
+import com.example.debts.API_Flask.IP_Server_Flask
 import java.sql.Connection
 import java.sql.DriverManager
-import java.util.Objects
 
 class ConnectionClass {
     private val dbName: String = "debts"
-    private val ip: String = "192.168.0.22"
+    private val ip: String = IP_Server_Flask.ip_number
     private val port: String = "3306"
     private val user: String = "debts_app"
     private val password: String = "debts2024"

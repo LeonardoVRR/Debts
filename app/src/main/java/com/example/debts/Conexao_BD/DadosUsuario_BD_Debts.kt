@@ -1,7 +1,8 @@
 package com.example.debts.Conexao_BD
 
 import android.content.Context
-import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
+import com.example.debts.API_Flask.Flask_Consultar_MySQL
+//import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.layout_Item_lista.OperacaoFinanceira
 import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
@@ -24,7 +25,7 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
     var usuarioLogado: String = recuperarUsuarioLogado()
 
-    private val dadosUsuario_MySQL = Metodos_BD_MySQL()
+    //private val dadosUsuario_MySQL = Metodos_BD_MySQL()
 
     private val dadosUsuario = BancoDados(context)
     private var nomeUsuario: String? = null
@@ -109,7 +110,7 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
         //val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
 
-        val dados = Metodos_BD_MySQL.dadosUsuario.listaDados
+        val dados = Flask_Consultar_MySQL.dadosUsuario.listaDados
 
         if (dados.isNotEmpty()) {
             idUsuario = dados[4].toInt()
@@ -123,7 +124,7 @@ class DadosUsuario_BD_Debts(private val context: Context) {
     fun pegarNomeUsuario(): String {
         //val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
 
-        val dados = Metodos_BD_MySQL.dadosUsuario.listaDados
+        val dados = Flask_Consultar_MySQL.dadosUsuario.listaDados
 
         if (dados.isNotEmpty()) {
             nomeUsuario = dados[0]
@@ -136,7 +137,7 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
         //val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
 
-        val dados = Metodos_BD_MySQL.dadosUsuario.listaDados
+        val dados = Flask_Consultar_MySQL.dadosUsuario.listaDados
 
         if (dados.isNotEmpty()) {
             senhaUsuario = dados[3]
@@ -149,7 +150,7 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
         //val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
 
-        val dados = Metodos_BD_MySQL.dadosUsuario.listaDados
+        val dados = Flask_Consultar_MySQL.dadosUsuario.listaDados
 
         if (dados.isNotEmpty()) {
             cpfUsuario = dados[2]
@@ -162,7 +163,7 @@ class DadosUsuario_BD_Debts(private val context: Context) {
 
         //val dados = dadosUsuario.salvarDadosUsuario(usuarioLogado)
 
-        val dados = Metodos_BD_MySQL.dadosUsuario.listaDados
+        val dados = Flask_Consultar_MySQL.dadosUsuario.listaDados
 
         if (dados.isNotEmpty()) {
             emailUsuario = dados[1]

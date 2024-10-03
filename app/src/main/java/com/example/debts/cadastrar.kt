@@ -11,6 +11,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.API_Flask.Flask_Consultar_MySQL
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
@@ -70,8 +71,9 @@ class cadastrar : AppCompatActivity() {
 //        }
 
         if (termosUso()) {
+            var contaCriada: Boolean = false
 
-            var contaExistente: String = ""
+            var contaExiste_msg: String = ""
 
             val msgCarregando = MensagemCarregando(this)
 
@@ -81,19 +83,20 @@ class cadastrar : AppCompatActivity() {
             executorService.execute {
                 try {
 
-                    val conta = Metodos_BD_MySQL().cadastrarConta(nome, email, cpf, senha)
+                    contaCriada = Flask_Consultar_MySQL(this).cadastrarConta(nome, email, cpf, senha)
+
+                    //contaCriada = Metodos_BD_MySQL().cadastrarConta(nome, email, cpf, senha)
 
                     //verifica se a conta existe para fazer o login
-                    if (conta){
-                        contaExistente = "Essa conta já existe"
-                    }
-
-                    else {
-
-                        contaExistente = "Conta Criada"
+                    if (contaCriada){
+                        contaExiste_msg = "Conta Criada"
 
                         //salva o nome do usuario logado
                         DadosUsuario_BD_Debts(this).salvarUsuarioLogado(nome)
+                    }
+
+                    else {
+                        contaExiste_msg = "Essa conta já existe"
                     }
 
                 } catch (e: Exception) {
@@ -103,11 +106,17 @@ class cadastrar : AppCompatActivity() {
                     // Atualizar a UI no thread principal
                     runOnUiThread {
                         msgCarregando.ocultarMensagem()
-                        CustomToast().showCustomToast(this, contaExistente)
+                        CustomToast().showCustomToast(this, contaExiste_msg)
 
-                        val navegarTelaLogin = Intent(this, MainActivity::class.java)
-                        startActivity(navegarTelaLogin)
-                        finish()
+                        if (contaCriada){
+                            val navegarTelaLogin = Intent(this, MainActivity::class.java)
+                            startActivity(navegarTelaLogin)
+                            finish()
+                        } else {
+                            val navegarTelaCriarConta = Intent(this, criarConta::class.java)
+                            startActivity(navegarTelaCriarConta)
+                            finish()
+                        }
                     }
 
                     executorService.shutdown()

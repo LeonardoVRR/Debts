@@ -139,11 +139,9 @@ class MainActivity : AppCompatActivity() {
         executorService.execute {
             try {
 
-                val login = Metodos_BD_MySQL().validarLogin(nome, senha)
+                //val login = Metodos_BD_MySQL().validarLogin(nome, senha)
 
-                val loginRequest = LoginRequest(nome, senha)
-                val jsonRequest = Gson().toJson(loginRequest)
-                //val login = Flask_Consultar_MySQL(this).validarLogin(nome, senha)
+                val login = Flask_Consultar_MySQL(this).validarLogin(nome, senha)
 
                 //verifica se a conta existe para fazer o login
                 if (login){
@@ -161,7 +159,9 @@ class MainActivity : AppCompatActivity() {
 
                     val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
 
-                    val questionarioPreenchido = Metodos_BD_MySQL().verificarQuestionario(IDusuario)
+                    //val questionarioPreenchido = Metodos_BD_MySQL().verificarQuestionario(IDusuario)
+
+                    val questionarioPreenchido = Flask_Consultar_MySQL(this).verificarQuestionario(IDusuario)
 
                     if (questionarioPreenchido) {
                         val navegarTelaPrincipal = Intent(this, telaPrincipal::class.java)

@@ -11,6 +11,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.API_Flask.Flask_Consultar_MySQL
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
@@ -61,9 +62,14 @@ class telaPrincipal : AppCompatActivity() {
 
         //------------ config. salvar dados do usurio do MySQL p/ o SQLite -----------------------//
 
-        //BancoDados(this).acessarBancoDados()
-
         val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+
+//        //testando função
+//        val btn_notif: Button = findViewById(R.id.btn_notificaoTelaPrincipal)
+//
+//        btn_notif.setOnClickListener { Flask_Consultar_MySQL(this).listaGastos(IDusuario) }
+
+        //BancoDados(this).acessarBancoDados()
 
         var resultado = ""
 
@@ -79,15 +85,15 @@ class telaPrincipal : AppCompatActivity() {
                 try {
 
                     //salva o tempo da ultima consulta a lista metas do BD MySQL
-                    val salvarConsultaListaMetas_MySQL: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoListas_MySQL(IDusuario, "metas_financeiras")
+                    val salvarConsultaListaMetas_MySQL: LocalDateTime = Flask_Consultar_MySQL(this).getUltimaAtualizacaoListas_MySQL(IDusuario, "metas_financeiras")
                     DadosUsuario_BD_Debts(this).setLastUpdateTimestamp_ListaMySQL(salvarConsultaListaMetas_MySQL, "Metas")
 
                     //salva o tempo da ultima consulta a lista gastos do BD MySQL
-                    val salvarConsultaListaGasto_MySQL: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoListas_MySQL(IDusuario, "gastos")
+                    val salvarConsultaListaGasto_MySQL: LocalDateTime = Flask_Consultar_MySQL(this).getUltimaAtualizacaoListas_MySQL(IDusuario, "gastos")
                     DadosUsuario_BD_Debts(this).setLastUpdateTimestamp_ListaMySQL(salvarConsultaListaGasto_MySQL, "Gastos")
 
                     //salva o tempo da ultima consulta a lista rendimentos do BD MySQL
-                    val salvarConsultaListaRendimento_MySQL: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoListas_MySQL(IDusuario, "rendimentos")
+                    val salvarConsultaListaRendimento_MySQL: LocalDateTime = Flask_Consultar_MySQL(this).getUltimaAtualizacaoListas_MySQL(IDusuario, "rendimentos")
                     DadosUsuario_BD_Debts(this).setLastUpdateTimestamp_ListaMySQL(salvarConsultaListaRendimento_MySQL, "Rendimentos")
 
 

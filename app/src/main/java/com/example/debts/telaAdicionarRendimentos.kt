@@ -14,6 +14,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.API_Flask.Flask_Consultar_MySQL
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
@@ -145,7 +146,7 @@ class telaAdicionarRendimentos : AppCompatActivity() {
                     executorService.execute {
                         try {
 
-                            resultado = Metodos_BD_MySQL().salvarRendimento(tipoMovimentacao, dataRendimento, valorRendimentoFormatado, idUsuario)
+                            resultado = Flask_Consultar_MySQL(this).salvarRendimento(tipoMovimentacao, dataRendimento, valorRendimentoFormatado, idUsuario)
 
                         } catch (e: Exception) {
                             e.printStackTrace()

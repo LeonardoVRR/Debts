@@ -2,6 +2,7 @@ package com.example.debts.ConsultaBD_MySQL
 
 import android.content.Context
 import android.util.Log
+import com.example.debts.API_Flask.Flask_Consultar_MySQL
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts

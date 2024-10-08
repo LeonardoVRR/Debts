@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.example.debts.API_Flask.Flask_Consultar_MySQL
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosFinanceiros_Usuario_BD_Debts
@@ -38,7 +39,7 @@ class BroadcastReceiver_ConsultarLista : BroadcastReceiver() {
             executorService.execute {
                 try {
                     // Fazendo uma nova consulta ao banco de dados
-                    val novaConsultaListaMetas: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoListas_MySQL(IDusuario, "metas_financeiras")
+                    val novaConsultaListaMetas: LocalDateTime = Flask_Consultar_MySQL(context).getUltimaAtualizacaoListas_MySQL(IDusuario, "metas_financeiras")
 
                     // Verifica se há novas metas no BD MySQL
                     if (novaConsultaListaMetas > ultimaConsultaListaMetas) {
@@ -93,7 +94,7 @@ class BroadcastReceiver_ConsultarLista : BroadcastReceiver() {
             executorService.execute {
                 try {
                     // Fazendo uma nova consulta ao banco de dados
-                    val novaConsultaListaGastos: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoListas_MySQL(IDusuario, "Gastos")
+                    val novaConsultaListaGastos: LocalDateTime = Flask_Consultar_MySQL(context).getUltimaAtualizacaoListas_MySQL(IDusuario, "Gastos")
 
                     // Verifica se há novas metas no BD MySQL
                     if (novaConsultaListaGastos > ultimaConsultaListaGasto) {
@@ -166,7 +167,7 @@ class BroadcastReceiver_ConsultarLista : BroadcastReceiver() {
             executorService.execute {
                 try {
                     // Fazendo uma nova consulta ao banco de dados
-                    val novaConsultaListaRendimentos: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoListas_MySQL(IDusuario, "Rendimentos")
+                    val novaConsultaListaRendimentos: LocalDateTime = Flask_Consultar_MySQL(context).getUltimaAtualizacaoListas_MySQL(IDusuario, "Rendimentos")
 
                     // Verifica se há novas metas no BD MySQL
                     if (novaConsultaListaRendimentos > ultimaConsultaListaRendimentos) {

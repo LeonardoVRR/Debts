@@ -18,6 +18,7 @@ import com.example.debts.MsgCarregando.MensagemCarregando
 import com.example.debts.R
 import android.os.Handler
 import android.os.Looper
+import com.example.debts.API_Flask.Flask_Consultar_MySQL
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -56,7 +57,7 @@ class avisoDeletarMeta(private val context: Context, private val lista_Meta_ID:S
             executorService.execute {
                 try {
                     // Fazendo uma nova consulta ao banco de dados
-                    val metaDeletada: Boolean = Metodos_BD_MySQL().deletarMeta(IDusuario, lista_Meta_ID.toInt())
+                    val metaDeletada: Boolean = Flask_Consultar_MySQL(context).deletarMeta(IDusuario, lista_Meta_ID.toInt())
 
                     // Verifica se a meta foi excluida no BD MySQL
                     if (metaDeletada) {

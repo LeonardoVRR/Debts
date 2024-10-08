@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.CustomToast
+import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
 import com.example.debts.models.LoginResponse
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
@@ -14,6 +15,9 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.MediaType
 import org.json.JSONObject
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.ZonedDateTime
+import org.threeten.bp.format.DateTimeFormatter
 
 class Flask_Consultar_MySQL(private val context: Context) {
 
@@ -22,44 +26,56 @@ class Flask_Consultar_MySQL(private val context: Context) {
     }
 
     @Throws(IOException::class) // Indica que esta função pode lançar uma IOException
-    private fun consultarMySQL(json: String, rota: String, metodo_requisicao: String): String { // Função que realiza o login, recebendo um JSON como String
+    private fun consultarMySQL(json: String, rota: String, metodo_requisicao: String): String { // Função que realiza a consulta ao MySQL, recebendo um JSON como String
 
         // Cria um cliente HTTP usando a biblioteca OkHttp
         val client = OkHttpClient()
 
-        // Define a URL para a requisição de login, utilizando o IP do servidor Flask
-        val url = "http://${IP_Server_Flask.ip_number}:5000/$rota"
+        // Define a URL para a requisição, utilizando o IP do servidor Flask
+        val url = "http://${IP_Server_Flask.ip_number}:36366/$rota"
 
         val builder: Request.Builder = Request.Builder() // Cria um construtor de requisição
         builder.url(url) // Define a URL da requisição
 
-        // Define o tipo de mídia como JSON e cria o corpo da requisição
+        // Define o tipo de mídia como JSON
         val mediaType: MediaType? = MediaType.parse("application/json; charset=utf-8")
 
         // Cria o corpo da requisição com o JSON
         val body: RequestBody = RequestBody.create(mediaType, json)
 
-        if (metodo_requisicao == "POST"){
-            // Define o método da requisição como POST e adiciona o corpo
-            builder.post(body)
-        }
-
+        // Configura a requisição de acordo com o método
         when(metodo_requisicao) {
             "GET" -> builder.get()
             "POST" -> builder.post(body)
             "PUT" -> builder.put(body)
             "DELETE" -> builder.delete(body)
-            else -> throw IllegalArgumentException("Operação inválida")
+            else -> throw IllegalArgumentException("Operação inválida: $metodo_requisicao")
         }
 
         // Constrói a requisição a partir do builder
         val request: Request = builder.build()
 
-        // Executa a requisição e obtém a resposta
-        val response: okhttp3.Response = client.newCall(request).execute()
+        try {
+            // Executa a requisição e obtém a resposta
+            val response: okhttp3.Response = client.newCall(request).execute()
 
-        // Verifica se a resposta não é nula e retorna o corpo da resposta como string
-        return response.body()?.string() ?: throw IOException("Corpo da resposta nulo") // Lança uma exceção se o corpo da resposta for nulo
+            // Log da resposta para depuração
+            Log.d("CONSULTAR_MYSQL - $rota", "Response code: ${response.code()}")
+
+            // Verifica se a resposta é bem-sucedida e retorna o corpo da resposta como string
+            if (response.isSuccessful) {
+                return response.body()?.string() ?: throw IOException("Corpo da resposta nulo")
+            } else {
+                Log.e("ERRO CONSULTAR_MYSQL - $rota", "Erro na requisição: ${response.message()}")
+                throw IOException("Erro na requisição - $rota: ${response.message()} - Código: ${response.code()}")
+            }
+        } catch (e: IOException) {
+            Log.e("ERRO CONSULTAR_MYSQL - $rota", "Erro de IO: ${e.message}")
+            throw e // Re-lança a exceção para tratamento posterior
+        } catch (e: Exception) {
+            Log.e("ERRO CONSULTAR_MYSQL - $rota", "Erro inesperado: ${e.message}")
+            throw IOException("Erro inesperado - $rota: ${e.message}") // Lança uma exceção genérica para qualquer outro erro
+        }
     }
 
 //--------------------------------------------------------------------------------------------------------------------------------//
@@ -349,4 +365,238 @@ class Flask_Consultar_MySQL(private val context: Context) {
             Log.e("ERRO deletarUsuario", "Erro inesperado: ${e.message}")
         }
     }
+
+//--------------------------------------------------------------------------------------------------------------------------------//
+
+    fun salvarRendimento(tipoMovimento: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int): String {
+        var resultado = ""
+
+        val jsonRequest = """
+        {
+            "tipo_movimento": "$tipoMovimento",
+            "data_rendimento": "$dataRendimento",
+            "valor_rendimento": "$valorRendimento",
+            "id": "$IDusuario"
+        }
+    """.trimIndent()
+
+        try {
+            val jsonResponse = consultarMySQL(jsonRequest, "salvar_rendimento", "POST")
+            Log.d("RESPOSTA BRUTA salvarRendimento", jsonResponse)  // Log da resposta bruta
+
+            // Cria um objeto JSONObject a partir da string JSON
+            val jsonObject = JSONObject(jsonResponse)
+
+            // Extraindo o valor da chave "message"
+            val salvarRendimentoResponse = jsonObject.getString("message")
+
+            // Verificando a mensagem da resposta
+            if (salvarRendimentoResponse == "Rendimento salvo com sucesso.") {
+                resultado = "Rendimento salvo com sucesso."
+            } else {
+                resultado = "Rendimento não salvo. Verifique o ID do usuário."
+            }
+
+            Log.d("RESPOSTA FLASK", "$salvarRendimentoResponse - $resultado")
+
+        } catch (e: IOException) {
+            Log.e("ERRO salvarRendimento", "IOException: ${e.message}")
+        } catch (e: JsonSyntaxException) {
+            Log.e("ERRO salvarRendimento", "Erro ao analisar o JSON: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("ERRO salvarRendimento", "Erro inesperado: ${e.message}")
+        }
+
+        return resultado
+    }
+
+//--------------------------------------------------------------------------------------------------------------------------------//
+
+    fun salvarQuestionario(nvl_conhecimeto_financ: Int, tps_investimentos: List<String>, tx_uso_ecommerce: Int, tx_uso_app_transporte: Int, tx_uso_app_entrega: Int, IDusuario: Int): String {
+        var resultado = ""
+
+        var metodo_requisicao = ""
+
+        val jsonRequest = """
+        {
+            "nvl_conhecimeto_financ": "$nvl_conhecimeto_financ",
+            "tps_investimentos": "$tps_investimentos",
+            "tx_uso_ecommerce": "$tx_uso_ecommerce",
+            "tx_uso_app_transporte":"$tx_uso_app_transporte",
+            "tx_uso_app_entrega":"$tx_uso_app_entrega",
+            "id": "$IDusuario"
+        }
+    """.trimIndent()
+
+        try {
+
+            if (verificarQuestionario(IDusuario)) {
+                metodo_requisicao = "PUT"
+            } else {
+                metodo_requisicao = "POST"
+            }
+
+            val jsonResponse = consultarMySQL(jsonRequest, "salvar_questionario", metodo_requisicao)
+            Log.d("RESPOSTA BRUTA salvarQuestionario", jsonResponse)  // Log da resposta bruta
+
+            // Cria um objeto JSONObject a partir da string JSON
+            val jsonObject = JSONObject(jsonResponse)
+
+            // Extraindo o valor da chave "message"
+            val salvarQuestionarioResponse = jsonObject.getString("message")
+
+            // Verificando a mensagem da resposta
+            if (salvarQuestionarioResponse == "Questionario atualizado com sucesso") {
+                resultado = "Questionario atualizado com sucesso."
+            } else {
+                resultado = "Questionario salvo com sucesso."
+            }
+
+            Log.d("RESPOSTA FLASK", "$salvarQuestionarioResponse - $resultado")
+
+        } catch (e: IOException) {
+            Log.e("ERRO salvarQuestionario", "IOException: ${e.message}")
+        } catch (e: JsonSyntaxException) {
+            Log.e("ERRO salvarQuestionario", "Erro ao analisar o JSON: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("ERRO salvarQuestionario", "Erro inesperado: ${e.message}")
+        }
+
+        return resultado
+    }
+
+//--------------------------------------------------------------------------------------------------------------------------------//
+
+    fun atualizarMeta(IDusuario: Int, IdMeta: Int, metas_concluidas: List<Boolean>, progresso_meta: Float): String {
+        var resultado = ""
+
+        val metas_concluidasJSON = Gson().toJson(metas_concluidas)
+
+        val jsonRequest = """
+        {
+            "id_meta": $IdMeta,
+            "metas_concluidas": $metas_concluidasJSON,
+            "progresso_meta": $progresso_meta,
+            "id": $IDusuario
+        }
+    """.trimIndent()
+
+        Log.d("lista JSON", jsonRequest)
+
+        try {
+
+            val jsonResponse = consultarMySQL(jsonRequest, "salvar_questionario", "PUT")
+            Log.d("RESPOSTA BRUTA atualizarMeta", jsonResponse)  // Log da resposta bruta
+
+            // Cria um objeto JSONObject a partir da string JSON
+            val jsonObject = JSONObject(jsonResponse)
+
+            // Extraindo o valor da chave "message"
+            val atualizarMetaResponse = jsonObject.getString("message")
+
+            // Verificando a mensagem da resposta
+            if (atualizarMetaResponse == "Meta MySQL atualizada") {
+                resultado = "Metas atualizadas com sucesso."
+            } else {
+                resultado = "Não existem metas para atualizar."
+            }
+
+            Log.d("RESPOSTA FLASK", "$atualizarMetaResponse - $resultado")
+
+        } catch (e: IOException) {
+            Log.e("ERRO atualizarMeta", "IOException: ${e.message}")
+        } catch (e: JsonSyntaxException) {
+            Log.e("ERRO atualizarMeta", "Erro ao analisar o JSON: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("ERRO atualizarMeta", "Erro inesperado: ${e.message}")
+        }
+
+        return resultado
+    }
+
+//--------------------------------------------------------------------------------------------------------------------------------//
+
+    fun deletarMeta(IDusuario: Int, IdMeta: Int): Boolean {
+        var metaExcluida: Boolean = false
+
+        val jsonRequest = """
+        {
+            "id": $IDusuario,
+            "id_meta": $IdMeta
+        }
+    """.trimIndent()
+
+        try {
+            val jsonResponse = consultarMySQL(jsonRequest, "deletar_meta", "DELETE")
+            Log.d("RESPOSTA BRUTA deletarMeta", jsonResponse)  // Log da resposta bruta
+
+            // Cria um objeto JSONObject a partir da string JSON
+            val jsonObject = JSONObject(jsonResponse)
+
+            // Extraindo o valor da chave "message"
+            val deletarMetaResponse = jsonObject.getString("message")
+
+            // Verificando a mensagem da resposta
+            if (deletarMetaResponse == "Meta excluida com sucesso.") {
+                metaExcluida = true
+            } else {
+                metaExcluida = false
+            }
+
+            Log.d("RESPOSTA FLASK", "$deletarMetaResponse - $metaExcluida")
+
+        } catch (e: IOException) {
+            Log.e("ERRO deletarMeta", "IOException: ${e.message}")
+        } catch (e: JsonSyntaxException) {
+            Log.e("ERRO deletarMeta", "Erro ao analisar o JSON: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("ERRO deletarMeta", "Erro inesperado: ${e.message}")
+        }
+
+        return metaExcluida
+    }
+
+//--------------------------------------------------------------------------------------------------------------------------------//
+
+    fun getUltimaAtualizacaoListas_MySQL(IDusuario: Int, consultarLista: String): LocalDateTime {
+        var timesTamp: LocalDateTime = LocalDateTime.MIN
+
+        val jsonRequest = """
+        {
+            "id": $IDusuario,
+            "nome_tabela": "$consultarLista"
+        }
+    """.trimIndent()
+
+        try {
+            val jsonResponse = consultarMySQL(jsonRequest, "verificar_atualizacao_tabela", "POST")
+            Log.d("RESPOSTA BRUTA UltimaAtualizacaoListas", jsonResponse)  // Log da resposta bruta
+
+            // Cria um objeto JSONObject a partir da string JSON
+            val jsonObject = JSONObject(jsonResponse)
+
+            // Extraindo o valor da chave "message"
+            val ultimaAtualizacaoListasResponse = jsonObject.getString("message")
+
+            // Verificando a mensagem da resposta
+            if (ultimaAtualizacaoListasResponse != "Busca nao realizada. Verifique se o ID do usuario esta correto.") {
+                // Convertendo a string da data para LocalDateTime
+                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                timesTamp = LocalDateTime.parse(ultimaAtualizacaoListasResponse, formatter)
+            }
+
+            Log.d("RESPOSTA FLASK", "$ultimaAtualizacaoListasResponse - $timesTamp")
+
+        } catch (e: IOException) {
+            Log.e("ERRO UltimaAtualizacaoListas", "IOException: ${e.message}")
+        } catch (e: JsonSyntaxException) {
+            Log.e("ERRO UltimaAtualizacaoListas", "Erro ao analisar o JSON: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("ERRO UltimaAtualizacaoListas", "Erro inesperado: ${e.message}")
+        }
+
+        return timesTamp
+    }
+
+
 }

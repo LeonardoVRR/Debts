@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.debts.API_Flask.Flask_Consultar_MySQL
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
@@ -291,7 +292,7 @@ class tela_Consulta_IA : AppCompatActivity() {
 
             try {
 
-                salvar = Metodos_BD_MySQL().salvarQuestionario(valorSeekBarFinal, listaOpcoesSelecionadas, valor_painel_opc1.toInt(), valor_painel_opc2.toInt(), valor_painel_opc3.toInt(), idUsuario)
+                salvar = Flask_Consultar_MySQL(this).salvarQuestionario(valorSeekBarFinal, listaOpcoesSelecionadas, valor_painel_opc1.toInt(), valor_painel_opc2.toInt(), valor_painel_opc3.toInt(), idUsuario)
 
             } catch (e: Exception) {
                 e.printStackTrace()

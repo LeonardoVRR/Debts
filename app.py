@@ -285,7 +285,7 @@ def salvarQuestionario(nvl_conhecimeto_financ, tps_investimentos, tx_uso_ecommer
 
             # Verificar se algum dado foi atualizado
             if cursor.rowcount > 0:
-                return True, "Questionário atualizado com sucesso!"
+                return True, "Questionario atualizado com sucesso"
 
         else:
             # Se o questionário não existir, ele sera salvo no BD
@@ -297,7 +297,7 @@ def salvarQuestionario(nvl_conhecimeto_financ, tps_investimentos, tx_uso_ecommer
             cursor.execute(insert, (nvl_conhecimeto_financ, tps_investimentosJSON, tx_uso_ecommerce, tx_uso_app_transporte, tx_uso_app_entrega, IDusuario))
             conn.commit()  # Confirmar a transação
 
-            return True, "Questionário salvo com sucesso!"
+            return True, "Questionario salvo com sucesso"
 
     except mysql.connector.Error as err:
         print(f"Erro na consulta salvar questionario: {err}")
@@ -649,9 +649,9 @@ def deletar_meta(IDusuario, IdMeta):
 
             if cursor.rowcount > 0:  # Verificar se a meta foi excluída
                 conn.commit()  # Confirmar a transação
-                return True, "Meta excluída com sucesso."
+                return True, "Meta excluida com sucesso."
             else:
-                return False, "Meta não encontrada ou já excluída."
+                return False, "Meta nao encontrada ou ja excluida."
 
     except Error as e:
         print(f"Erro ao deletar meta: {e}")
@@ -714,6 +714,12 @@ def listar_metas(IDusuario):
                     nome_meta = row['nome_meta']
                     data_meta = row['dt_meta']
 
+                    # Formatar a data no formato yyyy-MM-dd
+                    if isinstance(data_meta, datetime):
+                        data_meta_formatada = data_meta.strftime("%Y-%m-%d")
+                    else:
+                        data_meta_formatada = str(data_meta)
+
                     # Obter as listas de metas e metas concluídas em formato JSON e converter para listas Python
                     lista_metas_json = row['lista_metas']
                     lista_metas_concluidas_json = row['metas_concluidas']
@@ -729,7 +735,7 @@ def listar_metas(IDusuario):
                     item_debt_map = {
                         "id_meta": id_meta,
                         "nome_meta": nome_formatado,
-                        "data_meta": data_meta,
+                        "data_meta": data_meta_formatada,
                         "lista_metas": lista_metas,
                         "metas_concluidas": lista_metas_concluidas,
                         "progresso_meta": progresso_meta
@@ -755,7 +761,7 @@ def listar_metas(IDusuario):
         if conn:
             conn.close()
 
-@app.route('/listar_metas', methods=['GET'])
+@app.route('/listar_metas', methods=['POST'])
 def listar_metas_route():
     # Converte o corpo da requisição JSON em um dicionário Python
     data = request.json
@@ -879,7 +885,7 @@ def lista_rendimentos(IDusuario):
                     id_rendimento = row[0]
                     nome_rendimento = row[1]
                     data_rendimento = row[2]
-                    valor_rendimento = row[3]
+                    valor_rendimento = float(row[4])
 
                     # Formatar o nome do rendimento
                     nome_rendimento_formatado = nome_rendimento.capitalize()
@@ -893,7 +899,8 @@ def lista_rendimentos(IDusuario):
                     nomeMes = pegar_nome_mes(mes)  # Pega o nome completo do mês (ex: Janeiro)
 
                     # Formatar a data para "dia de mês de ano"
-                    data_formatada = f"{dia} de {nomeMes} de {ano}"
+                    #data_formatada = f"{dia} de {nomeMes} de {ano}"
+                    data_formatada = data_rendimento.strftime('%Y-%m-%d')
 
                     # Formatar o valor como moeda brasileira
                     try:
@@ -906,7 +913,7 @@ def lista_rendimentos(IDusuario):
                         'id': id_rendimento,
                         'descricao': nome_rendimento_formatado,
                         'tipo_movimento': "",
-                        'valor': valor_rendimento_formatado,
+                        'valor': valor_rendimento,
                         'data': data_formatada
                     }
 
@@ -946,7 +953,7 @@ def listar_rendimentos():
     listaRendimentos, mensagem = lista_rendimentos(IDusuario)
 
     if listaRendimentos:
-        return jsonify({"message": mensagem}), 200  # Código 200 para sucesso
+        return jsonify(mensagem), 200  # Código 200 para sucesso
     else:
         return jsonify({"message": mensagem}), 404  # Código 404 para erro
 
@@ -978,7 +985,7 @@ def lista_gastos(IDusuario):
                     id_gasto = row[0]
                     nome_gasto = row[1]
                     tipo_movimento = row[2]
-                    valor_gasto = row[3]
+                    valor_gasto = float(row[3])
                     data_gasto = row[4]
 
                     # Formatar o nome do gasto (você pode criar uma função similar ao FormatarNome se necessário)
@@ -996,7 +1003,8 @@ def lista_gastos(IDusuario):
                     nomeMes = pegar_nome_mes(mes)  # Pega o nome completo do mês (ex: Janeiro)
 
                     # Formatar a data para "dia de mês de ano"
-                    data_formatada = f"{dia} de {nomeMes} de {ano}"
+                    #data_formatada = f"{ano}-{mes}-{dia}"
+                    data_formatada = data_gasto.strftime('%Y-%m-%d')
 
                     # Formatar o valor como moeda brasileira
                     try:
@@ -1009,7 +1017,7 @@ def lista_gastos(IDusuario):
                         'id': id_gasto,
                         'descricao': nome_gasto_formatado,
                         'tipo_movimento': forma_pagamento_formatada,
-                        'valor': valor_gasto_formatado,
+                        'valor': valor_gasto,
                         'data': data_formatada
                     }
 
@@ -1048,7 +1056,7 @@ def listar_gastos():
     listaGastos, mensagem = lista_gastos(IDusuario)
 
     if listaGastos:
-        return jsonify({"message": mensagem}), 200  # Código 200 para sucesso
+        return jsonify(mensagem), 200  # Código 200 para sucesso
     else:
         return jsonify({"message": mensagem}), 404  # Código 404 para erro
 
@@ -1086,12 +1094,12 @@ def get_ultima_atualizacao_listas_mysql(IDusuario, consultarLista):
 
             if result:
                 data_criacao = result[0]  # Pega o valor da coluna `data_criacao`
-                timesTamp = datetime.strptime(str(data_criacao), formato)
+                timesTamp = data_criacao.strftime("%Y-%m-%d %H:%M:%S")
 
                 return True, timesTamp
 
             else:
-                return False, "Busca não realizada. Verifique se o ID do usuário está correto."
+                return False, "Busca nao realizada. Verifique se o ID do usuario esta correto."
 
             cursor.close()
 
@@ -1125,4 +1133,4 @@ def pegarUltimaAtualizacaoTabela():
         return jsonify({"message": mensagem}), 404  # Código 404 para erro
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    app.run(debug=True, port=36366, host='0.0.0.0')

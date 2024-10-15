@@ -98,14 +98,17 @@ class telaPrincipal : AppCompatActivity() {
 
 
                     //salvando a lista de metas
-                    DadosUsuario_BD_Debts.listas_MySQL.metasUsuario = Metodos_BD_MySQL().listarMetas(IDusuario, this)
+                    DadosUsuario_BD_Debts.listas_MySQL.metasUsuario = Flask_Consultar_MySQL(this).listarMetas(IDusuario)
                     //salvando a lista de gastos
-                    DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario = Metodos_BD_MySQL().listaGastos(IDusuario)
+                    DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario = Flask_Consultar_MySQL(this).listOpFinanceiras(IDusuario, "gastos")
                     //salvando a lista de rendimentos
-                    DadosUsuario_BD_Debts.listas_MySQL.rendimentosUsuario = Metodos_BD_MySQL().listaRendimentos(IDusuario)
+                    DadosUsuario_BD_Debts.listas_MySQL.rendimentosUsuario = Flask_Consultar_MySQL(this).listOpFinanceiras(IDusuario, "rendimentos")
 
                     Log.d("Lista Rendimentos SQLite", "${BancoDados(this).listaRendimentosMes(IDusuario)}")
                     Log.d("Lista Rendimentos MySQL", "${DadosUsuario_BD_Debts.listas_MySQL.rendimentosUsuario}")
+
+                    Log.d("Lista Gastos SQLite", "${BancoDados(this).listaGastosMes(IDusuario)}")
+                    Log.d("Lista Gastos MySQL", "${DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario}")
 
 
                     resultado = "Dados carregados com sucesso!"

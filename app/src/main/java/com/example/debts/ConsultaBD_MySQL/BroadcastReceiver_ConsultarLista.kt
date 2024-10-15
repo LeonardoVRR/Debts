@@ -44,7 +44,7 @@ class BroadcastReceiver_ConsultarLista : BroadcastReceiver() {
                     // Verifica se há novas metas no BD MySQL
                     if (novaConsultaListaMetas > ultimaConsultaListaMetas) {
                         // Atualiza a lista de metas
-                        DadosUsuario_BD_Debts.listas_MySQL.metasUsuario = Metodos_BD_MySQL().listarMetas(IDusuario, context)
+                        DadosUsuario_BD_Debts.listas_MySQL.metasUsuario = Flask_Consultar_MySQL(context).listarMetas(IDusuario)
 
                         // Atualiza o timestamp da última consulta
                         DadosUsuario_BD_Debts(context).setLastUpdateTimestamp_ListaMySQL(novaConsultaListaMetas, "Metas")
@@ -99,7 +99,7 @@ class BroadcastReceiver_ConsultarLista : BroadcastReceiver() {
                     // Verifica se há novas metas no BD MySQL
                     if (novaConsultaListaGastos > ultimaConsultaListaGasto) {
                         // Atualiza a lista de metas
-                        DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario = Metodos_BD_MySQL().listaGastos(IDusuario)
+                        DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario = Flask_Consultar_MySQL(context).listOpFinanceiras(IDusuario, "gastos")
 
                         // Atualiza o timestamp da última consulta
                         DadosUsuario_BD_Debts(context).setLastUpdateTimestamp_ListaMySQL(novaConsultaListaGastos, "Gastos")
@@ -172,7 +172,7 @@ class BroadcastReceiver_ConsultarLista : BroadcastReceiver() {
                     // Verifica se há novas metas no BD MySQL
                     if (novaConsultaListaRendimentos > ultimaConsultaListaRendimentos) {
                         // Atualiza a lista de metas
-                        DadosUsuario_BD_Debts.listas_MySQL.rendimentosUsuario = Metodos_BD_MySQL().listaRendimentos(IDusuario)
+                        DadosUsuario_BD_Debts.listas_MySQL.rendimentosUsuario = Flask_Consultar_MySQL(context).listOpFinanceiras(IDusuario, "rendimentos")
 
                         // Atualiza o timestamp da última consulta
                         DadosUsuario_BD_Debts(context).setLastUpdateTimestamp_ListaMySQL(novaConsultaListaRendimentos, "Rendimentos")

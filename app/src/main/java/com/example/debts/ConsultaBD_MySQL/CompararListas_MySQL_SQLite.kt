@@ -153,7 +153,7 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
 
                 val progressoMeta = meta.progressoMeta
 
-                Metodos_BD_MySQL().atualizarMeta(
+                Flask_Consultar_MySQL(context).atualizarMeta(
                     IDusuario,
                     idMeta,
                     listaMetaEstados,

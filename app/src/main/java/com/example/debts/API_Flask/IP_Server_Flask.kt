@@ -1,5 +1,5 @@
 package com.example.debts.API_Flask
 
 object IP_Server_Flask {
-    val ip_number = "192.168.0.14"
+    val ip_number = "192.168.0.23"
 }

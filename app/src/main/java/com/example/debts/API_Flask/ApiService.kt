@@ -17,3 +17,20 @@ data class LoginRequest(
     val nome: String,
     val senha: String
 )
+
+data class Meta(
+    val data_meta: String,
+    val id_meta: Int,
+    val lista_metas: List<String>,
+    val metas_concluidas: List<Boolean>,
+    val nome_meta: String,
+    val progresso_meta: Float
+)
+
+data class OpFinanc (
+    val id: Int,
+    val descricao: String,
+    val tipo_movimento: String,
+    val valor: Float,
+    val data: String
+)

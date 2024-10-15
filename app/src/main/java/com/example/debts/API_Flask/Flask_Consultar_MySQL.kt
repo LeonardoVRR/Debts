@@ -3,11 +3,15 @@ package com.example.debts.API_Flask
 import android.content.Context
 import android.util.Log
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
+import com.example.debts.Conexao_BD.DadosMetasFinanceiras_Usuario_BD_Debts
 import com.example.debts.CustomToast
+import com.example.debts.FormatarNome.FormatarNome
+import com.example.debts.layout_Item_lista.OperacaoFinanceira
 import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
 import com.example.debts.models.LoginResponse
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
+import com.google.gson.reflect.TypeToken
 import java.io.IOException
 import kotlin.jvm.Throws
 import okhttp3.OkHttpClient
@@ -18,6 +22,8 @@ import org.json.JSONObject
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
+import java.text.NumberFormat
+import java.util.Locale
 
 class Flask_Consultar_MySQL(private val context: Context) {
 
@@ -485,7 +491,7 @@ class Flask_Consultar_MySQL(private val context: Context) {
 
         try {
 
-            val jsonResponse = consultarMySQL(jsonRequest, "salvar_questionario", "PUT")
+            val jsonResponse = consultarMySQL(jsonRequest, "atualizar_meta", "PUT")
             Log.d("RESPOSTA BRUTA atualizarMeta", jsonResponse)  // Log da resposta bruta
 
             // Cria um objeto JSONObject a partir da string JSON
@@ -554,6 +560,130 @@ class Flask_Consultar_MySQL(private val context: Context) {
         }
 
         return metaExcluida
+    }
+
+//--------------------------------------------------------------------------------------------------------------------------------//
+
+    fun listarMetas(IDusuario: Int): List<dados_listaMeta_DebtMap> {
+        val listasItemsMetas = mutableListOf<dados_listaMeta_DebtMap>()
+
+        val jsonRequest = """
+        {
+            "id": $IDusuario
+        }
+    """.trimIndent()
+
+        Log.d("lista Metas", jsonRequest)
+
+        try {
+
+            val jsonResponse = consultarMySQL(jsonRequest, "listar_metas", "POST")
+            Log.d("RESPOSTA BRUTA listarMetas", jsonResponse)  // Log da resposta bruta
+
+            val json = object : TypeToken<List<Meta>>() {}.type
+            val metaList: List<Meta> = Gson().fromJson(jsonResponse, json)
+
+            //Log.d("RESPOSTA BRUTA listarMetas", "${metaList.size}")  // Log da resposta bruta
+
+            metaList.forEach { meta ->
+                val idMeta: Int = meta.id_meta
+                val nomeMeta: String = meta.nome_meta
+                val dataMeta: String = meta.data_meta
+                val listaMetas = meta.lista_metas
+                val listaMetasConcluidas = meta.metas_concluidas
+
+                val progressoMeta: Float = meta.progresso_meta
+
+                //formatando o nome da meta
+                val nomeFormatado = FormatarNome().formatar(nomeMeta)
+
+                // Converte a lista recuperada
+                val listaConvertida = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas, listaMetasConcluidas)
+
+                // Cria o item DebtMap
+                val itemDebtMap = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap(idMeta.toString(), nomeFormatado, progressoMeta, dataMeta, listaConvertida)
+
+                // Adiciona o item à lista de itens
+                listasItemsMetas += itemDebtMap
+            }
+
+        } catch (e: IOException) {
+            Log.e("ERRO listarMetas", "IOException: ${e.message}")
+        } catch (e: JsonSyntaxException) {
+            Log.e("ERRO listarMetas", "Erro ao analisar o JSON: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("ERRO listarMetas", "Erro inesperado: ${e.message}")
+        }
+
+        return listasItemsMetas.toList()
+    }
+
+//--------------------------------------------------------------------------------------------------------------------------------//
+
+    fun listOpFinanceiras(IDusuario: Int, tipo_Opfinanc: String): List<OperacaoFinanceira> {
+        val listaOpFinanc = mutableListOf<OperacaoFinanceira>()
+
+        var rota = when (tipo_Opfinanc) {
+            "rendimentos" -> "listar_rendimentos"
+            "gastos" -> "listar_gastos"
+            else -> "operacao_invalida"
+        }
+
+        val jsonRequest = """
+        {
+            "id": $IDusuario
+        }
+    """.trimIndent()
+
+        Log.d("lista listaOpFinanc", jsonRequest)
+
+        try {
+
+            val jsonResponse = consultarMySQL(jsonRequest, rota, "POST")
+            Log.d("RESPOSTA BRUTA listOpFinanceiras", jsonResponse)  // Log da resposta bruta
+
+            val json = object : TypeToken<List<OpFinanc>>() {}.type
+            val OpFinancList: List<OpFinanc> = Gson().fromJson(jsonResponse, json)
+
+            Log.d("RESPOSTA BRUTA listOpFinanceiras", "${OpFinancList.size}")  // Log da resposta bruta
+
+            OpFinancList.forEach { item ->
+                val id: Int = item.id
+                val descricao: String = item.descricao
+                val tipoMovimento: String = item.tipo_movimento
+                val valor = item.valor
+                val data = item.data
+
+                //formatando o nome do gasto
+                val nomeGastoFormatado = FormatarNome().formatar(descricao)
+
+                //formatando o a forma de pagamento
+                val forma_pagamento_formatada = FormatarNome().formatar(tipoMovimento)
+
+                // formatando o valor da Operação Financeira
+                val formatacaoReal = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+
+                val valorOpFinanc_Formatado = (formatacaoReal.format(valor)).toString()
+
+                val itemOpFinanc = OperacaoFinanceira(id, descricao, tipoMovimento, valorOpFinanc_Formatado, data)
+
+                listaOpFinanc += itemOpFinanc
+
+            }
+
+        } catch (e: IOException) {
+            Log.e("ERRO listOpFinanceiras", "IOException: ${e.message}")
+        } catch (e: JsonSyntaxException) {
+            Log.e("ERRO listOpFinanceiras", "Erro ao analisar o JSON: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("ERRO listOpFinanceiras", "Erro inesperado: ${e.message}")
+        }
+
+        listaOpFinanc.forEach { item ->
+            Log.d("listOpFinanceiras", "${item}")
+        }
+
+        return listaOpFinanc.toList()
     }
 
 //--------------------------------------------------------------------------------------------------------------------------------//

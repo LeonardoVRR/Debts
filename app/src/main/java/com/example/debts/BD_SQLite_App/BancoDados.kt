@@ -828,7 +828,7 @@ class BancoDados(private var context: Context) {
             regatarMetas.close()
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro recuper lista metas: ${e.message}")
-            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+            Log.e("Erro Consulta Listar Metas:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
             if (::bancoDados.isInitialized) {
@@ -863,7 +863,7 @@ class BancoDados(private var context: Context) {
 
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro Consulta Meta Concluida: ${e.message}")
-            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+            Log.e("Erro Consulta Metas Concluidas:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
             if (::bancoDados.isInitialized) {
@@ -897,7 +897,7 @@ class BancoDados(private var context: Context) {
 
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro Consulta Prog. Meta: ${e.message}")
-            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+            Log.e("Erro Consulta Progesso Meta:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
             if (::bancoDados.isInitialized) {
@@ -931,7 +931,7 @@ class BancoDados(private var context: Context) {
 
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")
-            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+            Log.e("Erro Consulta Estado Meta:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
             if (::bancoDados.isInitialized) {
@@ -1041,7 +1041,7 @@ class BancoDados(private var context: Context) {
 
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro Consulta Gasto: ${e.message}")
-            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+            Log.e("Erro Consulta Salvar Gasto:", e.message ?: "Erro desconhecido")
 
             gastoSalvo = false
         } finally {
@@ -1127,7 +1127,7 @@ class BancoDados(private var context: Context) {
 
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")
-            Log.e("Erro Consulta:", e.message ?: "Erro desconhecido")
+            Log.e("Erro Consulta Questionario:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
             if (::bancoDados.isInitialized) {

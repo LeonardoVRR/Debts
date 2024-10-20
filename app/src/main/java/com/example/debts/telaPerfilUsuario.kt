@@ -111,19 +111,21 @@ class telaPerfilUsuario : AppCompatActivity() {
 
         var valorTotal = 0f
 
-        if (somarItemsListaEntradas > somarItemsListaGastos) {
-            valorTotal = somarItemsListaEntradas - somarItemsListaGastos
-        } else {
-            valorTotal = somarItemsListaGastos - somarItemsListaEntradas
-        }
-
         val txtValorOrçamento: TextView = findViewById(R.id.txtValor_Orcamento)
         val txtValorDespesasMes: TextView = findViewById(R.id.txt_valorDespesasMes)
         val txtValorTotal: TextView = findViewById(R.id.txtValorTotal)
 
         txtValorOrçamento.text = "${formatToCurrency(somarItemsListaEntradas)}"
         txtValorDespesasMes.text = "${formatToCurrency(somarItemsListaGastos)}"
-        txtValorTotal.text = "${formatToCurrency(valorTotal*-1)}"
+
+        if (somarItemsListaEntradas > somarItemsListaGastos) {
+            valorTotal = somarItemsListaEntradas - somarItemsListaGastos
+            txtValorTotal.text = "${formatToCurrency(valorTotal)}"
+        } else {
+            valorTotal = somarItemsListaGastos - somarItemsListaEntradas
+            txtValorTotal.text = "${formatToCurrency(valorTotal*-1)}"
+        }
+
 
         //-------------------------- config. grafico pizza ---------------------------------------//
 

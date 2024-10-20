@@ -45,6 +45,7 @@
             android:backgroundTint="#00FFFFFF"
             android:text="Button"
             android:textColor="#00FFFFFF"
+            android:visibility="gone"
             app:icon="@drawable/notifications"
             app:iconGravity="textEnd"
             app:iconSize="35dp"

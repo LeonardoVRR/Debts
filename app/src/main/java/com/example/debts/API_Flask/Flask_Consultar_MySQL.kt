@@ -374,47 +374,123 @@ class Flask_Consultar_MySQL(private val context: Context) {
 
 //--------------------------------------------------------------------------------------------------------------------------------//
 
-    fun salvarRendimento(tipoMovimento: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int): String {
+    fun salvarBalanco(tipoMovimento: String, data: String, valor: Float, IDusuario: Int, tp_OpFinanc: String, nomeBalanco:String = ""): String {
         var resultado = ""
 
-        val jsonRequest = """
-        {
-            "tipo_movimento": "$tipoMovimento",
-            "data_rendimento": "$dataRendimento",
-            "valor_rendimento": "$valorRendimento",
-            "id": "$IDusuario"
+        var jsonRequest = ""
+
+        var rota = when (tp_OpFinanc) {
+            "rendimento" -> "salvar_rendimento"
+            "gasto" -> "salvar_gasto"
+            else -> "operacao_invalida"
         }
-    """.trimIndent()
+
+        if (tp_OpFinanc == "rendimento"){
+            jsonRequest = """
+                {
+                    "tipo_movimento": "$tipoMovimento",
+                    "data_rendimento": "$data",
+                    "valor_rendimento": "$valor",
+                    "id": "$IDusuario"
+                }
+            """.trimIndent()
+        }
+
+        else {
+            jsonRequest = """
+            {
+                    "descricao_gasto": "$nomeBalanco",
+                    "tipo_movimento":"$tipoMovimento",
+                    "data_gasto":"$data",
+                    "valor_gasto": $valor,
+                    "id": $IDusuario
+            }
+        """.trimIndent()
+        }
 
         try {
-            val jsonResponse = consultarMySQL(jsonRequest, "salvar_rendimento", "POST")
-            Log.d("RESPOSTA BRUTA salvarRendimento", jsonResponse)  // Log da resposta bruta
+            val jsonResponse = consultarMySQL(jsonRequest, rota, "POST")
+            Log.d("RESPOSTA BRUTA salvarBalanço", jsonResponse)  // Log da resposta bruta
 
             // Cria um objeto JSONObject a partir da string JSON
             val jsonObject = JSONObject(jsonResponse)
 
             // Extraindo o valor da chave "message"
-            val salvarRendimentoResponse = jsonObject.getString("message")
+            val salvarBalancoResponse = jsonObject.getString("message")
 
             // Verificando a mensagem da resposta
-            if (salvarRendimentoResponse == "Rendimento salvo com sucesso.") {
-                resultado = "Rendimento salvo com sucesso."
-            } else {
-                resultado = "Rendimento não salvo. Verifique o ID do usuário."
+            if (tp_OpFinanc == "rendimento"){
+                if (salvarBalancoResponse == "Rendimento salvo com sucesso.") {
+                    resultado = "Rendimento salvo com sucesso."
+                } else {
+                    resultado = "Rendimento não salvo. Verifique o ID do usuário."
+                }
             }
 
-            Log.d("RESPOSTA FLASK", "$salvarRendimentoResponse - $resultado")
+            else {
+                if (salvarBalancoResponse == "Gasto salvo com sucesso.") {
+                    resultado = "Gasto salvo com sucesso."
+                } else {
+                    resultado = "Gasto não salvo. Verifique o ID do usuário."
+                }
+            }
+
+            Log.d("RESPOSTA FLASK", "$salvarBalancoResponse - $resultado")
 
         } catch (e: IOException) {
-            Log.e("ERRO salvarRendimento", "IOException: ${e.message}")
+            Log.e("ERRO salvarBalanço", "IOException: ${e.message}")
         } catch (e: JsonSyntaxException) {
-            Log.e("ERRO salvarRendimento", "Erro ao analisar o JSON: ${e.message}")
+            Log.e("ERRO salvarBalanço", "Erro ao analisar o JSON: ${e.message}")
         } catch (e: Exception) {
-            Log.e("ERRO salvarRendimento", "Erro inesperado: ${e.message}")
+            Log.e("ERRO salvarBalanço", "Erro inesperado: ${e.message}")
         }
 
         return resultado
     }
+
+//--------------------------------------------------------------------------------------------------------------------------------//
+
+//    fun salvarRendimento(tipoMovimento: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int): String {
+//        var resultado = ""
+//
+//        val jsonRequest = """
+//        {
+//            "tipo_movimento": "$tipoMovimento",
+//            "data_rendimento": "$dataRendimento",
+//            "valor_rendimento": "$valorRendimento",
+//            "id": "$IDusuario"
+//        }
+//    """.trimIndent()
+//
+//        try {
+//            val jsonResponse = consultarMySQL(jsonRequest, "salvar_rendimento", "POST")
+//            Log.d("RESPOSTA BRUTA salvarRendimento", jsonResponse)  // Log da resposta bruta
+//
+//            // Cria um objeto JSONObject a partir da string JSON
+//            val jsonObject = JSONObject(jsonResponse)
+//
+//            // Extraindo o valor da chave "message"
+//            val salvarRendimentoResponse = jsonObject.getString("message")
+//
+//            // Verificando a mensagem da resposta
+//            if (salvarRendimentoResponse == "Rendimento salvo com sucesso.") {
+//                resultado = "Rendimento salvo com sucesso."
+//            } else {
+//                resultado = "Rendimento não salvo. Verifique o ID do usuário."
+//            }
+//
+//            Log.d("RESPOSTA FLASK", "$salvarRendimentoResponse - $resultado")
+//
+//        } catch (e: IOException) {
+//            Log.e("ERRO salvarRendimento", "IOException: ${e.message}")
+//        } catch (e: JsonSyntaxException) {
+//            Log.e("ERRO salvarRendimento", "Erro ao analisar o JSON: ${e.message}")
+//        } catch (e: Exception) {
+//            Log.e("ERRO salvarRendimento", "Erro inesperado: ${e.message}")
+//        }
+//
+//        return resultado
+//    }
 
 //--------------------------------------------------------------------------------------------------------------------------------//
 

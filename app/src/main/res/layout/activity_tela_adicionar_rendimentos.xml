@@ -45,6 +45,7 @@
             android:backgroundTint="#00FFFFFF"
             android:text="Button"
             android:textColor="#00FFFFFF"
+            android:visibility="gone"
             app:icon="@drawable/notifications"
             app:iconGravity="textEnd"
             app:iconSize="35dp"
@@ -61,7 +62,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="20dp"
-        android:text="Adicionar novo rendimento"
+        android:text="Adicionar novo balanço"
         android:textColor="#000000"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -94,8 +95,23 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <TextView
+                android:id="@+id/txt_descricaoGasto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="16dp"
+                android:text="Descrição do gasto:"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.02"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
             <EditText
-                android:id="@+id/input_nomeRendimento"
+                android:id="@+id/input_nomeGasto"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginStart="15dp"
@@ -103,7 +119,7 @@
                 android:layout_marginEnd="15dp"
                 android:background="@drawable/form_inputs"
                 android:ems="10"
-                android:hint="Recebimento"
+                android:hint="Descrição"
                 android:inputType="text"
                 android:paddingLeft="20dp"
                 android:textColor="#000000"
@@ -112,22 +128,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txt_tpTransacao" />
-
-            <TextView
-                android:id="@+id/txt_tpTransacao"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="16dp"
-                android:text="Forma de Recebimento:"
-                android:textColor="#000000"
-                android:textSize="16sp"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.02"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+                app:layout_constraintTop_toBottomOf="@+id/txt_descricaoGasto" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputLayout"
@@ -160,13 +161,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="16dp"
-                android:text="Data do Recebimento:"
+                android:text="Data do balanço:"
                 android:textColor="#000000"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.02"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/input_nomeRendimento" />
+                app:layout_constraintTop_toBottomOf="@+id/input_nomeGasto" />
 
             <com.santalu.maskara.widget.MaskEditText
                 android:id="@+id/input_dtRendimento"

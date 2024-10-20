@@ -187,7 +187,7 @@ class tela_DebtMap : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
-        CustomToast().showCustomToast(this@tela_DebtMap, "Atualizando Metas...")
+        //CustomToast().showCustomToast(this@tela_DebtMap, "Atualizando Metas...")
 
         val IDusuario = DadosUsuario_BD_Debts(this@tela_DebtMap).pegarIdUsuario()
 
@@ -213,7 +213,7 @@ class tela_DebtMap : AppCompatActivity() {
                 // Atualizar a UI no thread principal
                 runOnUiThread {
                     Log.d("lista metas atualizada", resultado)
-                    CustomToast().showCustomToast(this@tela_DebtMap, "Metas MySQL Atualizadas")
+                    //CustomToast().showCustomToast(this@tela_DebtMap, "Metas MySQL Atualizadas")
                 }
 
                 executorService.shutdown()

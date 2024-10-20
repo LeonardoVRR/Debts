@@ -86,29 +86,6 @@ class MainActivity : AppCompatActivity() {
         finish()
     }
 
-    fun conectarMySQL(v: View) {
-        val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-        executorService.execute {
-            try {
-                con = connectionClass.CONN()
-
-                str = if (con == null) {
-                    "Erro ao se conectar ao MySQL server"
-                } else {
-                    "Conectado ao MySQL server"
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                str = "Erro ao se conectar: ${e.message}"
-            }
-
-            // Atualizar a UI no thread principal
-            runOnUiThread {
-                Toast.makeText(this, str, Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-
     fun verificarCampos(v: View) {
         val inputNome: EditText = findViewById(R.id.input_nomeUsuarioLogin)
         val inputSenha: EditText = findViewById(R.id.input_senhaLogin)
@@ -206,5 +183,28 @@ class MainActivity : AppCompatActivity() {
         AgendarConsulta_MySQL(this).cancelarAlarme("listaRendimentos", 3)
 
     }
+
+//    fun conectarMySQL(v: View) {
+//        val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+//        executorService.execute {
+//            try {
+//                con = connectionClass.CONN()
+//
+//                str = if (con == null) {
+//                    "Erro ao se conectar ao MySQL server"
+//                } else {
+//                    "Conectado ao MySQL server"
+//                }
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//                str = "Erro ao se conectar: ${e.message}"
+//            }
+//
+//            // Atualizar a UI no thread principal
+//            runOnUiThread {
+//                Toast.makeText(this, str, Toast.LENGTH_LONG).show()
+//            }
+//        }
+//    }
 
 }

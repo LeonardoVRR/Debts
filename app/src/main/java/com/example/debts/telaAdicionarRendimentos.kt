@@ -9,6 +9,8 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ScrollView
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +20,7 @@ import com.example.debts.API_Flask.Flask_Consultar_MySQL
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.FormatarNome.FormatarNome
 import com.example.debts.MsgCarregando.MensagemCarregando
 import com.google.android.material.textfield.TextInputLayout
 import java.text.NumberFormat
@@ -79,6 +82,35 @@ class telaAdicionarRendimentos : AppCompatActivity() {
         val autoCompleteTextView: AutoCompleteTextView = findViewById(R.id.autoCompleteTextView)
         autoCompleteTextView.setAdapter(arrayAdapter)
 
+        //------------------ config. visibilidade do campo descrição gasto -----------------------//
+
+        val inputNomeGasto: EditText = findViewById(R.id.input_nomeGasto)
+        val txt_inputGasto: TextView = findViewById(R.id.txt_descricaoGasto)
+
+        val txt_dataBalanco: TextView = findViewById(R.id.txt_dtRendimento)
+
+        val scrollView: ScrollView = findViewById(R.id.scrollView3)
+
+        autoCompleteTextView.setOnItemClickListener { _, _, position, _ ->
+
+            val itemSelecionado = autoCompleteTextView.adapter.getItem(position).toString()
+
+            if (itemSelecionado == "Divida") {
+                txt_dataBalanco.text = "Data do Gasto:"
+                txt_inputGasto.visibility = View.VISIBLE
+                inputNomeGasto.visibility = View.VISIBLE
+            }
+
+            else {
+                txt_dataBalanco.text = "Data do Recebimento:"
+                txt_inputGasto.visibility = View.GONE
+                inputNomeGasto.visibility = View.GONE
+            }
+
+            // Código para recarregar o conteúdo do ScrollView
+            scrollView.fullScroll(ScrollView.FOCUS_UP)
+        }
+
         //-------------------- config. botão de voltar do celular --------------------------------//
 
         //configurando o botão voltar do celular quando for prescionado p/ voltar na tela de perfil usuario
@@ -103,6 +135,9 @@ class telaAdicionarRendimentos : AppCompatActivity() {
         val input_dtRendimento: EditText = findViewById(R.id.input_dtRendimento)
         val input_valorRendimento: EditText = findViewById(R.id.input_valorRendimento)
 
+        val inputNomeGasto: EditText = findViewById(R.id.input_nomeGasto)
+        val txt_inputGasto: TextView = findViewById(R.id.txt_descricaoGasto)
+
         //val nomeRendimeto = input_nomeRendimento.text.toString().trim()
         val tipoMovimentacao = input_tpMovimentacao.text.toString().trim()
 
@@ -111,6 +146,8 @@ class telaAdicionarRendimentos : AppCompatActivity() {
         val valorRendimento = input_valorRendimento.text.toString().trim()
 
         val idUsuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+
+        val descricaoGasto = inputNomeGasto.text.toString().trim()
 
         if (tipoMovimentacao.isEmpty() || dataRendimento.isEmpty() || valorRendimento.isEmpty()){
             CustomToast().showCustomToast(this, "Preencha todos os campos.")
@@ -134,6 +171,9 @@ class telaAdicionarRendimentos : AppCompatActivity() {
             else {
 
                 if (tipoMovimentacao != "Divida") {
+//                    txt_inputGasto.visibility = View.GONE
+//                    inputNomeGasto.visibility = View.GONE
+
                     //BancoDados(this).salvarRendimento(tipoMovimentacao, dataRendimento, valorRendimentoFormatado, idUsuario)
 
                     var resultado = ""
@@ -146,7 +186,7 @@ class telaAdicionarRendimentos : AppCompatActivity() {
                     executorService.execute {
                         try {
 
-                            resultado = Flask_Consultar_MySQL(this).salvarRendimento(tipoMovimentacao, dataRendimento, valorRendimentoFormatado, idUsuario)
+                            resultado = Flask_Consultar_MySQL(this).salvarBalanco(tipoMovimentacao, dataRendimento, valorRendimentoFormatado, idUsuario, "rendimento")
 
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -160,6 +200,46 @@ class telaAdicionarRendimentos : AppCompatActivity() {
                         }
                     }
                 }
+
+                else if (tipoMovimentacao == "Divida") {
+//                    txt_inputGasto.visibility = View.VISIBLE
+//                    inputNomeGasto.visibility = View.VISIBLE
+
+                    if (tipoMovimentacao.isEmpty() || dataRendimento.isEmpty() || valorRendimento.isEmpty() || descricaoGasto.isEmpty()){
+                        CustomToast().showCustomToast(this, "Preencha todos os campos.")
+                    }
+
+                    else {
+                        var resultado = ""
+
+                        val msgCarregando = MensagemCarregando(this)
+
+                        msgCarregando.mostrarMensagem()
+
+                        val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+                        executorService.execute {
+                            try {
+
+                                resultado = Flask_Consultar_MySQL(this).salvarBalanco(tipoMovimentacao, dataRendimento, valorRendimentoFormatado, idUsuario, "gasto", descricaoGasto)
+
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                //str = "Erro ao se conectar: ${e.message}"
+                            }
+
+                            // Atualizar a UI no thread principal
+                            runOnUiThread {
+                                msgCarregando.ocultarMensagem()
+                                CustomToast().showCustomToast(this, resultado)
+                            }
+                        }
+                    }
+                }
+
+//                else {
+//                    txt_inputGasto.visibility = View.GONE
+//                    inputNomeGasto.visibility = View.GONE
+//                }
             }
         }
     }

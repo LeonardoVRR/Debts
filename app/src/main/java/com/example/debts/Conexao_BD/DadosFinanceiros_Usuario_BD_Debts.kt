@@ -6,10 +6,19 @@ import com.example.debts.layout_Item_lista.OperacaoFinanceira
 
 class DadosFinanceiros_Usuario_BD_Debts(private val context: Context, private val IDusuario: Int) {
 
-    fun pegarListaEntradasMes(): List<OperacaoFinanceira> {
-        val listaEntradas = BancoDados(context).listaRendimentosMes(IDusuario)
+    fun pegarListaEntradasMes(mes: String = "", ano: String = ""): List<OperacaoFinanceira> {
+        if (mes != "" && ano != "") {
+            var listaEntradas = BancoDados(context).listaRendimentosMes(IDusuario, mes, ano)
 
-        return listaEntradas
+            return listaEntradas
+        }
+
+        else {
+            var listaEntradas = BancoDados(context).listaRendimentosMes(IDusuario)
+
+            return listaEntradas
+        }
+
     }
 
 //    fun pegarListaDespesasMes(): List<OperacaoFinanceira> {
@@ -21,10 +30,19 @@ class DadosFinanceiros_Usuario_BD_Debts(private val context: Context, private va
 //        return listaDespesas
 //    }
 
-    fun pegarListaGastosMes(): List<OperacaoFinanceira> {
-        val listaGastos = BancoDados(context).listaGastosMes(IDusuario)
+    fun pegarListaGastosMes(mes: String = "", ano: String = ""): List<OperacaoFinanceira> {
 
-        return listaGastos
+        if (mes != "" && ano != "") {
+            val listaGastos = BancoDados(context).listaGastosMes(IDusuario, mes, ano)
+
+            return listaGastos
+        }
+
+        else {
+            val listaGastos = BancoDados(context).listaGastosMes(IDusuario)
+
+            return listaGastos
+        }
     }
 
     fun pegarListaGastosRecentes(): List<OperacaoFinanceira> {

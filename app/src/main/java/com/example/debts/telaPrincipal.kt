@@ -12,15 +12,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.debts.API_Flask.Flask_Consultar_MySQL
-import com.example.debts.API_Flask.IP_Server_Flask
-//import com.example.debts.API_Flask.ObterIPRede
-import com.example.debts.API_Flask.Obter_IP_Rede
-import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
-import com.example.debts.Config_Notificacoes.NotificationHelper
 import com.example.debts.ConsultaBD_MySQL.AgendarConsulta_MySQL
-import com.example.debts.ConsultaBD_MySQL.BroadcastReceiver_ConsultarLista
 import com.example.debts.ConsultaBD_MySQL.CompararListas_MySQL_SQLite
 import com.example.debts.FormatarNome.FormatarNome
 import com.example.debts.MsgCarregando.MensagemCarregando
@@ -147,7 +141,6 @@ class telaPrincipal : AppCompatActivity() {
                         CompararListas_MySQL_SQLite(this).adicionarNovosRendimentos(DadosUsuario_BD_Debts.listas_MySQL.rendimentosUsuario, BancoDados(this).listaRendimentosMes(IDusuario))
 
                         CustomToast().showCustomToast(this, resultado)
-                        CustomToast().showCustomToast(this, "${Obter_IP_Rede().getLocalIpAddress()}")
 
                         val alarmeAtivo = AgendarConsulta_MySQL(this).alarmeAtivo("listaMetas", 1)
                         if (alarmeAtivo) {
@@ -174,16 +167,16 @@ class telaPrincipal : AppCompatActivity() {
 
         val btn_RelatorioGastos: Button = findViewById(R.id.btn_RelatorioGastos)
 
-        //btn_RelatorioGastos.setOnClickListener { teleRelatorioGastos() }
+        btn_RelatorioGastos.setOnClickListener { teleRelatorioGastos() }
 
-        btn_RelatorioGastos.setOnClickListener {
-            // Cria um Intent para disparar o BroadcastReceiver
-            val intent = Intent(this, BroadcastReceiver_ConsultarLista::class.java)
-            intent.putExtra("nomeAlarme", "listaRendimentos") // Ou outro nome que você deseja testar
-
-            // Envia o broadcast
-            sendBroadcast(intent)
-        }
+//        btn_RelatorioGastos.setOnClickListener {
+//            // Cria um Intent para disparar o BroadcastReceiver
+//            val intent = Intent(this, BroadcastReceiver_ConsultarLista::class.java)
+//            intent.putExtra("nomeAlarme", "listaRendimentos") // Ou outro nome que você deseja testar
+//
+//            // Envia o broadcast
+//            sendBroadcast(intent)
+//        }
 
         //testar notificação
 //        btn_RelatorioGastos.setOnClickListener {

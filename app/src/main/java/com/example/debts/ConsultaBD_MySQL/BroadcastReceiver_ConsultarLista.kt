@@ -164,27 +164,27 @@ class BroadcastReceiver_ConsultarLista : BroadcastReceiver() {
 
                                 //-------------------------------------- config. Notificação -------------------------------------------------//
 
-                                val listaEntradas = DadosFinanceiros_Usuario_BD_Debts(
-                                    context,
-                                    IDusuario
-                                ).pegarListaEntradasMes()
-                                val listaGastos = DadosFinanceiros_Usuario_BD_Debts(
-                                    context,
-                                    IDusuario
-                                ).pegarListaGastosMes()
-
-                                val somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
-                                val somarItemsListaGastos = Somar().valoresCampo(listaGastos)
-
-                                if (somarItemsListaGastos > somarItemsListaEntradas) {
-                                    val notificacaoGasto = NotificationHelper(context)
-
-                                    notificacaoGasto.criarCanal()
-                                    notificacaoGasto.enviarNotificacao(
-                                        "Cuidado",
-                                        "Você está gastando muito!"
-                                    )
-                                }
+//                                val listaEntradas = DadosFinanceiros_Usuario_BD_Debts(
+//                                    context,
+//                                    IDusuario
+//                                ).pegarListaEntradasMes()
+//                                val listaGastos = DadosFinanceiros_Usuario_BD_Debts(
+//                                    context,
+//                                    IDusuario
+//                                ).pegarListaGastosMes()
+//
+//                                val somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
+//                                val somarItemsListaGastos = Somar().valoresCampo(listaGastos)
+//
+//                                if (somarItemsListaGastos > somarItemsListaEntradas) {
+//                                    val notificacaoGasto = NotificationHelper(context)
+//
+//                                    notificacaoGasto.criarCanal()
+//                                    notificacaoGasto.enviarNotificacao(
+//                                        "Cuidado",
+//                                        "Você está gastando muito!"
+//                                    )
+//                                }
 
                                 //-------------------------------------- fim config. Notificação ---------------------------------------------//
 

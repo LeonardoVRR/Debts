@@ -1,5 +1,7 @@
 package com.example.debts.API_Flask
 
+import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+
 object IP_Server_Flask {
-    val ip_number = Obter_IP_Rede().getLocalIpAddress().toString()
+    var ip_number = "192.168.0.20"
 }

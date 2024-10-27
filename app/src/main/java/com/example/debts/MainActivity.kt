@@ -15,6 +15,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.debts.API_Flask.Flask_Consultar_MySQL
 import com.example.debts.API_Flask.LoginRequest
+import com.example.debts.API_Flask.Obter_IP_Rede
 import com.example.debts.BD_MySQL_App.ConnectionClass
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
@@ -51,6 +52,10 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        //Obter_IP_Rede().fetchLocalIPAddress()
+
+        //Log.d("END_IP", "${DadosUsuario_BD_Debts.enderecoIP.ip}")
 
         // Cancela os alarmes
         AgendarConsulta_MySQL(this).cancelarAlarme("listaMetas", 1)

@@ -19,4 +19,22 @@ class ManipularData {
             else -> throw IllegalArgumentException("Número do mês inválido")
         }
     }
+
+    fun pegarNumeroMes(mes: String): String {
+        return when (mes.lowercase()) {
+            "janeiro" -> "01"
+            "fevereiro" -> "02"
+            "março" -> "03"
+            "abril" -> "04"
+            "maio" -> "05"
+            "junho" -> "06"
+            "julho" -> "07"
+            "agosto" -> "08"
+            "setembro" -> "09"
+            "outubro" -> "10"
+            "novembro" -> "11"
+            "dezembro" -> "12"
+            else -> throw IllegalArgumentException("Nome do mês inválido")
+        }
+    }
 }

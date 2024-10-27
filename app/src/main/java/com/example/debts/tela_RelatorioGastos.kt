@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
@@ -16,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosFinanceiros_Usuario_BD_Debts
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.ManipularData.ManipularData
 import com.example.debts.SomarValoresCampo.Somar
 import com.example.debts.layoutExpandivel.criarListaItems
 import com.example.debts.layoutExpandivel.removerListaItems
@@ -56,14 +58,6 @@ class tela_RelatorioGastos : AppCompatActivity() {
             insets
         }
 
-        val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
-
-        val listaEntradas = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaEntradasMes()
-
-        //private val listaDespesas = DadosFinanceiros_Usuario_BD_Debts().pegarListaDespesasMes()
-
-        val listaGastos = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaGastosMes()
-
         //id do usuario logado
         val usuarioID = DadosUsuario_BD_Debts(this).pegarIdUsuario()
 
@@ -91,21 +85,53 @@ class tela_RelatorioGastos : AppCompatActivity() {
         // Obtém o nome do mês atual para exibição
         var nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, java.util.Locale.getDefault())
 
-        var dataInicial = calendar.time
+        //var dataInicial = calendar.time
 
         // Define uma formação para a data
         val formataData = SimpleDateFormat("dd/MM", Locale("pt", "BR"))
-        var dataFormatada = formataData.format(dataInicial) // usa a formatação definida
+        //var dataFormatada = formataData.format(dataInicial) // usa a formatação definida
 
         //configurando para mostra o nome do mes atual
         val viewNomeMes: TextView = findViewById(R.id.graf_MesAtual)
         viewNomeMes.text = "${nomeMes.uppercase()} $anoAtual"
 
+        var ano_mes_Atual_graf = viewNomeMes.text.toString()
+
+        var mes_graf = ManipularData().pegarNumeroMes(ano_mes_Atual_graf.split(" ")[0])
+        var ano_graf = ano_mes_Atual_graf.split(" ")[1]
+
+        Log.d("grafico", "graf: $ano_mes_Atual_graf, mes: $mes_graf, ano: $ano_graf")
+
+        var listaEntradas = DadosFinanceiros_Usuario_BD_Debts(this, usuarioID).pegarListaEntradasMes(mes_graf, ano_graf)
+
+        //private val listaDespesas = DadosFinanceiros_Usuario_BD_Debts().pegarListaDespesasMes()
+
+        var listaGastos = DadosFinanceiros_Usuario_BD_Debts(this, usuarioID).pegarListaGastosMes(mes_graf, ano_graf)
+
+        //-------------------- config. somas dos gastos dos items de cada campo --------------------------//
+
+        var somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
+        //val somarItemsListaDespesas = somarValoresCampo(pegarDados(listaDespesas))
+        var somarItemsListaGastos = Somar().valoresCampo(listaGastos)
+
+        var txt_valorEntradas: TextView = findViewById(R.id.txt_valorEntradas)
+        //val txt_valorDespesas: TextView = findViewById(R.id.txt_valorDespesas)
+        var txt_valorGastos: TextView = findViewById(R.id.txt_valorGastos)
+
+        txt_valorEntradas.text = "${formatToCurrency(somarItemsListaEntradas)}"
+        txt_valorGastos.text = "${formatToCurrency(somarItemsListaGastos)}"
+        //txt_valorDespesas.text = "${formatToCurrency(somarItemsListaDespesas)}"
+
+        //-------------------- fim das config. somas dos gastos dos items de cada campo ------------------//
+
         //array que contem todas as legendas das colunas
         var legendaColunas = criarLegendas(qtdDiasMes, calendar)
 
         //lista que vai conter os gastos diarios do mes
-        var listaValores: MutableList<Float> = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID).toMutableList()
+        var listaValores: MutableList<Float> = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID, ano_graf).toMutableList()
+
+        //lista que vai conter os rendimentos diarios do mes
+        //var listaValoresRendimento = BancoDados(this).rendimentosDiariosMesGraf(nomeMes.lowercase(), usuarioID).toMutableList()
 
         //quando o btn_ProxMes for clicado vai chamar uma função para avançar o mes
         btn_ProxMes.setOnClickListener {
@@ -125,6 +151,16 @@ class tela_RelatorioGastos : AppCompatActivity() {
             nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, java.util.Locale.getDefault())
             viewNomeMes.text = "${nomeMes.uppercase()} $anoAtual"
 
+            ano_mes_Atual_graf = viewNomeMes.text.toString()
+
+            mes_graf = ManipularData().pegarNumeroMes(ano_mes_Atual_graf.split(" ")[0])
+            ano_graf = ano_mes_Atual_graf.split(" ")[1]
+
+            listaEntradas = DadosFinanceiros_Usuario_BD_Debts(this, usuarioID).pegarListaEntradasMes(mes_graf, ano_graf)
+            listaGastos = DadosFinanceiros_Usuario_BD_Debts(this, usuarioID).pegarListaGastosMes(mes_graf, ano_graf)
+
+            Log.d("grafico avança", "graf: $ano_mes_Atual_graf, mes: $mes_graf, ano: $ano_graf")
+
             // Verifica se a lista "entries" tem elementos
             if (entries.isNotEmpty() && legendaColunas.isNotEmpty()) {
 //                Toast.makeText(
@@ -137,11 +173,17 @@ class tela_RelatorioGastos : AppCompatActivity() {
                 entries.clear() // Esvazia a lista
                 legendaColunas = arrayOf() // Esvazia a lista
 
-                listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID).toMutableList()
-                criarColunasGraf(entries, qtdDiasMes, nomeMes, usuarioID)
+                listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID, ano_graf).toMutableList()
+                criarColunasGraf(entries, qtdDiasMes, nomeMes, usuarioID, ano_graf)
                 legendaColunas = criarLegendas(qtdDiasMes, calendar)
 
                 Log.d("Gastos do Mes", "$listaValores")
+
+                somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
+                somarItemsListaGastos = Somar().valoresCampo(listaGastos)
+
+                txt_valorEntradas.text = "${formatToCurrency(somarItemsListaEntradas)}"
+                txt_valorGastos.text = "${formatToCurrency(somarItemsListaGastos)}"
 
                 //atualiza as legendas do grafico
                 val xAxis = grafico.xAxis
@@ -169,6 +211,16 @@ class tela_RelatorioGastos : AppCompatActivity() {
             nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, java.util.Locale.getDefault())
             viewNomeMes.text = "${nomeMes.uppercase()} $anoAtual"
 
+            ano_mes_Atual_graf = viewNomeMes.text.toString()
+
+            mes_graf = ManipularData().pegarNumeroMes(ano_mes_Atual_graf.split(" ")[0])
+            ano_graf = ano_mes_Atual_graf.split(" ")[1]
+
+            listaEntradas = DadosFinanceiros_Usuario_BD_Debts(this, usuarioID).pegarListaEntradasMes(mes_graf, ano_graf)
+            listaGastos = DadosFinanceiros_Usuario_BD_Debts(this, usuarioID).pegarListaGastosMes(mes_graf, ano_graf)
+
+            Log.d("grafico retrocede", "graf: $ano_mes_Atual_graf, mes: $mes_graf, ano: $ano_graf")
+
             // Verifica se a lista "entries" tem elementos
             if (entries.isNotEmpty() && legendaColunas.isNotEmpty()) {
 //                Toast.makeText(
@@ -181,11 +233,17 @@ class tela_RelatorioGastos : AppCompatActivity() {
                 entries.clear() // Esvazia a lista
                 legendaColunas = arrayOf() // Esvazia a lista
 
-                listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID).toMutableList()
-                criarColunasGraf(entries, qtdDiasMes, nomeMes, usuarioID)
+                listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID, ano_graf).toMutableList()
+                criarColunasGraf(entries, qtdDiasMes, nomeMes, usuarioID, ano_graf)
                 legendaColunas = criarLegendas(qtdDiasMes, calendar)
 
                 Log.d("Gastos do Mes", "$listaValores")
+
+                somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
+                somarItemsListaGastos = Somar().valoresCampo(listaGastos)
+
+                txt_valorEntradas.text = "${formatToCurrency(somarItemsListaEntradas)}"
+                txt_valorGastos.text = "${formatToCurrency(somarItemsListaGastos)}"
 
                 //atualiza as legendas do grafico
                 val xAxis = grafico.xAxis
@@ -203,7 +261,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
         grafico = findViewById(R.id.bar_chart)
 
         //chama a função para criar as colunas do grafico
-        criarColunasGraf(entries, qtdDiasMes, nomeMes, usuarioID)
+        criarColunasGraf(entries, qtdDiasMes, nomeMes, usuarioID, ano_graf)
 
         //Estilizando o grafico
         val barDataSet1 = BarDataSet(entries, "")
@@ -448,20 +506,6 @@ class tela_RelatorioGastos : AppCompatActivity() {
             campoGastos_isExpanded = !campoGastos_isExpanded
         }
 
-        //-------------------- config. somas dos gastos dos items de cada campo ------------------//
-
-        val somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
-        //val somarItemsListaDespesas = somarValoresCampo(pegarDados(listaDespesas))
-        val somarItemsListaGastos = Somar().valoresCampo(listaGastos)
-
-        val txt_valorEntradas: TextView = findViewById(R.id.txt_valorEntradas)
-        //val txt_valorDespesas: TextView = findViewById(R.id.txt_valorDespesas)
-        val txt_valorGastos: TextView = findViewById(R.id.txt_valorGastos)
-
-        txt_valorEntradas.text = "${formatToCurrency(somarItemsListaEntradas)}"
-        //txt_valorDespesas.text = "${formatToCurrency(somarItemsListaDespesas)}"
-        txt_valorGastos.text = "${formatToCurrency(somarItemsListaGastos)}"
-
         //-------------------- config. botão de voltar do celular --------------------------------//
 
         //configurando o botão voltar do celular quando for prescionado p/ voltar na tela de login
@@ -478,10 +522,10 @@ class tela_RelatorioGastos : AppCompatActivity() {
         })
     }
 
-    //função que gera numeros do tipo float aleatorios
-    fun randomFloat(min: Float, max: Float): Float {
-        return Random.nextFloat() * (max - min) + min
-    }
+//    //função que gera numeros do tipo float aleatorios
+//    fun randomFloat(min: Float, max: Float): Float {
+//        return Random.nextFloat() * (max - min) + min
+//    }
 
     // Função que retorna os textos acima das colunas formatados
     fun createValueFormatter(): ValueFormatter {
@@ -521,25 +565,25 @@ class tela_RelatorioGastos : AppCompatActivity() {
         }
     }
 
-    fun formatarValor(valorString: String): Float {
-        // Remover o símbolo de moeda "R$", remover os espaços e os separadores de milhar.
-        val valorLimpo = valorString
-            .replace("R$", "") // Remove o símbolo "R$"
-            .replace(".", "")  // Remove os separadores de milhar
-            .replace(",", ".") // Substitui a vírgula decimal por ponto
-            .trim()            // Remove espaços em branco extras
-
-        // Converte a string limpa para Float
-        return valorLimpo.toFloat()
-    }
+//    fun formatarValor(valorString: String): Float {
+//        // Remover o símbolo de moeda "R$", remover os espaços e os separadores de milhar.
+//        val valorLimpo = valorString
+//            .replace("R$", "") // Remove o símbolo "R$"
+//            .replace(".", "")  // Remove os separadores de milhar
+//            .replace(",", ".") // Substitui a vírgula decimal por ponto
+//            .trim()            // Remove espaços em branco extras
+//
+//        // Converte a string limpa para Float
+//        return valorLimpo.toFloat()
+//    }
 
     //função que cria as colunas do grafico
-    private fun criarColunasGraf(entries: MutableList<BarEntry>, qtdDiasMes: Int, nomeMes: String, usuarioID: Int) {
+    private fun criarColunasGraf(entries: MutableList<BarEntry>, qtdDiasMes: Int, nomeMes: String, usuarioID: Int, ano_graf: String) {
         entries.clear()
 
         // Recuperar a lista de valores do banco de dados
-        val listaGastos = BancoDados(this).gastosDiariosMesGraf(nomeMes, usuarioID)
-        val listaRendimentos = BancoDados(this).rendimentosDiariosMesGraf(nomeMes, usuarioID)
+        val listaGastos = BancoDados(this).gastosDiariosMesGraf(nomeMes, usuarioID, ano_graf)
+        val listaRendimentos = BancoDados(this).rendimentosDiariosMesGraf(nomeMes, usuarioID, ano_graf)
 
         // lista preenchida com zeros
         val listaGastosAjustados = MutableList(qtdDiasMes) { 0f }
@@ -670,28 +714,28 @@ class tela_RelatorioGastos : AppCompatActivity() {
         return legendaColunas.toTypedArray() // Converte a lista mutável para um array
     }
 
-    //função que pega os dados do BD para colocar nas listas de items
-    private fun pegarDados(listaItems: List<OperacaoFinanceira> = emptyList()): List<OperacaoFinanceira> {
-
-        // Lista que será preenchida com os itens formatados
-        val items: MutableList<OperacaoFinanceira> = mutableListOf()
-
-        // Itera sobre cada item da lista de entrada e cria novos itens formatados
-        listaItems.forEach { item ->
-            // Adiciona um novo item à lista 'items' com os valores formatados
-            items.add(
-                OperacaoFinanceira(
-                    item.id,
-                    item.descricao,  // Descrição da compra
-                    item.tipo_movimento,  // Forma de pagamento
-                    formatToCurrency(item.valor.toFloat()),  // Valor formatado
-                    item.data  // Data formatada
-                )
-            )
-        }
-
-        return items
-    }
+//    //função que pega os dados do BD para colocar nas listas de items
+//    private fun pegarDados(listaItems: List<OperacaoFinanceira> = emptyList()): List<OperacaoFinanceira> {
+//
+//        // Lista que será preenchida com os itens formatados
+//        val items: MutableList<OperacaoFinanceira> = mutableListOf()
+//
+//        // Itera sobre cada item da lista de entrada e cria novos itens formatados
+//        listaItems.forEach { item ->
+//            // Adiciona um novo item à lista 'items' com os valores formatados
+//            items.add(
+//                OperacaoFinanceira(
+//                    item.id,
+//                    item.descricao,  // Descrição da compra
+//                    item.tipo_movimento,  // Forma de pagamento
+//                    formatToCurrency(item.valor.toFloat()),  // Valor formatado
+//                    item.data  // Data formatada
+//                )
+//            )
+//        }
+//
+//        return items
+//    }
 
     //função para voltar a tela inicial do aplicativo
     fun voltarTelaInicial(v: View){

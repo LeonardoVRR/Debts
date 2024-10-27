@@ -334,7 +334,7 @@ class BancoDados(private var context: Context) {
     }
 
     //função que retorna todos os gastos do mes do usuario
-    fun gastosDiariosMes(mesGasto: String, IdUsuario: Int): List<Float> {
+    fun gastosDiariosMes(mesGasto: String, IdUsuario: Int, ano: String): List<Float> {
         // Abre o banco de dados existente no caminho especificado
         bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
@@ -343,8 +343,8 @@ class BancoDados(private var context: Context) {
         try {
             // Consulta para obter os dados do usuário com base no id
             val gastos = bancoDados.rawQuery(
-                "SELECT SUM(valor_gasto) AS total_gasto FROM Gastos WHERE id_user_gasto = ? AND mes = ? GROUP BY dt_gasto ORDER BY dt_gasto ASC",
-                arrayOf(IdUsuario.toString(), mesGasto)
+                "SELECT SUM(valor_gasto) AS total_gasto FROM Gastos WHERE id_user_gasto = ? AND mes = ? AND strftime('%Y', dt_gasto) = ? GROUP BY dt_gasto ORDER BY dt_gasto ASC",
+                arrayOf(IdUsuario.toString(), mesGasto, ano)
             )
 
             // Processa todos os resultados da consulta
@@ -371,7 +371,7 @@ class BancoDados(private var context: Context) {
     }
 
     //função que retorna todos os gastos do mes do usuario para usar no grafico
-    fun gastosDiariosMesGraf(mesGasto: String, IdUsuario: Int): List<MovintoDia> {
+    fun gastosDiariosMesGraf(mesGasto: String, IdUsuario: Int, ano: String): List<MovintoDia> {
         // Abre o banco de dados existente no caminho especificado
         bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
@@ -380,8 +380,8 @@ class BancoDados(private var context: Context) {
         try {
             // Consulta para obter os dados do usuário com base no id
             val gastos = bancoDados.rawQuery(
-                "SELECT dt_gasto, SUM(valor_gasto) AS total_gasto FROM Gastos WHERE id_user_gasto = ? AND mes = ? GROUP BY dt_gasto ORDER BY dt_gasto ASC",
-                arrayOf(IdUsuario.toString(), mesGasto)
+                "SELECT dt_gasto, SUM(valor_gasto) AS total_gasto FROM Gastos WHERE id_user_gasto = ? AND mes = ? AND strftime('%Y', dt_gasto) = ? GROUP BY dt_gasto ORDER BY dt_gasto ASC",
+                arrayOf(IdUsuario.toString(), mesGasto, ano)
             )
 
             // Processa todos os resultados da consulta
@@ -413,8 +413,8 @@ class BancoDados(private var context: Context) {
         return listaGastos.toList()
     }
 
-    //função que retorna todos os gastos do mes do usuario para usar no grafico
-    fun rendimentosDiariosMesGraf(mesRendimento: String, IdUsuario: Int): List<MovintoDia> {
+    //função que retorna todos os rendimentos do mes do usuario para usar no grafico
+    fun rendimentosDiariosMesGraf(mesRendimento: String, IdUsuario: Int, ano: String): List<MovintoDia> {
         // Abre o banco de dados existente no caminho especificado
         bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
@@ -423,8 +423,8 @@ class BancoDados(private var context: Context) {
         try {
             // Consulta para obter os dados do usuário com base no id
             val rendimentos = bancoDados.rawQuery(
-                "SELECT dt_rendimento, SUM(valor_rendimento) AS total_rendimento FROM Rendimentos WHERE id_user_rendimento = ? AND mes = ? GROUP BY dt_rendimento ORDER BY dt_rendimento ASC",
-                arrayOf(IdUsuario.toString(), mesRendimento)
+                "SELECT dt_rendimento, SUM(valor_rendimento) AS total_rendimento FROM Rendimentos WHERE id_user_rendimento = ? AND mes = ? AND strftime('%Y', dt_rendimento) = ? GROUP BY dt_rendimento ORDER BY dt_rendimento ASC",
+                arrayOf(IdUsuario.toString(), mesRendimento, ano)
             )
 
             // Processa todos os resultados da consulta
@@ -456,7 +456,7 @@ class BancoDados(private var context: Context) {
         return listaRendimentos.toList()
     }
 
-    fun listaRendimentosMes(IdUsuario: Int): List<OperacaoFinanceira> {
+    fun listaRendimentosMes(IdUsuario: Int, mes: String = "", ano: String = ""): List<OperacaoFinanceira> {
 
         var listaRendimentosMes: MutableList<OperacaoFinanceira> = mutableListOf()
 
@@ -464,23 +464,26 @@ class BancoDados(private var context: Context) {
             // Abre o banco de dados existente no caminho especificado
             bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
-            // Consulta para obter as metas do usuário
-            val regatarGastos: Cursor = bancoDados.rawQuery(" SELECT * FROM Rendimentos WHERE id_user_rendimento = ? ORDER BY dt_rendimento ASC", arrayOf(IdUsuario.toString()))
+            if (mes != "" && ano != "") {
+                // Consulta para obter os rendimentos do usuário
+                val regatarRendimento: Cursor = bancoDados.rawQuery(" SELECT * FROM Rendimentos WHERE id_user_rendimento = ? AND strftime('%m', dt_rendimento) = ? AND strftime('%Y', dt_rendimento) = ? ORDER BY dt_rendimento ASC", arrayOf(IdUsuario.toString(), mes, ano))
 
-            // Verifica se há resultados e processa todos
-            if (regatarGastos.moveToFirst()) {
-                do {
-                    val idRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("id_rendimento")).toInt()
-                    val nomeRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("tp_movimento")).toString()
-                    //val forma_pagamento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("tp_transacao"))
-                    val dataRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("dt_rendimento")).toString()
-                    val valorRendimento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("valor_rendimento"))
 
-                    //formatando o nome do gasto
-                    val nomeRendimentoFormatado = FormatarNome().formatar(nomeRendimento)
 
-                    //formatando o a forma de pagamento
-                    val forma_pagamento_formatada = ""
+                // Verifica se há resultados e processa todos
+                if (regatarRendimento.moveToFirst()) {
+                    do {
+                        val idRendimento = regatarRendimento.getString(regatarRendimento.getColumnIndexOrThrow("id_rendimento")).toInt()
+                        val nomeRendimento = regatarRendimento.getString(regatarRendimento.getColumnIndexOrThrow("tp_movimento")).toString()
+                        //val forma_pagamento = regatarRendimento.getString(regatarRendimento.getColumnIndexOrThrow("tp_transacao"))
+                        val dataRendimento = regatarRendimento.getString(regatarRendimento.getColumnIndexOrThrow("dt_rendimento")).toString()
+                        val valorRendimento = regatarRendimento.getString(regatarRendimento.getColumnIndexOrThrow("valor_rendimento"))
+
+                        //formatando o nome do gasto
+                        val nomeRendimentoFormatado = FormatarNome().formatar(nomeRendimento)
+
+                        //formatando o a forma de pagamento
+                        val forma_pagamento_formatada = ""
 
 //                    //formatando a data
 //                    //faz o fatiamento da data
@@ -493,30 +496,90 @@ class BancoDados(private var context: Context) {
 //                    calendar.set(Calendar.MONTH, mes)
 //                    val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
 
-                    //faz o fatiamento da data
-                    val dia = dataRendimento.split("-")[2].trim()
-                    val mes = dataRendimento.split("-")[1].trim().toInt()
-                    val ano = dataRendimento.split("-")[0].trim()
+                        //faz o fatiamento da data
+                        val dia = dataRendimento.split("-")[2].trim()
+                        val mes = dataRendimento.split("-")[1].trim().toInt()
+                        val ano = dataRendimento.split("-")[0].trim()
 
-                    val nomeMes = ManipularData().pegarNomeMes(mes)
+                        val nomeMes = ManipularData().pegarNomeMes(mes)
 
-                    val dataFormatada = "$dia de $nomeMes de $ano"
+                        val dataFormatada = "$dia de $nomeMes de $ano"
 
-                    //formatando o valor do gasto
-                    // Obtém a instância de NumberFormat para a localidade do Brasil
-                    val formatacaoReal = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+                        //formatando o valor do gasto
+                        // Obtém a instância de NumberFormat para a localidade do Brasil
+                        val formatacaoReal = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
 
-                    val valorRendimentoFormatado = (formatacaoReal.format(valorRendimento.toFloat())).toString()
+                        val valorRendimentoFormatado = (formatacaoReal.format(valorRendimento.toFloat())).toString()
 
 
-                    val itemGasto = OperacaoFinanceira(idRendimento, nomeRendimentoFormatado, forma_pagamento_formatada, valorRendimentoFormatado, dataFormatada)
+                        val itemGasto = OperacaoFinanceira(idRendimento, nomeRendimentoFormatado, forma_pagamento_formatada, valorRendimentoFormatado, dataFormatada)
 
-                    // Adiciona o item à lista de itens
-                    listaRendimentosMes += itemGasto
-                } while (regatarGastos.moveToNext()) // Continua para o próximo item
+                        // Adiciona o item à lista de itens
+                        listaRendimentosMes += itemGasto
+                    } while (regatarRendimento.moveToNext()) // Continua para o próximo item
+                }
+
+                regatarRendimento.close()
             }
 
-            regatarGastos.close()
+            else {
+                // Consulta para obter os rendimentos do usuário
+                val regatarRendimento: Cursor = bancoDados.rawQuery(" SELECT * FROM Rendimentos WHERE id_user_rendimento = ? ORDER BY dt_rendimento ASC", arrayOf(IdUsuario.toString()))
+
+
+
+                // Verifica se há resultados e processa todos
+                if (regatarRendimento.moveToFirst()) {
+                    do {
+                        val idRendimento = regatarRendimento.getString(regatarRendimento.getColumnIndexOrThrow("id_rendimento")).toInt()
+                        val nomeRendimento = regatarRendimento.getString(regatarRendimento.getColumnIndexOrThrow("tp_movimento")).toString()
+                        //val forma_pagamento = regatarRendimento.getString(regatarRendimento.getColumnIndexOrThrow("tp_transacao"))
+                        val dataRendimento = regatarRendimento.getString(regatarRendimento.getColumnIndexOrThrow("dt_rendimento")).toString()
+                        val valorRendimento = regatarRendimento.getString(regatarRendimento.getColumnIndexOrThrow("valor_rendimento"))
+
+                        //formatando o nome do gasto
+                        val nomeRendimentoFormatado = FormatarNome().formatar(nomeRendimento)
+
+                        //formatando o a forma de pagamento
+                        val forma_pagamento_formatada = ""
+
+//                    //formatando a data
+//                    //faz o fatiamento da data
+//                    val dia = dataRendimento.substring(8,10)
+//                    val mes = (dataRendimento.substring(5,7)).toInt()
+//                    val ano = dataRendimento.substring(0,4)
+//
+//                    // Obtém o nome do mês atual para exibição
+//                    val calendar = Calendar.getInstance()
+//                    calendar.set(Calendar.MONTH, mes)
+//                    val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+
+                        //faz o fatiamento da data
+                        val dia = dataRendimento.split("-")[2].trim()
+                        val mes = dataRendimento.split("-")[1].trim().toInt()
+                        val ano = dataRendimento.split("-")[0].trim()
+
+                        val nomeMes = ManipularData().pegarNomeMes(mes)
+
+                        val dataFormatada = "$dia de $nomeMes de $ano"
+
+                        //formatando o valor do gasto
+                        // Obtém a instância de NumberFormat para a localidade do Brasil
+                        val formatacaoReal = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+
+                        val valorRendimentoFormatado = (formatacaoReal.format(valorRendimento.toFloat())).toString()
+
+
+                        val itemGasto = OperacaoFinanceira(idRendimento, nomeRendimentoFormatado, forma_pagamento_formatada, valorRendimentoFormatado, dataFormatada)
+
+                        // Adiciona o item à lista de itens
+                        listaRendimentosMes += itemGasto
+                    } while (regatarRendimento.moveToNext()) // Continua para o próximo item
+                }
+
+                regatarRendimento.close()
+            }
+
 
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro recuper listaRendimentosMes: ${e.message}")
@@ -567,7 +630,7 @@ class BancoDados(private var context: Context) {
 //        return listaRendimentosMes.toList()
 //    }
 
-    fun listaGastosMes(IdUsuario: Int): List<OperacaoFinanceira> {
+    fun listaGastosMes(IdUsuario: Int, mes: String = "", ano: String = ""): List<OperacaoFinanceira> {
 
         var listaGastosMes: MutableList<OperacaoFinanceira> = mutableListOf()
 
@@ -575,23 +638,24 @@ class BancoDados(private var context: Context) {
             // Abre o banco de dados existente no caminho especificado
             bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
-            // Consulta para obter as metas do usuário
-            val regatarGastos: Cursor = bancoDados.rawQuery("SELECT * FROM Gastos WHERE id_user_gasto = ? ORDER BY dt_gasto DESC", arrayOf(IdUsuario.toString()))
+            if (mes != "" && ano != "") {
+                // Consulta para obter as metas do usuário
+                val regatarGastos: Cursor = bancoDados.rawQuery("SELECT * FROM Gastos WHERE id_user_gasto = ? AND strftime('%m', dt_gasto) = ? AND strftime('%Y', dt_gasto) = ? ORDER BY dt_gasto DESC", arrayOf(IdUsuario.toString(), mes, ano))
 
-            // Verifica se há resultados e processa todos
-            if (regatarGastos.moveToFirst()) {
-                do {
-                    val idGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("id_gasto")).toInt()
-                    val nomeGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("descricao_gasto")).toString()
-                    val forma_pagamento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("tp_transacao"))
-                    val dataGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("dt_gasto")).toString()
-                    val valor_compra = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("valor_gasto"))
+                // Verifica se há resultados e processa todos
+                if (regatarGastos.moveToFirst()) {
+                    do {
+                        val idGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("id_gasto")).toInt()
+                        val nomeGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("descricao_gasto")).toString()
+                        val forma_pagamento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("tp_transacao"))
+                        val dataGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("dt_gasto")).toString()
+                        val valor_compra = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("valor_gasto"))
 
-                    //formatando o nome do gasto
-                    val nomeGastoFormatado = FormatarNome().formatar(nomeGasto)
+                        //formatando o nome do gasto
+                        val nomeGastoFormatado = FormatarNome().formatar(nomeGasto)
 
-                    //formatando o a forma de pagamento
-                    val forma_pagamento_formatada = FormatarNome().formatar(forma_pagamento)
+                        //formatando o a forma de pagamento
+                        val forma_pagamento_formatada = FormatarNome().formatar(forma_pagamento)
 
 //                    //formatando a data
 //                    //faz o fatiamento da data
@@ -606,30 +670,89 @@ class BancoDados(private var context: Context) {
 //
 
 
-                    //faz o fatiamento da data
-                    val dia = dataGasto.split("-")[2].trim()
-                    val mes = dataGasto.split("-")[1].trim().toInt()
-                    val ano = dataGasto.split("-")[0].trim()
+                        //faz o fatiamento da data
+                        val dia = dataGasto.split("-")[2].trim()
+                        val mes = dataGasto.split("-")[1].trim().toInt()
+                        val ano = dataGasto.split("-")[0].trim()
 
-                    val nomeMes = ManipularData().pegarNomeMes(mes)
+                        val nomeMes = ManipularData().pegarNomeMes(mes)
 
-                    val dataFormatada = "$dia de $nomeMes de $ano"
+                        val dataFormatada = "$dia de $nomeMes de $ano"
 
-                    //formatando o valor do gasto
-                    // Obtém a instância de NumberFormat para a localidade do Brasil
-                    val formatacaoReal = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+                        //formatando o valor do gasto
+                        // Obtém a instância de NumberFormat para a localidade do Brasil
+                        val formatacaoReal = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
 
-                    val valorGastoFormatado = (formatacaoReal.format(valor_compra.toFloat())).toString()
+                        val valorGastoFormatado = (formatacaoReal.format(valor_compra.toFloat())).toString()
 
 
-                    val itemGasto = OperacaoFinanceira(idGasto, nomeGastoFormatado, forma_pagamento_formatada, valorGastoFormatado, dataFormatada)
+                        val itemGasto = OperacaoFinanceira(idGasto, nomeGastoFormatado, forma_pagamento_formatada, valorGastoFormatado, dataFormatada)
 
-                    // Adiciona o item à lista de itens
-                    listaGastosMes += itemGasto
-                } while (regatarGastos.moveToNext()) // Continua para o próximo item
+                        // Adiciona o item à lista de itens
+                        listaGastosMes += itemGasto
+                    } while (regatarGastos.moveToNext()) // Continua para o próximo item
+                }
+
+                regatarGastos.close()
             }
 
-            regatarGastos.close()
+            else {
+                // Consulta para obter as metas do usuário
+                val regatarGastos: Cursor = bancoDados.rawQuery("SELECT * FROM Gastos WHERE id_user_gasto = ? ORDER BY dt_gasto DESC", arrayOf(IdUsuario.toString()))
+
+                // Verifica se há resultados e processa todos
+                if (regatarGastos.moveToFirst()) {
+                    do {
+                        val idGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("id_gasto")).toInt()
+                        val nomeGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("descricao_gasto")).toString()
+                        val forma_pagamento = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("tp_transacao"))
+                        val dataGasto = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("dt_gasto")).toString()
+                        val valor_compra = regatarGastos.getString(regatarGastos.getColumnIndexOrThrow("valor_gasto"))
+
+                        //formatando o nome do gasto
+                        val nomeGastoFormatado = FormatarNome().formatar(nomeGasto)
+
+                        //formatando o a forma de pagamento
+                        val forma_pagamento_formatada = FormatarNome().formatar(forma_pagamento)
+
+//                    //formatando a data
+//                    //faz o fatiamento da data
+//                    val dia = dataGasto.substring(8,10)
+//                    val mes = (dataGasto.substring(5,7)).toInt()
+//                    val ano = dataGasto.substring(0,4)
+//
+//                    // Obtém o nome do mês atual para exibição
+//                    val calendar = Calendar.getInstance()
+//                    calendar.set(Calendar.MONTH, mes)
+//                    val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+//
+
+
+                        //faz o fatiamento da data
+                        val dia = dataGasto.split("-")[2].trim()
+                        val mes = dataGasto.split("-")[1].trim().toInt()
+                        val ano = dataGasto.split("-")[0].trim()
+
+                        val nomeMes = ManipularData().pegarNomeMes(mes)
+
+                        val dataFormatada = "$dia de $nomeMes de $ano"
+
+                        //formatando o valor do gasto
+                        // Obtém a instância de NumberFormat para a localidade do Brasil
+                        val formatacaoReal = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+
+                        val valorGastoFormatado = (formatacaoReal.format(valor_compra.toFloat())).toString()
+
+
+                        val itemGasto = OperacaoFinanceira(idGasto, nomeGastoFormatado, forma_pagamento_formatada, valorGastoFormatado, dataFormatada)
+
+                        // Adiciona o item à lista de itens
+                        listaGastosMes += itemGasto
+                    } while (regatarGastos.moveToNext()) // Continua para o próximo item
+                }
+
+                regatarGastos.close()
+            }
 
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro recuper gastos: ${e.message}")

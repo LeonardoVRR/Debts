@@ -476,95 +476,77 @@ class Metodos_BD_MySQL {
         }
     }
 
-    fun listarMetas(IDusuario: Int, context: Context): List<dados_listaMeta_DebtMap> {
-        // Inicializa a conexão com BD
-        val con = ConnectionClass().CONN()
-
-        val listasItemsMetas = mutableListOf<dados_listaMeta_DebtMap>()
-
-        // Verifica se a conexão foi estabelecida
-        if (con != null){
-
-            // Crie um Statement para executar a consulta
-            val statement: Statement = con.createStatement()
-
-            // Defina a consulta SQL
-            val sql = "SELECT * FROM metas_financeiras WHERE id_user_meta = $IDusuario"
-
-            try {
-
-                // Executa a consulta e obtém o resultado
-                val consultarMetas: ResultSet = statement.executeQuery(sql)
-
-                // Processa os resultados da consulta
-                while (consultarMetas.next()) {
-                    // Obtendo os resultados da consulta
-                    val idMeta: String = consultarMetas.getString("id_meta")
-                    val nomeMeta: String = consultarMetas.getString("nome_meta")
-                    val dataMeta: String = consultarMetas.getString("dt_meta")
-
-                    val listaMetasJSON = consultarMetas.getString("lista_metas")
-                    val listaMetasConcluidasJSON = consultarMetas.getString("metas_concluidas")
-
-                    // Convertendo os dados JSON em listas
-                    val listaSTR_type = object : TypeToken<List<String>>() {}.type
-                    val listaBool_type = object : TypeToken<List<Boolean>>() {}.type
-
-                    val listaMetas: List<String> = Gson().fromJson(listaMetasJSON, listaSTR_type)
-                    val listaMetasConcluidas: List<Boolean> = Gson().fromJson(listaMetasConcluidasJSON, listaBool_type)
-
-                    val progressoMeta: Float = consultarMetas.getFloat("progresso_meta")
-                    //val id_user_meta: Int = consultarMetas.getInt("id_user_meta")
-
-                    //formatando o nome da meta
-                    val nomeFormatado = FormatarNome().formatar(nomeMeta)
-
-                    // Converte a lista recuperada
-                    val listaConvertida = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas, listaMetasConcluidas)
-
-                    //faz o fatiamento da data
-//                    val dia = dataMeta.split("-")[2].trim()
-//                    val mes = dataMeta.split("-")[1].trim()
-//                    val ano = dataMeta.split("-")[0].trim()
+//    fun listarMetas(IDusuario: Int, context: Context): List<dados_listaMeta_DebtMap> {
+//        // Inicializa a conexão com BD
+//        val con = ConnectionClass().CONN()
 //
-//                    // Obtém o nome do mês atual para exibição
-//                    val calendar = Calendar.getInstance()
-//                    calendar.set(Calendar.MONTH, mes.toInt() - 1)
-//                    val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+//        val listasItemsMetas = mutableListOf<dados_listaMeta_DebtMap>()
 //
-//                    val dataFormatada = "$dia de $nomeMes de $ano"
-
-                    // Cria o item DebtMap
-                    val itemDebtMap = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap(idMeta, nomeFormatado, progressoMeta, dataMeta, listaConvertida)
-
-                    // Adiciona o item à lista de itens
-                    listasItemsMetas += itemDebtMap
-                }
-
-                // Fecha o ResultSet
-                consultarMetas.close()
-
-            } catch (e: SQLException) {
-                e.printStackTrace()
-                Log.e("ErroConsulta", "Erro consulta MySQL: ${e.message}")
-
-            } finally {
-                // Feche os recursos
-                try {
-                    statement.close()
-                    con.close()
-                } catch (e: SQLException) {
-                    e.printStackTrace()
-                }
-            }
-
-        } else {
-            Log.e("ErroConexao", "Conexão não estabelecida")
-
-        }
-
-        return listasItemsMetas.toList()
-    }
+//        // Verifica se a conexão foi estabelecida
+//        if (con != null){
+//
+//            // Crie um Statement para executar a consulta
+//            val statement: Statement = con.createStatement()
+//
+//            // Defina a consulta SQL
+//            val sql = "SELECT * FROM metas WHERE usuario = $IDusuario"
+//
+//            try {
+//
+//                // Executa a consulta e obtém o resultado
+//                val consultarMetas: ResultSet = statement.executeQuery(sql)
+//
+//                // Processa os resultados da consulta
+//                while (consultarMetas.next()) {
+//                    // Obtendo os resultados da consulta
+//                    val idMeta: String = consultarMetas.getString("id_meta")
+//                    val dataMeta: String = consultarMetas.getString("dt_meta")
+//
+//                    //val id_user_meta: Int = consultarMetas.getInt("id_user_meta")
+//
+//                    //faz o fatiamento da data
+////                    val dia = dataMeta.split("-")[2].trim()
+////                    val mes = dataMeta.split("-")[1].trim()
+////                    val ano = dataMeta.split("-")[0].trim()
+////
+////                    // Obtém o nome do mês atual para exibição
+////                    val calendar = Calendar.getInstance()
+////                    calendar.set(Calendar.MONTH, mes.toInt() - 1)
+////                    val nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+////
+////                    val dataFormatada = "$dia de $nomeMes de $ano"
+//
+//                    // Cria o item DebtMap
+//                    val itemDebtMap = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap(idMeta, nomeFormatado, progressoMeta, dataMeta, listaConvertida)
+//
+//                    // Adiciona o item à lista de itens
+//                    listasItemsMetas += itemDebtMap
+//                }
+//
+//                // Fecha o ResultSet
+//                consultarMetas.close()
+//
+//            } catch (e: SQLException) {
+//                e.printStackTrace()
+//                Log.e("ErroConsulta", "Erro consulta MySQL: ${e.message}")
+//
+//            } finally {
+//                // Feche os recursos
+//                try {
+//                    statement.close()
+//                    con.close()
+//                } catch (e: SQLException) {
+//                    e.printStackTrace()
+//                }
+//            }
+//
+//        } else {
+//            Log.e("ErroConexao", "Conexão não estabelecida")
+//
+//        }
+//
+//        return listasItemsMetas.toList()
+//    }
 
     fun salvarMeta(IDusuario: Int, nome_meta: String, dt_meta: String, lista_metas: List<String>, metas_concluidas: List<Boolean>, progresso_meta: Float): String {
         // Inicialize a conexão com BD

@@ -46,7 +46,7 @@ class BroadcastReceiver_ConsultarLista : BroadcastReceiver() {
                         val novaConsultaListaMetas: LocalDateTime =
                             Flask_Consultar_MySQL(context).getUltimaAtualizacaoListas_MySQL(
                                 IDusuario,
-                                "metas_financeiras"
+                                "metas"
                             )
 
                         //val novaConsultaListaMetas: LocalDateTime = Metodos_BD_MySQL().getUltimaAtualizacaoListas_MySQL(IDusuario, "metas_financeiras")
@@ -91,7 +91,7 @@ class BroadcastReceiver_ConsultarLista : BroadcastReceiver() {
                                 )
                                 CustomToast().showCustomToast(context, "Novas metas disponíveis!")
                             } else {
-                                CustomToast().showCustomToast(context, "Nenhuma nova meta.")
+                                //CustomToast().showCustomToast(context, "Nenhuma nova meta.")
                             }
                         }
                         executorService.shutdown()
@@ -189,7 +189,7 @@ class BroadcastReceiver_ConsultarLista : BroadcastReceiver() {
                                 //-------------------------------------- fim config. Notificação ---------------------------------------------//
 
                             } else {
-                                CustomToast().showCustomToast(context, "Nenhuma novo gasto.")
+                                //CustomToast().showCustomToast(context, "Nenhuma novo gasto.")
                             }
                         }
                         executorService.shutdown()
@@ -214,7 +214,7 @@ class BroadcastReceiver_ConsultarLista : BroadcastReceiver() {
                         val novaConsultaListaRendimentos: LocalDateTime =
                             Flask_Consultar_MySQL(context).getUltimaAtualizacaoListas_MySQL(
                                 IDusuario,
-                                "Rendimentos"
+                                "entradas_nrastreadas"
                             )
 
                         // Verifica se há novas metas no BD MySQL
@@ -269,7 +269,7 @@ class BroadcastReceiver_ConsultarLista : BroadcastReceiver() {
                                     "Novos Rendimentos disponíveis!"
                                 )
                             } else {
-                                CustomToast().showCustomToast(context, "Nenhuma novo Rendimentos.")
+                                //CustomToast().showCustomToast(context, "Nenhuma novo Rendimentos.")
                             }
                         }
                         executorService.shutdown()

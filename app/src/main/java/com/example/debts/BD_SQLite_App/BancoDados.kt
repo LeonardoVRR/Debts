@@ -836,23 +836,15 @@ class BancoDados(private var context: Context) {
     }
 
     //função para salvar uma nova meta
-    fun salvarMeta(nomeMeta: String, dataMeta: String, listaMetas:List<String>, listaMetasEstados: List<Boolean>, progressoMeta: Float, IDusuario: Int, idMeta: Int) {
+    fun salvarMeta(cartao: Int, vlr_inicial: Float, perc_meta: Float, dt_meta_inicio: String, dt_meta_conclusao: String, IDusuario: Int, ramo_meta: Int, idMeta: Int) {
 
         try {
 
             // Abre o banco de dados existente no caminho especificado
             bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
-            //convertendo a lista de metas para JSON para poder salvar no banco de dados
-            val listaMetasJSON = Gson().toJson(listaMetas)
-
-            //convertendo a lista de estados para JSON para poder salvar no banco de dados
-            val listaMetasEstadosJSON = Gson().toJson(listaMetasEstados)
-
-            val nomeMetaFormatado = nomeMeta.lowercase()
-
             // query para salvar uma nova meta do usuário
-            val query = "INSERT INTO Metas_Financeiras (id_meta, nome_meta, dt_meta, lista_metas, metas_concluidas, progresso_meta, id_user_meta) VALUES ($idMeta, '$nomeMetaFormatado', '$dataMeta', '$listaMetasJSON', '$listaMetasEstadosJSON', $progressoMeta, $IDusuario)"
+            val query = "INSERT INTO Metas (id_metas, usuario, cartao, vlr_inicial, perc_meta, dt_meta_inicio, dt_meta_conclusao, ramo_meta) VALUES ($idMeta, $IDusuario, $cartao, $vlr_inicial, $perc_meta, '$dt_meta_inicio', '$dt_meta_conclusao', $ramo_meta)"
 
             //executa a query
             bancoDados.execSQL(query)
@@ -878,7 +870,7 @@ class BancoDados(private var context: Context) {
             bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
             // query para excluir uma meta do usuário
-            val query = "DELETE FROM Metas_Financeiras WHERE id_user_meta = $IDusuario AND id_meta = $IdMeta"
+            val query = "DELETE FROM Metas WHERE usuario = $IDusuario AND id_metas = $IdMeta"
 
             //executa a query
             bancoDados.execSQL(query)
@@ -905,31 +897,17 @@ class BancoDados(private var context: Context) {
             bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
             // Consulta para obter as metas do usuário
-            val regatarMetas: Cursor = bancoDados.rawQuery("SELECT * FROM Metas_Financeiras WHERE id_user_meta = ?", arrayOf(IdUsuario.toString()))
+            val resgatarMetas: Cursor = bancoDados.rawQuery("SELECT * FROM Metas WHERE usuario = ?", arrayOf(IdUsuario.toString()))
 
             // Verifica se há resultados e processa todos
-            if (regatarMetas.moveToFirst()) {
+            if (resgatarMetas.moveToFirst()) {
                 do {
-                    val idMeta = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("id_meta")).toString()
-                    val nomeMeta = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("nome_meta")).toString()
-                    val dataMeta = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("dt_meta")).toString()
-                    val listaMetasJSON = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("lista_metas"))
-                    val progressoMeta = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("progresso_meta"))
-                    val listaMetasConcluidasJSON = regatarMetas.getString(regatarMetas.getColumnIndexOrThrow("metas_concluidas"))
+                    val idMeta = resgatarMetas.getString(resgatarMetas.getColumnIndexOrThrow("id_metas")).toString()
+                    val vlr_inicial = resgatarMetas.getFloat(resgatarMetas.getColumnIndexOrThrow("vlr_inicial"))
+                    val perc_meta = resgatarMetas.getFloat(resgatarMetas.getColumnIndexOrThrow("perc_meta"))
+                    val dt_meta_inicio = resgatarMetas.getString(resgatarMetas.getColumnIndexOrThrow("dt_meta_inicio")).toString()
 
-                    //formatando o nome da meta
-                    val nomeFormatado = FormatarNome().formatar(nomeMeta)
-
-                    // Especifica o tipo da lista para deserialização
-                    val tipoLista = object : TypeToken<List<String>>() {}.type
-                    val tipoBool = object : TypeToken<List<Boolean>>() {}.type
-
-                    // Converte a lista JSON resgatada do BD para o tipo "List<String>"
-                    val listaMetas: List<String> = Gson().fromJson(listaMetasJSON, tipoLista)
-                    val listaMetasConcluidas: List<Boolean> = Gson().fromJson(listaMetasConcluidasJSON, tipoBool)
-
-                    // Converte a lista recuperada
-                    val listaConvertida = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas, listaMetasConcluidas)
+                    val dataMeta = dt_meta_inicio.split(" ")[0]
 
                     //faz o fatiamento da data
                     val dia = dataMeta.split("-")[2].trim()
@@ -941,14 +919,14 @@ class BancoDados(private var context: Context) {
                     val dataFormatada = "$dia de $nomeMes de $ano"
 
                     // Cria o item DebtMap
-                    val itemDebtMap = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap(idMeta, nomeFormatado, progressoMeta.toFloat(), dataFormatada, listaConvertida)
+                    val itemDebtMap = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap(idMeta, dataFormatada, vlr_inicial, perc_meta)
 
                     // Adiciona o item à lista de itens
                     listasItemsMetas += itemDebtMap
-                } while (regatarMetas.moveToNext()) // Continua para o próximo item
+                } while (resgatarMetas.moveToNext()) // Continua para o próximo item
             }
 
-            regatarMetas.close()
+            resgatarMetas.close()
         } catch (e: Exception) {
             CustomToast().showCustomToast(context, "Erro recuper lista metas: ${e.message}")
             Log.e("Erro Consulta Listar Metas:", e.message ?: "Erro desconhecido")

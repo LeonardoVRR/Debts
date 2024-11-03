@@ -22,7 +22,7 @@ import com.example.debts.API_Flask.Flask_Consultar_MySQL
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class avisoDeletarMeta(private val context: Context, private val lista_Meta_ID:String, private val IDusuario: Int, private val nomeMeta: String) {
+class avisoDeletarMeta(private val context: Context, private val lista_Meta_ID:String, private val IDusuario: Int) {
     // Configurando a função que vai exibir a mensagem de aviso ao clicar em "Deletar Meta"
     @SuppressLint("MissingInflatedId")
     fun AvisoDeletarMeta() {
@@ -43,7 +43,7 @@ class avisoDeletarMeta(private val context: Context, private val lista_Meta_ID:S
         val btnCancelarExclusao: Button = dialogView.findViewById(R.id.btn_CancelarExclusaoMeta)
         val txt_nomeMetaEcluir: TextView = dialogView.findViewById(R.id.txt_nomeMetaEcluir)
 
-        txt_nomeMetaEcluir.text = nomeMeta
+//        txt_nomeMetaEcluir.text = nomeMeta
 
         // Configurar ações para os botões
         btnConfirmarExclusao.setOnClickListener {

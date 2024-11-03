@@ -83,22 +83,22 @@ class telaPrincipal : AppCompatActivity() {
                 try {
 
                     //salva o tempo da ultima consulta a lista metas do BD MySQL
-                    val salvarConsultaListaMetas_MySQL: LocalDateTime = Flask_Consultar_MySQL(this).getUltimaAtualizacaoListas_MySQL(IDusuario, "metas_financeiras")
+                    val salvarConsultaListaMetas_MySQL: LocalDateTime = Flask_Consultar_MySQL(this).getUltimaAtualizacaoListas_MySQL(IDusuario, "metas")
                     DadosUsuario_BD_Debts(this).setLastUpdateTimestamp_ListaMySQL(salvarConsultaListaMetas_MySQL, "Metas")
 
                     //salva o tempo da ultima consulta a lista gastos do BD MySQL
-                    val salvarConsultaListaGasto_MySQL: LocalDateTime = Flask_Consultar_MySQL(this).getUltimaAtualizacaoListas_MySQL(IDusuario, "gastos")
-                    DadosUsuario_BD_Debts(this).setLastUpdateTimestamp_ListaMySQL(salvarConsultaListaGasto_MySQL, "Gastos")
+                    //val salvarConsultaListaGasto_MySQL: LocalDateTime = Flask_Consultar_MySQL(this).getUltimaAtualizacaoListas_MySQL(IDusuario, "gastos")
+                    //DadosUsuario_BD_Debts(this).setLastUpdateTimestamp_ListaMySQL(salvarConsultaListaGasto_MySQL, "Gastos")
 
                     //salva o tempo da ultima consulta a lista rendimentos do BD MySQL
-                    val salvarConsultaListaRendimento_MySQL: LocalDateTime = Flask_Consultar_MySQL(this).getUltimaAtualizacaoListas_MySQL(IDusuario, "rendimentos")
+                    val salvarConsultaListaRendimento_MySQL: LocalDateTime = Flask_Consultar_MySQL(this).getUltimaAtualizacaoListas_MySQL(IDusuario, "entradas_nrastreadas")
                     DadosUsuario_BD_Debts(this).setLastUpdateTimestamp_ListaMySQL(salvarConsultaListaRendimento_MySQL, "Rendimentos")
 
 
                     //salvando a lista de metas
                     DadosUsuario_BD_Debts.listas_MySQL.metasUsuario = Flask_Consultar_MySQL(this).listarMetas(IDusuario)
                     //salvando a lista de gastos
-                    DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario = Flask_Consultar_MySQL(this).listOpFinanceiras(IDusuario, "gastos")
+                    //DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario = Flask_Consultar_MySQL(this).listOpFinanceiras(IDusuario, "gastos")
                     //salvando a lista de rendimentos
                     DadosUsuario_BD_Debts.listas_MySQL.rendimentosUsuario = Flask_Consultar_MySQL(this).listOpFinanceiras(IDusuario, "rendimentos")
 
@@ -125,7 +125,7 @@ class telaPrincipal : AppCompatActivity() {
                         AgendarConsulta_MySQL(this).agendarAlarmeConsultaLista("listaMetas", 1, 10)
 
                         // ativa um alarme para fazer consultas ao BD na Tabela Gastos de 3 seg em 3 seg
-                        AgendarConsulta_MySQL(this).agendarAlarmeConsultaLista("listaGastos", 2, 5)
+                        //AgendarConsulta_MySQL(this).agendarAlarmeConsultaLista("listaGastos", 2, 5)
 
                         // ativa um alarme para fazer consultas ao BD na Tabela Gastos de 3 seg em 3 seg
                         AgendarConsulta_MySQL(this).agendarAlarmeConsultaLista("listaRendimentos", 3, 5)
@@ -135,7 +135,7 @@ class telaPrincipal : AppCompatActivity() {
                         CompararListas_MySQL_SQLite(this).adicionarNovasMetas(DadosUsuario_BD_Debts.listas_MySQL.metasUsuario, BancoDados(this).listarMetas(IDusuario))
 
                         //lista Gastos
-                        CompararListas_MySQL_SQLite(this).adicionarNovosGastos(DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario, BancoDados(this).listaGastosMes(IDusuario))
+                        //CompararListas_MySQL_SQLite(this).adicionarNovosGastos(DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario, BancoDados(this).listaGastosMes(IDusuario))
 
                         //lista Rendimentos
                         CompararListas_MySQL_SQLite(this).adicionarNovosRendimentos(DadosUsuario_BD_Debts.listas_MySQL.rendimentosUsuario, BancoDados(this).listaRendimentosMes(IDusuario))

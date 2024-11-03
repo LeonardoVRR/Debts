@@ -3,8 +3,10 @@ package com.example.debts.lista_DebtMap
 //define o formato dos dados dos items do DebtMap
 data class dados_listaMeta_DebtMap (
     val idMeta: String,
-    val nomeMeta: String,
-    val progressoMeta: Float,
-    val dataCriacaoMeta:String,
-    val listaMetas_Item: List<dados_listaMeta_Item_DebtMap>
+    val cartao: Int = 0,
+    val vlr_inicial: Float,
+    val perc_meta: Float,
+    val dt_meta_inicio:String,
+    val dt_meta_conclusao: String = "",
+    val ramo_meta: Int = 0
 )

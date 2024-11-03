@@ -101,23 +101,25 @@ class tela_DebtMap : AppCompatActivity() {
         listaDados.mapIndexedNotNull { index, item ->
 
 
-            if (item.progressoMeta == 0f) {
-                Log.d("Lista Metas Novas", "${item}")
+            listaDadosMetasNovas.add(item)
 
-                listaDadosMetasNovas.add(item)
-            }
-
-            else if (item.progressoMeta > 0f && item.progressoMeta < 100f) {
-                Log.d("Lista Metas em progresso", "${item}")
-
-                listaDadosMetasEmProgresso.add(item)
-            }
-
-            else {
-                Log.d("Lista Metas em concluidas", "${item}")
-
-                listaDadosMetasConcluidas.add(item)
-            }
+//            if (item.progressoMeta == 0f) {
+//                Log.d("Lista Metas Novas", "${item}")
+//
+//                listaDadosMetasNovas.add(item)
+//            }
+//
+//            else if (item.progressoMeta > 0f && item.progressoMeta < 100f) {
+//                Log.d("Lista Metas em progresso", "${item}")
+//
+//                listaDadosMetasEmProgresso.add(item)
+//            }
+//
+//            else {
+//                Log.d("Lista Metas em concluidas", "${item}")
+//
+//                listaDadosMetasConcluidas.add(item)
+//            }
         }
 
         //------------- configurando o layout manager do listaMetasNovas -------------------------//
@@ -184,95 +186,95 @@ class tela_DebtMap : AppCompatActivity() {
     }
 
     //salvas as alterações feitas nas metas quando a activity for destruida
-    override fun onDestroy() {
-        super.onDestroy()
-
-        //CustomToast().showCustomToast(this@tela_DebtMap, "Atualizando Metas...")
-
-        val IDusuario = DadosUsuario_BD_Debts(this@tela_DebtMap).pegarIdUsuario()
-
-        val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-        executorService.execute {
-            try {
-
-                val listaAtualizarMetas = CompararListas_MySQL_SQLite(this@tela_DebtMap).atualizarMetas(DadosUsuario_BD_Debts.listas_MySQL.metasUsuario, BancoDados(this@tela_DebtMap).listarMetas(IDusuario))
-
-                if (listaAtualizarMetas) {
-                    resultado = "Metas MySQL atualizadas"
-                } else {
-                    resultado = "Nenhuma meta atualizada"
-                }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Log.e("Erro salvar alteração meta", "${e.message}")
-
-                resultado = "Erro salvar alteração meta: ${e.message}"
-            } finally {
-
-                // Atualizar a UI no thread principal
-                runOnUiThread {
-                    Log.d("lista metas atualizada", resultado)
-                    //CustomToast().showCustomToast(this@tela_DebtMap, "Metas MySQL Atualizadas")
-                }
-
-                executorService.shutdown()
-            }
-        }
-        /*
-
-                        CustomToast().showCustomToast(this@tela_DebtMap, "Atualizando Metas...")
-
-                var resultado = ""
-
-                val IDusuario = DadosUsuario_BD_Debts(this@tela_DebtMap).pegarIdUsuario()
-
-                val msgCarregando = MensagemCarregando(this@tela_DebtMap)
-
-                msgCarregando.mostrarMensagem()
-
-                val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-                executorService.execute {
-                    try {
-
-                        val listaAtualizarMetas = CompararListas_MySQL_SQLite(this@tela_DebtMap).atualizarMetas(DadosUsuario_BD_Debts.listas_MySQL.metasUsuario, BancoDados(this@tela_DebtMap).listarMetas(IDusuario))
-
-                        listaAtualizarMetas.forEach { meta ->
-                            val idMeta = meta.idMeta.toInt()
-
-                            // Converte os estados da lista de metas
-                            val listaMetaEstados: MutableList<Boolean> = meta.listaMetas_Item.map { it.isChecked }.toMutableList()
-
-                            val progressoMeta = meta.progressoMeta
-
-                            resultado = Metodos_BD_MySQL().atualizarMeta(IDusuario, idMeta, listaMetaEstados, progressoMeta)
-
-                            Log.d("RESULTADO METAS ATUALIZADAS 2", "$listaAtualizarMetas")
-
-                        }
-
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        Log.e("Erro salvar alteração meta", "${e.message}")
-
-                        resultado = "Erro salvar alteração meta: ${e.message}"
-                    } finally {
-
-                        // Atualizar a UI no thread principal
-                        runOnUiThread {
-                            msgCarregando.ocultarMensagem()
-
-                            Log.d("lista metas atualizada", resultado)
-                            CustomToast().showCustomToast(this@tela_DebtMap, "Metas MySQL Atualizadas")
-
-
-                        }
-
-                        executorService.shutdown()
-                    }
-                }
-
-        */
-
-    }
+//    override fun onDestroy() {
+//        super.onDestroy()
+//
+//        //CustomToast().showCustomToast(this@tela_DebtMap, "Atualizando Metas...")
+//
+//        val IDusuario = DadosUsuario_BD_Debts(this@tela_DebtMap).pegarIdUsuario()
+//
+//        val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+//        executorService.execute {
+//            try {
+//
+//                val listaAtualizarMetas = CompararListas_MySQL_SQLite(this@tela_DebtMap).atualizarMetas(DadosUsuario_BD_Debts.listas_MySQL.metasUsuario, BancoDados(this@tela_DebtMap).listarMetas(IDusuario))
+//
+//                if (listaAtualizarMetas) {
+//                    resultado = "Metas MySQL atualizadas"
+//                } else {
+//                    resultado = "Nenhuma meta atualizada"
+//                }
+//
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//                Log.e("Erro salvar alteração meta", "${e.message}")
+//
+//                resultado = "Erro salvar alteração meta: ${e.message}"
+//            } finally {
+//
+//                // Atualizar a UI no thread principal
+//                runOnUiThread {
+//                    Log.d("lista metas atualizada", resultado)
+//                    //CustomToast().showCustomToast(this@tela_DebtMap, "Metas MySQL Atualizadas")
+//                }
+//
+//                executorService.shutdown()
+//            }
+//        }
+//        /*
+//
+//                        CustomToast().showCustomToast(this@tela_DebtMap, "Atualizando Metas...")
+//
+//                var resultado = ""
+//
+//                val IDusuario = DadosUsuario_BD_Debts(this@tela_DebtMap).pegarIdUsuario()
+//
+//                val msgCarregando = MensagemCarregando(this@tela_DebtMap)
+//
+//                msgCarregando.mostrarMensagem()
+//
+//                val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+//                executorService.execute {
+//                    try {
+//
+//                        val listaAtualizarMetas = CompararListas_MySQL_SQLite(this@tela_DebtMap).atualizarMetas(DadosUsuario_BD_Debts.listas_MySQL.metasUsuario, BancoDados(this@tela_DebtMap).listarMetas(IDusuario))
+//
+//                        listaAtualizarMetas.forEach { meta ->
+//                            val idMeta = meta.idMeta.toInt()
+//
+//                            // Converte os estados da lista de metas
+//                            val listaMetaEstados: MutableList<Boolean> = meta.listaMetas_Item.map { it.isChecked }.toMutableList()
+//
+//                            val progressoMeta = meta.progressoMeta
+//
+//                            resultado = Metodos_BD_MySQL().atualizarMeta(IDusuario, idMeta, listaMetaEstados, progressoMeta)
+//
+//                            Log.d("RESULTADO METAS ATUALIZADAS 2", "$listaAtualizarMetas")
+//
+//                        }
+//
+//                    } catch (e: Exception) {
+//                        e.printStackTrace()
+//                        Log.e("Erro salvar alteração meta", "${e.message}")
+//
+//                        resultado = "Erro salvar alteração meta: ${e.message}"
+//                    } finally {
+//
+//                        // Atualizar a UI no thread principal
+//                        runOnUiThread {
+//                            msgCarregando.ocultarMensagem()
+//
+//                            Log.d("lista metas atualizada", resultado)
+//                            CustomToast().showCustomToast(this@tela_DebtMap, "Metas MySQL Atualizadas")
+//
+//
+//                        }
+//
+//                        executorService.shutdown()
+//                    }
+//                }
+//
+//        */
+//
+//    }
 }

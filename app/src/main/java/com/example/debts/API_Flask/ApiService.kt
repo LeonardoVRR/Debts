@@ -21,10 +21,8 @@ data class LoginRequest(
 data class Meta(
     val data_meta: String,
     val id_meta: Int,
-    val lista_metas: List<String>,
-    val metas_concluidas: List<Boolean>,
-    val nome_meta: String,
-    val progresso_meta: Float
+    val perc_meta: Float,
+    val vlr_inicial: Float
 )
 
 data class OpFinanc (

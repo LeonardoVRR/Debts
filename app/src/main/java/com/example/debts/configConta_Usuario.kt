@@ -19,12 +19,16 @@ import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.MsgCarregando.MensagemCarregando
+import com.example.debts.layoutExpandivel.criarListaItems
 import com.example.debts.visibilidadeSenha.AlterarVisibilidade
 import kotlinx.coroutines.delay
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class configConta_Usuario : AppCompatActivity() {
+
+    private lateinit var recyclerViewManager: criarListaItems
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -55,6 +59,19 @@ class configConta_Usuario : AppCompatActivity() {
         btn_IconeRedefinirSenha.setOnClickListener { AlterarVisibilidade(input_RedefinirSenha, btn_IconeRedefinirSenha).verSenha() }
         btn_IconeConfirmarRedefinirSenha.setOnClickListener { AlterarVisibilidade(input_ConfirmarRedefinirSenha, btn_IconeConfirmarRedefinirSenha).verSenha() }
 
+        //----- config. area de salvar cartão ----------------------------------------------------//
+
+        val input_numCartao: EditText = findViewById(R.id.input_numCartao)
+        val btn_add_cartao: Button = findViewById(R.id.btn_cadastrarCartao)
+
+        btn_add_cartao.setOnClickListener {
+            val numCartao = input_numCartao.text.toString()
+
+            if (numCartao != "") {
+                salvarCartao(numCartao.toInt())
+            }
+        }
+
         //----- configurando o botão para voltar para a tela do perfil do usuário --------------//
         val btn_btn_voltarPerfilUsuario: ImageButton = findViewById(R.id.btn_voltarPerfilUsuario)
 
@@ -78,6 +95,11 @@ class configConta_Usuario : AppCompatActivity() {
                 finish()
             }
         })
+    }
+
+    // função para salvar um novo cartão no banco de dados
+    fun salvarCartao(numCartao: Int) {
+
     }
 
     //configurando a função para o botão que altera o nome e email do usuário

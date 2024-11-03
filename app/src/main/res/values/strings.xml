@@ -4,6 +4,5 @@
     <string-array name="Escolha">
         <item>Recebimento recorrente</item>
         <item>Recebimento único</item>
-        <item>Divida</item>
     </string-array>
 </resources>

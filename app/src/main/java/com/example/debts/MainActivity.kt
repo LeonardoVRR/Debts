@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
 
         // Cancela os alarmes
         AgendarConsulta_MySQL(this).cancelarAlarme("listaMetas", 1)
-        AgendarConsulta_MySQL(this).cancelarAlarme("listaGastos", 2)
+        //AgendarConsulta_MySQL(this).cancelarAlarme("listaGastos", 2)
         AgendarConsulta_MySQL(this).cancelarAlarme("listaRendimentos", 3)
 
         //definindo o estado do login do usuário
@@ -70,6 +70,8 @@ class MainActivity : AppCompatActivity() {
         //chamando a função para acessar o BD
         BancoDados(this).copyDatabase()
         BancoDados(this).limparBancoDados()
+
+        //BancoDados(this).acessarBancoDados()
 
         //configurando o click do botão logar
 

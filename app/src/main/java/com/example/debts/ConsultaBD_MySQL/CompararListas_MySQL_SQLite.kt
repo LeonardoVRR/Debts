@@ -85,27 +85,18 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
             listaMetasNovas.forEach { meta ->
 
                 val idMeta = meta.idMeta.toInt()
-                val nomeMeta = meta.nomeMeta
-
-                // formatando a data
-                val dataMeta = meta.dataCriacaoMeta
+                val cartao = meta.cartao
+                val vlr_inicial = meta.vlr_inicial
+                val perc_meta = meta.perc_meta
+                val dt_meta_inicio = meta.dt_meta_inicio
+                val dt_meta_conclusao = meta.dt_meta_conclusao
+                val ramo_meta = meta.ramo_meta
 
                 //Log.d("DATA CRIAÇÂO META", "$dataMeta")
 
                 //val dataMetaFormatada = formatarDataString(dataMeta)
 
-                val listaMetas = meta.listaMetas_Item
-                val listaMetasConvertida = mutableListOf<String>()
-                val listaMetaEstados = mutableListOf<Boolean>()
-
-                listaMetas.forEach { item ->
-                    listaMetasConvertida.add(item.nomeMeta)
-                    listaMetaEstados.add(item.isChecked)
-                }
-
-                val progressoMeta = meta.progressoMeta
-
-                BancoDados(context).salvarMeta(nomeMeta, dataMeta, listaMetasConvertida.toList(), listaMetaEstados.toList(), progressoMeta, IDusuario, idMeta)
+                BancoDados(context).salvarMeta(cartao, vlr_inicial, perc_meta, dt_meta_inicio, dt_meta_conclusao, IDusuario, ramo_meta, idMeta)
 
                 resultado = "Novas Metas SQLite"
             }
@@ -128,51 +119,51 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
         Log.d("RESULTADO METAS", resultado)
     }
 
-    fun atualizarMetas(listaMeta_MySQL: List<dados_listaMeta_DebtMap>, listaMeta_SQLite: List<dados_listaMeta_DebtMap>): Boolean {
-
-        val listaAtualizarMetas: MutableList<dados_listaMeta_DebtMap> = mutableListOf()
-
-        val IDusuario = DadosUsuario_BD_Debts(context).pegarIdUsuario()
-
-        var metaAtualizada = false
-
-        for (meta in listaMeta_SQLite) {
-            // Comparar o progresso da meta e a lista de itens
-            if (listaMeta_MySQL.any { it.progressoMeta != meta.progressoMeta || it.listaMetas_Item != meta.listaMetas_Item }) {
-                listaAtualizarMetas.add(meta)
-            }
-        }
-
-        if (listaAtualizarMetas.isNotEmpty()) {
-
-            listaAtualizarMetas.forEach { meta ->
-                val idMeta = meta.idMeta.toInt()
-
-                // Converte os estados da lista de metas
-                val listaMetaEstados: MutableList<Boolean> = meta.listaMetas_Item.map { it.isChecked }.toMutableList()
-
-                val progressoMeta = meta.progressoMeta
-
-                Flask_Consultar_MySQL(context).atualizarMeta(
-                    IDusuario,
-                    idMeta,
-                    listaMetaEstados,
-                    progressoMeta
-                )
-
-            }
-
-            metaAtualizada = true
-        } else {
-            metaAtualizada = false
-        }
-
-        Log.d("RESULTADO METAS ATUALIZADAS", "$listaAtualizarMetas")
-
-        listaAtualizarMetas.clear()
-
-        return metaAtualizada
-    }
+//    fun atualizarMetas(listaMeta_MySQL: List<dados_listaMeta_DebtMap>, listaMeta_SQLite: List<dados_listaMeta_DebtMap>): Boolean {
+//
+//        val listaAtualizarMetas: MutableList<dados_listaMeta_DebtMap> = mutableListOf()
+//
+//        val IDusuario = DadosUsuario_BD_Debts(context).pegarIdUsuario()
+//
+//        var metaAtualizada = false
+//
+//        for (meta in listaMeta_SQLite) {
+//            // Comparar o progresso da meta e a lista de itens
+//            if (listaMeta_MySQL.any { it.progressoMeta != meta.progressoMeta || it.listaMetas_Item != meta.listaMetas_Item }) {
+//                listaAtualizarMetas.add(meta)
+//            }
+//        }
+//
+//        if (listaAtualizarMetas.isNotEmpty()) {
+//
+//            listaAtualizarMetas.forEach { meta ->
+//                val idMeta = meta.idMeta.toInt()
+//
+//                // Converte os estados da lista de metas
+//                val listaMetaEstados: MutableList<Boolean> = meta.listaMetas_Item.map { it.isChecked }.toMutableList()
+//
+//                val progressoMeta = meta.progressoMeta
+//
+//                Flask_Consultar_MySQL(context).atualizarMeta(
+//                    IDusuario,
+//                    idMeta,
+//                    listaMetaEstados,
+//                    progressoMeta
+//                )
+//
+//            }
+//
+//            metaAtualizada = true
+//        } else {
+//            metaAtualizada = false
+//        }
+//
+//        Log.d("RESULTADO METAS ATUALIZADAS", "$listaAtualizarMetas")
+//
+//        listaAtualizarMetas.clear()
+//
+//        return metaAtualizada
+//    }
 
     fun adicionarNovosGastos(listaGasto_MySQL: List<OperacaoFinanceira>, listaGasto_SQLite: List<OperacaoFinanceira>) {
 

@@ -374,7 +374,7 @@ class Flask_Consultar_MySQL(private val context: Context) {
 
 //--------------------------------------------------------------------------------------------------------------------------------//
 
-    fun salvarBalanco(tipoMovimento: String, data: String, valor: Float, IDusuario: Int, tp_OpFinanc: String, nomeBalanco:String = ""): String {
+    fun salvarBalanco(tipoMovimento: Int, data: String, valor: Float, descricao: String, IDusuario: Int, tp_OpFinanc: String, nomeBalanco:String = ""): String {
         var resultado = ""
 
         var jsonRequest = ""
@@ -391,6 +391,7 @@ class Flask_Consultar_MySQL(private val context: Context) {
                     "tipo_movimento": "$tipoMovimento",
                     "data_rendimento": "$data",
                     "valor_rendimento": "$valor",
+                    "descricao": "$descricao",
                     "id": "$IDusuario"
                 }
             """.trimIndent()
@@ -502,9 +503,9 @@ class Flask_Consultar_MySQL(private val context: Context) {
         val jsonRequest = """
         {
             "nvl_conhecimeto_financ": "$nvl_conhecimeto_financ",
-            "tps_investimentos": "$tps_investimentos",
+            "tp_investimentos": "$tps_investimentos",
             "tx_uso_ecommerce": "$tx_uso_ecommerce",
-            "tx_uso_app_transporte":"$tx_uso_app_transporte",
+            "tx_uso_transporte":"$tx_uso_app_transporte",
             "tx_uso_app_entrega":"$tx_uso_app_entrega",
             "id": "$IDusuario"
         }
@@ -663,21 +664,20 @@ class Flask_Consultar_MySQL(private val context: Context) {
 
             metaList.forEach { meta ->
                 val idMeta: Int = meta.id_meta
-                val nomeMeta: String = meta.nome_meta
-                val dataMeta: String = meta.data_meta
-                val listaMetas = meta.lista_metas
-                val listaMetasConcluidas = meta.metas_concluidas
+                val dataCriacao: String = meta.data_meta
+                val vlr_inicial: Float = meta.vlr_inicial
+                val perc_meta: Float = meta.perc_meta
 
-                val progressoMeta: Float = meta.progresso_meta
+                //val progressoMeta: Float = meta.progresso_meta
 
                 //formatando o nome da meta
-                val nomeFormatado = FormatarNome().formatar(nomeMeta)
+                //val nomeFormatado = FormatarNome().formatar(nomeMeta)
 
                 // Converte a lista recuperada
-                val listaConvertida = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas, listaMetasConcluidas)
+                //val listaConvertida = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas, listaMetasConcluidas)
 
                 // Cria o item DebtMap
-                val itemDebtMap = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap(idMeta.toString(), nomeFormatado, progressoMeta, dataMeta, listaConvertida)
+                val itemDebtMap = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap(idMeta.toString(), dataCriacao, vlr_inicial, perc_meta)
 
                 // Adiciona o item à lista de itens
                 listasItemsMetas += itemDebtMap

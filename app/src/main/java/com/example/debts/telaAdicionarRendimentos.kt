@@ -103,8 +103,8 @@ class telaAdicionarRendimentos : AppCompatActivity() {
 
             else {
                 txt_dataBalanco.text = "Data do Recebimento:"
-                txt_inputGasto.visibility = View.GONE
-                inputNomeGasto.visibility = View.GONE
+                txt_inputGasto.visibility = View.VISIBLE
+                inputNomeGasto.visibility = View.VISIBLE
             }
 
             // Código para recarregar o conteúdo do ScrollView
@@ -149,7 +149,9 @@ class telaAdicionarRendimentos : AppCompatActivity() {
 
         val descricaoGasto = inputNomeGasto.text.toString().trim()
 
-        if (tipoMovimentacao.isEmpty() || dataRendimento.isEmpty() || valorRendimento.isEmpty()){
+        var recorrencia = 0
+
+        if (tipoMovimentacao.isEmpty() || dataRendimento.isEmpty() || valorRendimento.isEmpty() || descricaoGasto.isEmpty()){
             CustomToast().showCustomToast(this, "Preencha todos os campos.")
         }
 
@@ -168,13 +170,21 @@ class telaAdicionarRendimentos : AppCompatActivity() {
                 CustomToast().showCustomToast(this, "Data Inválida: $dataRendimento")
             }
 
-            else {
+           else {
 
                 if (tipoMovimentacao != "Divida") {
 //                    txt_inputGasto.visibility = View.GONE
 //                    inputNomeGasto.visibility = View.GONE
 
                     //BancoDados(this).salvarRendimento(tipoMovimentacao, dataRendimento, valorRendimentoFormatado, idUsuario)
+
+                    if (tipoMovimentacao == "Recebimento único") {
+                        recorrencia = 0
+                    }
+
+                    else {
+                        recorrencia = 1
+                    }
 
                     var resultado = ""
 
@@ -186,10 +196,10 @@ class telaAdicionarRendimentos : AppCompatActivity() {
                     executorService.execute {
                         try {
 
-                            resultado = Flask_Consultar_MySQL(this).salvarBalanco(tipoMovimentacao, dataRendimento, valorRendimentoFormatado, idUsuario, "rendimento")
+                            resultado = Flask_Consultar_MySQL(this).salvarBalanco(recorrencia, dataRendimento, valorRendimentoFormatado, descricaoGasto, idUsuario, "rendimento")
 
                         } catch (e: Exception) {
-                            e.printStackTrace()
+                               e.printStackTrace()
                             //str = "Erro ao se conectar: ${e.message}"
                         }
 
@@ -198,48 +208,48 @@ class telaAdicionarRendimentos : AppCompatActivity() {
                             msgCarregando.ocultarMensagem()
                             CustomToast().showCustomToast(this, resultado)
                         }
-                    }
+                   }
                 }
 
-                else if (tipoMovimentacao == "Divida") {
-//                    txt_inputGasto.visibility = View.VISIBLE
-//                    inputNomeGasto.visibility = View.VISIBLE
-
-                    if (tipoMovimentacao.isEmpty() || dataRendimento.isEmpty() || valorRendimento.isEmpty() || descricaoGasto.isEmpty()){
-                        CustomToast().showCustomToast(this, "Preencha todos os campos.")
-                    }
-
-                    else {
-                        var resultado = ""
-
-                        val msgCarregando = MensagemCarregando(this)
-
-                        msgCarregando.mostrarMensagem()
-
-                        val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-                        executorService.execute {
-                            try {
-
-                                resultado = Flask_Consultar_MySQL(this).salvarBalanco(tipoMovimentacao, dataRendimento, valorRendimentoFormatado, idUsuario, "gasto", descricaoGasto)
-
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                //str = "Erro ao se conectar: ${e.message}"
-                            }
-
-                            // Atualizar a UI no thread principal
-                            runOnUiThread {
-                                msgCarregando.ocultarMensagem()
-                                CustomToast().showCustomToast(this, resultado)
-                            }
-                        }
-                    }
-                }
-
-//                else {
-//                    txt_inputGasto.visibility = View.GONE
-//                    inputNomeGasto.visibility = View.GONE
+//                else if (tipoMovimentacao == "Divida") {
+////                    txt_inputGasto.visibility = View.VISIBLE
+////                    inputNomeGasto.visibility = View.VISIBLE
+//
+//                    if (tipoMovimentacao.isEmpty() || dataRendimento.isEmpty() || valorRendimento.isEmpty() || descricaoGasto.isEmpty()){
+//                        CustomToast().showCustomToast(this, "Preencha todos os campos.")
+//                    }
+//
+//                    else {
+//                        var resultado = ""
+//
+//                        val msgCarregando = MensagemCarregando(this)
+//
+//                        msgCarregando.mostrarMensagem()
+//
+//                        val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+//                        executorService.execute {
+//                            try {
+//
+//                                resultado = Flask_Consultar_MySQL(this).salvarBalanco(tipoMovimentacao, dataRendimento, valorRendimentoFormatado, idUsuario, "gasto", descricaoGasto)
+//
+//                            } catch (e: Exception) {
+//                                e.printStackTrace()
+//                                //str = "Erro ao se conectar: ${e.message}"
+//                            }
+//
+//                            // Atualizar a UI no thread principal
+//                            runOnUiThread {
+//                                msgCarregando.ocultarMensagem()
+//                                CustomToast().showCustomToast(this, resultado)
+//                            }
+//                        }
+//                    }
 //                }
+//
+////                else {
+////                    txt_inputGasto.visibility = View.GONE
+////                    inputNomeGasto.visibility = View.GONE
+////                }
             }
         }
     }

@@ -26,30 +26,25 @@ cursor = None
 def validarUsuario(IDusuario):
     # Inicializar a conexão com o banco de dados
     try:
-        conn = pymysql.connect(**db_config)
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        # Inicializa a conexão com o banco de dados usando o gerenciador de contexto
+        with pymysql.connect(**db_config) as conn:
+            # Abre um cursor também com gerenciador de contexto
+            with conn.cursor() as cursor:
 
-        # Consulta SQL
-        sql = "SELECT * FROM usuario WHERE id_usuario = %s"
-        cursor.execute(sql, (IDusuario,))
+                # Consulta SQL
+                sql = "SELECT * FROM usuario WHERE id_usuario = %s"
+                cursor.execute(sql, (IDusuario,))
 
-        # Processar o resultado
-        result = cursor.fetchone()
-        if result:
-            return True, "Usuário valido."
-        else:
-            return False, "Esse usuário não existe."
+                # Processar o resultado
+                result = cursor.fetchone()
+                if result:
+                    return True, "Usuário valido."
+                else:
+                    return False, "Esse usuário não existe."
 
     except pymysql.MySQLError as err:
         print(f"Erro na consulta validar usuario: {err}")
         return False, f"Erro ao realizar a consulta validar usuario: {err}"
-
-    finally:
-        # Fechar o cursor e a conexão
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 #----------------- Função p/ pegar o nome do mês pelo numero -----------------------------------------------------------
 
@@ -79,40 +74,33 @@ def pegar_nome_mes(mes: int) -> str:
 
 # Função para validar login
 def validar_login(nome, senha):
-
-    # Inicializar a conexão com o banco de dados
     try:
-        conn = pymysql.connect(**db_config)
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        # Inicializa a conexão com o banco de dados usando o gerenciador de contexto
+        with pymysql.connect(**db_config) as conn:
+            # Abre um cursor DictCursor para obter os resultados como dicionário
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
 
-        # Consulta SQL
-        sql = "SELECT * FROM usuario WHERE nome_usuario = %s AND senha_usuario = %s"
-        cursor.execute(sql, (nome, senha))
+                # Consulta SQL
+                sql = "SELECT * FROM usuario WHERE nome_usuario = %s AND senha_usuario = %s"
+                cursor.execute(sql, (nome, senha))
 
-        # Processar o resultado
-        result = cursor.fetchone()
-        if result:
-            dados_usuario = {
-                "nome": result["nome_usuario"],
-                "email": result["email_usuario"],
-                "cpf": result["cpf_usuario"],
-                "senha": result["senha_usuario"],
-                "id_usuario": result["id_usuario"]
-            }
-            return True, dados_usuario
-        else:
-            return False, {}
+                # Processar o resultado
+                result = cursor.fetchone()
+                if result:
+                    dados_usuario = {
+                        "nome": result["nome_usuario"],
+                        "email": result["email_usuario"],
+                        "cpf": result["cpf_usuario"],
+                        "senha": result["senha_usuario"],
+                        "id_usuario": result["id_usuario"]
+                    }
+                    return True, dados_usuario
+                else:
+                    return False, {}
 
     except pymysql.MySQLError as err:
         print(f"Erro na consulta validar login: {err}")
         return False, f"Erro ao realizar a consulta validar login: {err}"
-
-    finally:
-        # Fechar o cursor e a conexão
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 # Rota de login
 @app.route('/login', methods=['POST'])
@@ -143,42 +131,36 @@ def cadastraConta(nome, email, cpf, senha):
     emailFormatado = email.lower()
 
     try:
-        # Inicializar a conexão com o banco de dados
-        conn = pymysql.connect(**db_config)
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        # Inicializa a conexão com o banco de dados usando o gerenciador de contexto
+        with pymysql.connect(**db_config) as conn:
+            # Abre um cursor também com gerenciador de contexto
+            with conn.cursor() as cursor:
 
-        # Verificar se o email já está cadastrado
-        emailConsulta = "SELECT * FROM usuario WHERE email_usuario = %s"
-        cursor.execute(emailConsulta, (emailFormatado,))
-        verificarEmail = cursor.fetchone()
+                # Verificar se o email já está cadastrado
+                emailConsulta = "SELECT * FROM usuario WHERE email_usuario = %s"
+                cursor.execute(emailConsulta, (emailFormatado,))
+                verificarEmail = cursor.fetchone()
 
-        # Verificar se o CPF já está cadastrado
-        cpfConsulta = "SELECT * FROM usuario WHERE cpf_usuario = %s"
-        cursor.execute(cpfConsulta, (cpf,))
-        verificarCPF = cursor.fetchone()
+                # Verificar se o CPF já está cadastrado
+                cpfConsulta = "SELECT * FROM usuario WHERE cpf_usuario = %s"
+                cursor.execute(cpfConsulta, (cpf,))
+                verificarCPF = cursor.fetchone()
 
-        # Se o email ou CPF já existir, retornamos a mensagem de erro
-        if verificarEmail or verificarCPF:
-            return True, "Essa conta ja existe"
+                # Se o email ou CPF já existir, retornamos a mensagem de erro
+                if verificarEmail or verificarCPF:
+                    return True, "Essa conta ja existe"
 
-        else:
-            # Se o email e o CPF não existirem, inserimos a nova conta
-            insert = "INSERT INTO usuario (nome_usuario, senha_usuario, email_usuario, cpf_usuario) VALUES (%s, %s, %s, %s)"
-            cursor.execute(insert, (nomeFormatado, emailFormatado, cpf, senha))
-            conn.commit()  # Confirmar a transação
+                else:
+                    # Se o email e o CPF não existirem, inserimos a nova conta
+                    insert = "INSERT INTO usuario (nome_usuario, senha_usuario, email_usuario, cpf_usuario) VALUES (%s, %s, %s, %s)"
+                    cursor.execute(insert, (nomeFormatado, emailFormatado, cpf, senha))
+                    conn.commit()  # Confirmar a transação
 
-            return False, "Conta criada com sucesso"
+                    return False, "Conta criada com sucesso"
 
     except pymysql.MySQLError as err:
         print(f"Erro na consulta cadastrar conta: {err}")
         return False, f"Erro ao realizar a consulta cadastrar conta: {err}"
-
-    finally:
-        # Fechar o cursor e a conexão
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 
 # Rota p/ cadastrar uma nova conta
@@ -210,31 +192,26 @@ def novaConta():
 def verificarQuestionario(IDusuario):
     # Inicializar a conexão com o banco de dados
     try:
-        conn = pymysql.connect(**db_config)
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        # Inicializa a conexão com o banco de dados usando o gerenciador de contexto
+        with pymysql.connect(**db_config) as conn:
+            # Abre um cursor também com gerenciador de contexto
+            with conn.cursor() as cursor:
 
-        # Consulta SQL
-        sql = "SELECT * FROM questionario WHERE id_usuario = %s"
-        cursor.execute(sql, (IDusuario,))
+                # Consulta SQL
+                sql = "SELECT * FROM questionario WHERE id_usuario = %s"
+                cursor.execute(sql, (IDusuario,))
 
-        # Processar o resultado
-        questionarioPreenchido = cursor.fetchone()
+                # Processar o resultado
+                questionarioPreenchido = cursor.fetchone()
 
-        if questionarioPreenchido:
-            return True, "Questinario preenchido."
-        else:
-            return False, "Questionario nao preenchido."
+                if questionarioPreenchido:
+                    return True, "Questinario preenchido."
+                else:
+                    return False, "Questionario nao preenchido."
 
     except pymysql.MySQLError as err:
         print(f"Erro na consulta verificar Questionario: {err}")
         return False, f"Erro ao realizar a consulta verificar Questionario: {err}"
-
-    finally:
-        # Fechar o cursor e a conexão
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 # Rota p/ consultar o questionario
 @app.route('/verificar_questionario', methods=['POST'])
@@ -268,55 +245,47 @@ def consultarQuestionario():
 def salvarQuestionario(nvl_conhecimeto_financ, tps_investimentos, tx_uso_ecommerce, tx_uso_app_transporte, tx_uso_app_entrega, IDusuario):
 
     try:
-        # Inicializar a conexão com o banco de dados
-        conn = pymysql.connect(**db_config)
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        with pymysql.connect(**db_config) as conn:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
 
-        tps_investimentosJSON = json.dumps(tps_investimentos)
+                tps_investimentosJSON = json.dumps(tps_investimentos)
 
-        # Verificar se o questionário já foi preenchido
-        questionarioPreenchido, _ = verificarQuestionario(IDusuario)
+                # Verificar se o questionário já foi preenchido
+                questionarioPreenchido, _ = verificarQuestionario(IDusuario)
 
-        # Verifica se já existe um questionario salvo se existir ele só atualiza as informações
-        if questionarioPreenchido:
-            update = """
-                        UPDATE questionario
-                        SET nvl_conhecimeto_financ = %s, 
-                            tps_investimentos = %s, 
-                            tx_uso_ecommerce = %s, 
-                            tx_uso_transporte = %s, 
-                            tx_uso_app_entrega = %s 
-                        WHERE id_usuario = %s
-                        """
-            cursor.execute(update, (nvl_conhecimeto_financ, tps_investimentosJSON, tx_uso_ecommerce, tx_uso_app_transporte, tx_uso_app_entrega, IDusuario))
-            conn.commit() # Confirmar a transação
+                # Verifica se já existe um questionario salvo se existir ele só atualiza as informações
+                if questionarioPreenchido:
+                    update = """
+                                UPDATE questionario
+                                SET nvl_conhecimeto_financ = %s, 
+                                    tps_investimentos = %s, 
+                                    tx_uso_ecommerce = %s, 
+                                    tx_uso_transporte = %s, 
+                                    tx_uso_app_entrega = %s 
+                                WHERE id_usuario = %s
+                                """
+                    cursor.execute(update, (nvl_conhecimeto_financ, tps_investimentosJSON, tx_uso_ecommerce, tx_uso_app_transporte, tx_uso_app_entrega, IDusuario))
+                    conn.commit() # Confirmar a transação
 
-            # Verificar se algum dado foi atualizado
-            if cursor.rowcount > 0:
-                return True, "Questionario atualizado com sucesso"
+                    # Verificar se algum dado foi atualizado
+                    if cursor.rowcount > 0:
+                        return True, "Questionario atualizado com sucesso"
 
-        else:
-            # Se o questionário não existir, ele sera salvo no BD
-            insert = """
-                        INSERT INTO questionario
-                        (id_usuario, nvl_conhecimeto_financ, tps_investimentos, tx_uso_ecommerce, tx_uso_transporte, tx_uso_app_entrega) 
-                        VALUES (%s, %s, %s, %s, %s, %s)
-                        """
-            cursor.execute(insert, (IDusuario, nvl_conhecimeto_financ, tps_investimentosJSON, tx_uso_ecommerce, tx_uso_app_transporte, tx_uso_app_entrega))
-            conn.commit()  # Confirmar a transação
+                else:
+                    # Se o questionário não existir, ele sera salvo no BD
+                    insert = """
+                                INSERT INTO questionario
+                                (id_usuario, nvl_conhecimeto_financ, tps_investimentos, tx_uso_ecommerce, tx_uso_transporte, tx_uso_app_entrega) 
+                                VALUES (%s, %s, %s, %s, %s, %s)
+                                """
+                    cursor.execute(insert, (IDusuario, nvl_conhecimeto_financ, tps_investimentosJSON, tx_uso_ecommerce, tx_uso_app_transporte, tx_uso_app_entrega))
+                    conn.commit()  # Confirmar a transação
 
-            return True, "Questionario salvo com sucesso"
+                    return True, "Questionario salvo com sucesso"
 
     except pymysql.MySQLError as err:
         print(f"Erro na consulta salvar questionario: {err}")
         return False, f"Erro ao realizar a consulta salvar questionario: {err}"
-
-    finally:
-        # Fechar o cursor e a conexão
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 # Rota p/ salvar/atualizar o questionário
 @app.route('/salvar_questionario', methods=['POST','PUT'])
@@ -356,31 +325,24 @@ def atualizarQuestionario():
 def atualizarDados(novoNome, novoEmail, IDusuario):
     # Inicializar a conexão com o banco de dados
     try:
-        conn = pymysql.connect(**db_config)
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        with pymysql.connect(**db_config) as conn:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
 
-        # Consulta SQL
-        sql = "UPDATE usuario SET nome_usuario = %s, email_usuario = %s WHERE id_usuario = %s"
-        cursor.execute(sql, (novoNome, novoEmail, IDusuario))
+                # Consulta SQL
+                sql = "UPDATE usuario SET nome_usuario = %s, email_usuario = %s WHERE id_usuario = %s"
+                cursor.execute(sql, (novoNome, novoEmail, IDusuario))
 
-        conn.commit()  # Confirmar a transação
+                conn.commit()  # Confirmar a transação
 
-        # Verificar se algum dado foi atualizado
-        if cursor.rowcount > 0:
-            return True, "Dados atualizados com sucesso"
-        else:
-            return False, "Nenhum dado atualizado. Verifique se o ID do usuário esta correto."
+                # Verificar se algum dado foi atualizado
+                if cursor.rowcount > 0:
+                    return True, "Dados atualizados com sucesso"
+                else:
+                    return False, "Nenhum dado atualizado. Verifique se o ID do usuário esta correto."
 
     except pymysql.MySQLError as err:
         print(f"Erro na consulta atualizar dados: {err}")
         return False, f"Erro ao realizar a consulta atualizar dados: {err}"
-
-    finally:
-        # Fechar o cursor e a conexão
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 # Rota p/ atualizar os dados do usuário
 @app.route('/atualizar_dados', methods=['PUT'])
@@ -410,31 +372,24 @@ def atualizarDadosUsuario():
 def atualizarSenha(novaSenha, IDusuario):
     # Inicializar a conexão com o banco de dados
     try:
-        conn = pymysql.connect(**db_config)
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        with pymysql.connect(**db_config) as conn:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
 
-        # Consulta SQL
-        sql = "UPDATE usuario SET senha_usuario = %s WHERE id_usuario = %s"
-        cursor.execute(sql, (novaSenha, IDusuario))
+                # Consulta SQL
+                sql = "UPDATE usuario SET senha_usuario = %s WHERE id_usuario = %s"
+                cursor.execute(sql, (novaSenha, IDusuario))
 
-        conn.commit()  # Confirmar a transação
+                conn.commit()  # Confirmar a transação
 
-        # Verificar se algum dado foi atualizado
-        if cursor.rowcount > 0:
-            return True, "Senha atualizada com sucesso"
-        else:
-            return False, "Senha nao atualizada. Verifique se o ID do usuario esta correto."
+                # Verificar se algum dado foi atualizado
+                if cursor.rowcount > 0:
+                    return True, "Senha atualizada com sucesso"
+                else:
+                    return False, "Senha nao atualizada. Verifique se o ID do usuario esta correto."
 
     except pymysql.MySQLError as err:
         print(f"Erro na consulta atualizar senha: {err}")
         return False, f"Erro ao realizar a atualizar senha: {err}"
-
-    finally:
-        # Fechar o cursor e a conexão
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 # Rota p/ atualizar a senha do usuário
 @app.route('/atualizar_senha', methods=['PUT'])
@@ -461,36 +416,30 @@ def atualizarSenhaUsuario():
 
 # Função para deletar um usuário do banco de dados
 def deletar_usuario(IDusuario):
-    cursor = None
 
     # Inicializa a conexão com o banco de dados
     try:
-        conn = pymysql.connect(**db_config)
+        # Inicializa a conexão com o banco de dados usando o gerenciador de contexto
+        with pymysql.connect(**db_config) as conn:
+            # Abre um cursor também com gerenciador de contexto
+            with conn.cursor() as cursor:
 
-        # Query para excluir um usuário
-        query = "DELETE FROM Usuario WHERE id_usuario = %s"
+                # Query para excluir um usuário
+                query = "DELETE FROM Usuario WHERE id_usuario = %s"
 
-        # Preparar a instrução SQL
-        cursor = conn.cursor()
-        cursor.execute(query, (IDusuario,))  # Executa a consulta
+                # Preparar a instrução SQL
+                cursor.execute(query, (IDusuario,))  # Executa a consulta
 
-        # Verificar se alguma linha foi afetada
-        if cursor.rowcount > 0:
-            conn.commit()  # Commit da transação
-            return True, "Usuario deletado com sucesso."
-        else:
-            return False, "Usuario nao encontrado. Verifique se o ID do usuario está correto."
+                # Verificar se alguma linha foi afetada
+                if cursor.rowcount > 0:
+                    conn.commit()  # Commit da transação
+                    return True, "Usuario deletado com sucesso."
+                else:
+                    return False, "Usuario nao encontrado. Verifique se o ID do usuario está correto."
 
     except pymysql.MySQLError as e:
         print(f"Erro ao realizar a consulta deletar usuario: {e}")
         return False, f"Erro ao deletar usuario: {e}"
-
-    finally:
-        # Fechar o cursor e a conexão
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 # Rota p/ deletar um usuário
 @app.route('/deletar_usuario', methods=['DELETE'])
@@ -519,48 +468,48 @@ def deletarUsuario():
 
 #----------------- Rota p/ salvar as Metas do Usuário ----------------------------
 # Função para salvar meta no banco de dados
-def salvar_meta(IDusuario, cartao, vlr_inicial, perc_meta, dt_meta_conclusao, ramo_meta):
+def salvar_meta(IDusuario, cartao, vlr_inicial, perc_meta, ramo_meta):
     # Inicializa a conexão com o banco de dados
     try:
-        conn = pymysql.connect(**db_config)
+        # Inicializa a conexão com o banco de dados usando o gerenciador de contexto
+        with pymysql.connect(**db_config) as conn:
+            # Abre um cursor também com gerenciador de contexto
+            with conn.cursor() as cursor:
 
-        perc_meta_calc = vlr_inicial * (1 - perc_meta)
+                perc_meta_calc = vlr_inicial * (1 - perc_meta)
 
-        # Converter listas para JSON
-        #listaMetasJSON = json.dumps(lista_metas)
-        #listaMetasConcluidasJSON = json.dumps(metas_concluidas)
+                dt_meta_conclusao = datetime.now()
 
-        # Query para inserir a meta
-        insert = """
-            INSERT INTO metas
-            (usuario, cartao, vlr_inicial, perc_meta, dt_meta_conclusao, ramo_meta) 
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """
+                # Formata a data e hora no formato compatível com MySQL (YYYY-MM-DD HH:MM:SS)
+                data_hora_mysql = dt_meta_conclusao.strftime('%Y-%m-%d 00:00:00')
 
-        # Preparar a instrução SQL
-        cursor = conn.cursor()
+                # Converter listas para JSON
+                #listaMetasJSON = json.dumps(lista_metas)
+                #listaMetasConcluidasJSON = json.dumps(metas_concluidas)
 
-        # Executar a consulta com os parâmetros
-        cursor.execute(insert,
-                       (IDusuario, cartao, vlr_inicial, perc_meta_calc, dt_meta_conclusao, ramo_meta))
+                # Query para inserir a meta
+                insert = """
+                    INSERT INTO metas
+                    (usuario, cartao, vlr_inicial, perc_meta, dt_meta_conclusao, ramo_meta) 
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """
 
-        # Verificar se a inserção foi bem-sucedida
-        if cursor.rowcount > 0:
-            conn.commit()  # Confirmar a transação
-            return True, "Meta salva com sucesso!"
-        else:
-            return False, "Falha ao salvar a meta."
+                # Preparar a instrução SQL
+
+                # Executar a consulta com os parâmetros
+                cursor.execute(insert,
+                               (IDusuario, cartao, vlr_inicial, perc_meta_calc, data_hora_mysql, ramo_meta))
+
+                # Verificar se a inserção foi bem-sucedida
+                if cursor.rowcount > 0:
+                    conn.commit()  # Confirmar a transação
+                    return True, "Meta salva com sucesso!"
+                else:
+                    return False, "Falha ao salvar a meta."
 
     except pymysql.MySQLError as e:
         print(f"Erro ao salvar meta: {e}")
         return False, f"Erro ao salvar meta: {e}"
-
-    finally:
-        # Fechar o cursor e a conexão
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 # Rota p/ salvar uma nova meta
 @app.route('/salvar_meta', methods=['POST'])
@@ -573,14 +522,13 @@ def novaMeta():
     cartao = data.get('cartao')
     vlr_inicial = data.get('vlr_inicial')
     perc_meta = data.get('perc_meta')
-    dt_meta_conclusao = data.get('dt_meta_conclusao')
     ramo_meta = data.get('ramo_meta')
 
-    if not IDusuario or not vlr_inicial or not perc_meta or not dt_meta_conclusao:
+    if not IDusuario or not vlr_inicial or not perc_meta:
         return jsonify({"message": "informe todos os dados necessários para realizar o salvamento da meta!"}), 400
 
     # Chamar a função para cadastrar a conta
-    metaSalva, mensagem = salvar_meta(IDusuario, cartao, vlr_inicial, perc_meta, dt_meta_conclusao, ramo_meta)
+    metaSalva, mensagem = salvar_meta(IDusuario, cartao, vlr_inicial, perc_meta, ramo_meta)
 
     if metaSalva:
         return jsonify({"message": mensagem}), 200
@@ -588,60 +536,50 @@ def novaMeta():
         return jsonify({"message": mensagem}), 400
 
 #----------------- Rota p/ atualizar as Metas do Usuário ----------------------------
+
 # Função para atualizar metas no banco de dados
 def atualizar_meta(IDusuario, IdMeta):
-
     try:
-        # Inicializa a conexão com o banco de dados
-        conn = pymysql.connect(**db_config)
+        # Conexão com o banco de dados utilizando gerenciadores de contexto
+        with pymysql.connect(**db_config) as conn:
+            with conn.cursor() as cursorMetaConclusao:
 
-        consultarDt_conclusaoMeta = """
-            select dt_meta_conclusao from metas where id_metas = %s and usuario = %s
-        """
-
-        cursorMetaConclusao = conn.cursor()
-        cursorMetaConclusao.execute(consultarDt_conclusaoMeta, (IdMeta, IDusuario))
-
-        resultado = cursorMetaConclusao.fetchone()
-
-        if resultado:
-            horaCadastro = str(resultado).split(" ")[1]
-
-            if horaCadastro != "00:00:00":
-
-                dt_meta_conclusao = datetime.now()
-
-                # Formata a data e hora no formato compatível com MySQL (YYYY-MM-DD HH:MM:SS)
-                data_hora_mysql = dt_meta_conclusao.strftime('%Y-%m-%d %H:%M:%S')
-
-                # Query para atualizar a meta
-                query = """
-                    UPDATE metas 
-                    SET dt_meta_conclusao = %s
-                    WHERE usuario = %s AND id_metas = %s
+                # Consulta para verificar a data de conclusão da meta
+                consultarDt_conclusaoMeta = """
+                    SELECT dt_meta_conclusao FROM metas WHERE id_metas = %s AND usuario = %s
                 """
+                cursorMetaConclusao.execute(consultarDt_conclusaoMeta, (IdMeta, IDusuario))
+                resultado = cursorMetaConclusao.fetchone()
 
-                # Preparar a instrução SQL
-                cursor = conn.cursor()
-                cursor.execute(query, (data_hora_mysql, IDusuario, IdMeta))
+                if resultado:
+                    horaCadastro = str(resultado[0]).split(" ")[1]  # Extrai a hora da data
 
-                # Executa a consulta e verifica se algo foi atualizado
-                if cursor.rowcount > 0:
-                    conn.commit()  # Confirma a transação
-                    return True, "Meta MySQL atualizada"
-                else:
-                    return False, "Meta não atualizada. Verifique se o ID do usuário ou da Meta estão corretos."
+                    # Verifica se a hora não é "00:00:00", então atualiza a meta
+                    if horaCadastro != "00:00:00":
+                        dt_meta_conclusao = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Formato MySQL
+
+                        # Query para atualizar a meta
+                        update_query = """
+                            UPDATE metas 
+                            SET dt_meta_conclusao = %s
+                            WHERE usuario = %s AND id_metas = %s
+                        """
+
+                        # Executa a atualização com gerenciador de contexto do cursor
+                        with conn.cursor() as cursorUpdate:
+                            cursorUpdate.execute(update_query, (dt_meta_conclusao, IDusuario, IdMeta))
+
+                            # Confirma a transação se houver atualização
+                            if cursorUpdate.rowcount > 0:
+                                conn.commit()
+                                return True, "Meta MySQL atualizada com sucesso."
+                            else:
+                                return False, "Meta não encontrada."
 
     except pymysql.MySQLError as e:
         print(f"Erro ao atualizar meta: {e}")
         return False, f"Erro ao atualizar meta: {e}"
 
-    finally:
-        # Fechar o cursor e a conexão
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 # Rota p/ atualizar as metas do usuário
 @app.route('/atualizar_meta', methods=['PUT'])
@@ -670,32 +608,26 @@ def atualizarMetaUsuario():
 def deletar_meta(IDusuario, IdMeta):
 
     try:
-        # Inicializa a conexão com o banco de dados
-        conn = pymysql.connect(**db_config)
+        # Inicializa a conexão com o banco de dados usando o gerenciador de contexto
+        with pymysql.connect(**db_config) as conn:
+            # Abre um cursor também com gerenciador de contexto
+            with conn.cursor() as cursor:
 
-        # Query para excluir a meta com base no ID da meta e ID do usuário
-        query = "DELETE FROM metas WHERE id_metas = %s AND usuario = %s"
+                # Query para excluir a meta com base no ID da meta e ID do usuário
+                query = "DELETE FROM metas WHERE id_metas = %s AND usuario = %s"
 
-        # Preparar a instrução SQL
-        cursor = conn.cursor()
-        cursor.execute(query, (IdMeta, IDusuario))  # Executa a consulta com parâmetros
+                # Preparar a instrução SQL
+                cursor.execute(query, (IdMeta, IDusuario))  # Executa a consulta com parâmetros
 
-        if cursor.rowcount > 0:  # Verificar se a meta foi excluída
-            conn.commit()  # Confirmar a transação
-            return True, "Meta excluida com sucesso."
-        else:
-            return False, "Meta nao encontrada ou ja excluida."
+                if cursor.rowcount > 0:  # Verificar se a meta foi excluída
+                    conn.commit()  # Confirmar a transação
+                    return True, "Meta excluida com sucesso."
+                else:
+                    return False, "Meta nao encontrada ou ja excluida."
 
     except pymysql.MySQLError as e:
         print(f"Erro ao deletar meta: {e}")
         return False, f"Erro ao deletar meta: {e}"
-
-    finally:
-        # Fechar o cursor e a conexão
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 # Rota p/ deletar uma meta do usuário
 @app.route('/deletar_meta', methods=['DELETE'])
@@ -720,80 +652,55 @@ def deletarMetaUsuario():
 
 #----------------- Rota p/ listar todas as Metas do Usuário ----------------------------
 
-#----------------- Arrumar rota --------------------------------------------------
-# Função para listar todas as metas do usuario
+# Função para listar todas as metas do usuário
 def listar_metas(IDusuario):
-    # Inicializa a conexão com o banco de dados
     try:
-        conn = pymysql.connect(**db_config)
+        # Conexão com o banco de dados
+        with pymysql.connect(**db_config) as conn:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
 
-        # Lista para armazenar as metas
-        listas_items_metas = []
+                # Lista para armazenar as metas
+                listas_items_metas = []
 
-        # Query para selecionar as metas do usuário
-        sql = "SELECT * FROM metas WHERE usuario = %s"
+                # Query para selecionar as metas do usuário
+                sql = "SELECT * FROM metas WHERE usuario = %s"
+                cursor.execute(sql, (IDusuario,))  # Executar a consulta
 
-        # Preparar a instrução SQL
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute(sql, (IDusuario,))  # Executar a consulta
+                resultado = cursor.fetchall()
 
-        resultado = cursor.fetchall()
+                if resultado:
+                    # Processar os resultados da consulta
+                    for row in resultado:
+                        id_meta = row['id_metas']
+                        vlr_inicial = row['vlr_inicial']
+                        perc_meta = row['perc_meta']
+                        dt_meta_inicio = row['dt_meta_inicio']
 
-        if resultado:
+                        # Verificar e formatar a data
+                        if isinstance(dt_meta_inicio, datetime):
+                            data_meta_formatada = dt_meta_inicio.strftime("%Y-%m-%d")
+                        else:
+                            data_meta_formatada = str(dt_meta_inicio).split(" ")[0]
 
-            # Processar os resultados da consulta
-            for row in resultado:
-                # Recuperar dados da consulta
-                id_meta = row['id_meta']
-                nome_meta = row['nome_meta']
-                data_meta = row['dt_meta_inicio']
+                        # Criar o item com os dados da meta
+                        item_debt_map = {
+                            "id_meta": id_meta,
+                            "vlr_inicial": vlr_inicial,
+                            "perc_meta": perc_meta,
+                            "data_meta": data_meta_formatada
+                        }
 
-                # Formatar a data no formato yyyy-MM-dd
-                if isinstance(data_meta, datetime):
-                    data_meta_formatada = data_meta.strftime("%Y-%m-%d")
+                        # Adicionar o item à lista
+                        listas_items_metas.append(item_debt_map)
+
+                    return True, listas_items_metas
+
                 else:
-                    data_meta_formatada = str(data_meta)
-
-                # Obter as listas de metas e metas concluídas em formato JSON e converter para listas Python
-                lista_metas_json = row['lista_metas']
-                lista_metas_concluidas_json = row['metas_concluidas']
-
-                lista_metas = json.loads(lista_metas_json)  # Converte de JSON para lista de strings
-                lista_metas_concluidas = json.loads(lista_metas_concluidas_json)  # Converte de JSON para lista de booleanos
-
-                progresso_meta = row['progresso_meta']
-
-                nome_formatado = nome_meta.lower()
-
-                # Criar o item com os dados da meta
-                item_debt_map = {
-                    "id_meta": id_meta,
-                    "nome_meta": nome_formatado,
-                    "data_meta": data_meta_formatada,
-                    "lista_metas": lista_metas,
-                    "metas_concluidas": lista_metas_concluidas,
-                    "progresso_meta": progresso_meta
-                }
-
-                # Adicionar o item à lista
-                listas_items_metas.append(item_debt_map)
-
-            # Retornar a lista de metas
-            return True, listas_items_metas
-
-        else:
-            return False, "Erro ao listar metas ou nenhum registro encontrado"
+                    return False, "Erro ao listar metas ou nenhum registro encontrado"
 
     except pymysql.MySQLError as e:
         print(f"Erro ao listar metas: {e}")
-        return False, "Erro ao listar metas: {e}"
-
-    finally:
-        # Fechar o cursor e a conexão
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        return False, f"Erro ao listar metas: {e}"
 
 @app.route('/listar_metas', methods=['POST'])
 def listar_metas_route():
@@ -819,55 +726,49 @@ def listar_metas_route():
 # Função para salvar rendimento no banco de dados
 def salvar_rendimento(tipoMovimento, dataRendimento, valorRendimento, descricao, IDusuario):
     try:
-        # Inicializa a conexão com o banco de dados
-        conn = pymysql.connect(**db_config)
+        # Inicializa a conexão com o banco de dados usando o gerenciador de contexto
+        with pymysql.connect(**db_config) as conn:
+            # Abre um cursor também com gerenciador de contexto
+            with conn.cursor() as cursor:
 
-        # Formatar a data recebida (dd/MM/yyyy) para o formato (yyyy-MM-dd)
-        dia, mes, ano = dataRendimento.split("/")
-        dia = dia.strip()
-        mes = int(mes.strip())
-        ano = ano.strip()
+                # Formatar a data recebida (dd/MM/yyyy) para o formato (yyyy-MM-dd)
+                dia, mes, ano = dataRendimento.split("/")
+                dia = dia.strip()
+                mes = int(mes.strip())
+                ano = ano.strip()
 
-        # Obter o nome do mês usando a biblioteca calendar
-        nomeMes = pegar_nome_mes(mes)  # Pega o nome completo do mês (ex: Janeiro)
+                # Obter o nome do mês usando a biblioteca calendar
+                nomeMes = pegar_nome_mes(mes)  # Pega o nome completo do mês (ex: Janeiro)
 
-        # Formatar a data para o formato yyyy-MM-dd
-        mes_formatado = f"{mes:02d}"
-        data_formatada = f"{ano}-{mes_formatado}-{dia}"
+                # Formatar a data para o formato yyyy-MM-dd
+                mes_formatado = f"{mes:02d}"
+                data_formatada = f"{ano}-{mes_formatado}-{dia}"
 
-        # Query para salvar um novo rendimento do usuário
-        sql = """
-            INSERT INTO entradas_nrastreadas (usuario, ds_entrada, recorencia, valor, dt_recorrencia)
-            VALUES (%s, %s, %s, %s, %s)
-        """
+                # Query para salvar um novo rendimento do usuário
+                sql = """
+                    INSERT INTO entradas_nrastreadas (usuario, ds_entrada, recorencia, valor, dt_recorrencia)
+                    VALUES (%s, %s, %s, %s, %s)
+                """
 
-        usuarioExiste, mensagem = validarUsuario(IDusuario)
+                usuarioExiste, mensagem = validarUsuario(IDusuario)
 
-        if usuarioExiste:
+                if usuarioExiste:
 
-            # Preparar a instrução SQL e executar a consulta
-            cursor = conn.cursor()
-            cursor.execute(sql, (IDusuario, descricao, tipoMovimento, valorRendimento, data_formatada))
+                    # Preparar a instrução SQL e executar a consulta
+                    cursor.execute(sql, (IDusuario, descricao, tipoMovimento, valorRendimento, data_formatada))
 
-            if cursor.rowcount > 0:  # Verificar se o rendimento foi salvo
-                conn.commit()  # Confirmar a transação
-                return True, "Rendimento salvo com sucesso."
-            else:
-                return False, "Rendimento nao salvo. Verifique se o ID do usuario esta correto."
+                    if cursor.rowcount > 0:  # Verificar se o rendimento foi salvo
+                        conn.commit()  # Confirmar a transação
+                        return True, "Rendimento salvo com sucesso."
+                    else:
+                        return False, "Rendimento nao salvo. Verifique se o ID do usuario esta correto."
 
-            cursor.close()
-
-        else:
-            return False, mensagem
+                else:
+                    return False, mensagem
 
     except pymysql.MySQLError as e:
         print(f"Erro ao realizar a consulta salvar rendimento: {e}")
         return False, f"Erro ao realizar a consulta salvar rendimento: {e}"
-
-    finally:
-        # Fechar o cursor e a conexão
-        if conn:
-            conn.close()
 
 @app.route('/salvar_rendimento', methods=['POST'])
 def salvar_rendimento_route():
@@ -980,76 +881,68 @@ def lista_rendimentos(IDusuario):
     lista_rendimentos = []
 
     try:
-        # Conectar ao banco de dados
-        conn = pymysql.connect(**db_config)
+        # Inicializa a conexão com o banco de dados usando o gerenciador de contexto
+        with pymysql.connect(**db_config) as conn:
+            # Abre um cursor também com gerenciador de contexto
+            with conn.cursor() as cursor:
 
-        cursor = conn.cursor()
+                # Defina a consulta SQL
+                sql = "SELECT * FROM entradas_nrastreadas WHERE usuario = %s ORDER BY dt_recorrencia ASC"
+                cursor.execute(sql, (IDusuario,))
 
-        # Defina a consulta SQL
-        sql = "SELECT * FROM entradas_nrastreadas WHERE usuario = %s ORDER BY dt_recorrencia ASC"
-        cursor.execute(sql, (IDusuario,))
+                resultado = cursor.fetchall()
 
-        resultado = cursor.fetchall()
+                if resultado:
 
-        if resultado:
+                    # Processar os resultados da consulta
+                    for row in resultado:
+                        id_rendimento = row[0]
+                        nome_rendimento = row[2]
+                        data_rendimento = row[5]
+                        valor_rendimento = row[4]
+                        recorrencia = row[3]
 
-            # Processar os resultados da consulta
-            for row in resultado:
-                id_rendimento = row[0]
-                nome_rendimento = row[2]
-                data_rendimento = row[5]
-                valor_rendimento = row[4]
-                recorrencia = row[3]
+                        # Formatar o nome do rendimento
+                        #nome_rendimento_formatado = nome_rendimento.capitalize()
 
-                # Formatar o nome do rendimento
-                #nome_rendimento_formatado = nome_rendimento.capitalize()
+                        # Formatar a data (yyyy-MM-dd) para "dia de mês de ano"
+                        #dia = data_rendimento.day
+                        #mes = data_rendimento.month
+                        #ano = data_rendimento.year
 
-                # Formatar a data (yyyy-MM-dd) para "dia de mês de ano"
-                #dia = data_rendimento.day
-                #mes = data_rendimento.month
-                #ano = data_rendimento.year
+                        # Obter o nome do mês usando a biblioteca calendar
+                        #nomeMes = pegar_nome_mes(mes)  # Pega o nome completo do mês (ex: Janeiro)
 
-                # Obter o nome do mês usando a biblioteca calendar
-                #nomeMes = pegar_nome_mes(mes)  # Pega o nome completo do mês (ex: Janeiro)
+                        # Formatar a data para "dia de mês de ano"
+                        #data_formatada = f"{dia} de {nomeMes} de {ano}"
+                        data_formatada = data_rendimento.strftime('%Y-%m-%d')
 
-                # Formatar a data para "dia de mês de ano"
-                #data_formatada = f"{dia} de {nomeMes} de {ano}"
-                data_formatada = data_rendimento.strftime('%Y-%m-%d')
+                        # Formatar o valor como moeda brasileira
+                        try:
+                            valor_rendimento_formatado = locale.currency(float(valor_rendimento), grouping=True)
+                        except ValueError:
+                            valor_rendimento_formatado = "Valor inválido"
 
-                # Formatar o valor como moeda brasileira
-                try:
-                    valor_rendimento_formatado = locale.currency(float(valor_rendimento), grouping=True)
-                except ValueError:
-                    valor_rendimento_formatado = "Valor inválido"
+                        # Criar um dicionário representando a operação financeira
+                        item_rendimento = {
+                            'id': id_rendimento,
+                            'descricao': nome_rendimento,
+                            'tipo_movimento': recorrencia,
+                            'valor': valor_rendimento,
+                            'data': data_formatada
+                        }
 
-                # Criar um dicionário representando a operação financeira
-                item_rendimento = {
-                    'id': id_rendimento,
-                    'descricao': nome_rendimento,
-                    'tipo_movimento': recorrencia,
-                    'valor': valor_rendimento,
-                    'data': data_formatada
-                }
+                        # Adicionar à lista de rendimentos
+                        lista_rendimentos.append(item_rendimento)
 
-                # Adicionar à lista de rendimentos
-                lista_rendimentos.append(item_rendimento)
+                    return True, lista_rendimentos
 
-            return True, lista_rendimentos
-
-        else:
-            return False, "Lista de rendimentos vazia. Verifique se o ID do usuário está correto."
-
-        # Fechar o cursor
-        cursor.close()
-
+                else:
+                    return False, "Lista de rendimentos vazia. Verifique se o ID do usuário está correto."
 
     except pymysql.MySQLError as e:
         print(f"Erro ao realizar a consulta listar rendimentos: {e}")
         return False, f"Erro ao realizar a consulta listar rendimentos: {e}"
-
-    finally:
-        # Fechar o cursor e a conexão
-        conn.close()
 
 @app.route('/listar_rendimentos', methods=['POST'])
 def listar_rendimentos():
@@ -1202,37 +1095,31 @@ def get_ultima_atualizacao_listas_mysql(IDusuario, consultarLista):
         atributo = "dt_entrada"
 
     try:
-        # Inicializa a conexão com o banco de dados
-        conn = pymysql.connect(**db_config)
+        # Inicializa a conexão com o banco de dados usando o gerenciador de contexto
+        with pymysql.connect(**db_config) as conn:
+            # Abre um cursor também com gerenciador de contexto
+            with conn.cursor() as cursor:
 
-        cursor = conn.cursor()
+                # Consulta SQL para buscar a última data de criação
+                sql = f"SELECT {atributo} FROM {consultarLista.lower()} WHERE usuario = %s ORDER BY {atributo} DESC LIMIT 1"
 
-        # Consulta SQL para buscar a última data de criação
-        sql = f"SELECT {atributo} FROM {consultarLista.lower()} WHERE usuario = %s ORDER BY {atributo} DESC LIMIT 1"
+                cursor.execute(sql, (IDusuario,))
 
-        cursor.execute(sql, (IDusuario,))
+                # Processa o resultado
+                result = cursor.fetchone()
 
-        # Processa o resultado
-        result = cursor.fetchone()
+                if result:
+                    data_criacao = result[0]  # Pega o valor da coluna `data_criacao`
+                    timesTamp = data_criacao.strftime("%Y-%m-%d %H:%M:%S")
 
-        if result:
-            data_criacao = result[0]  # Pega o valor da coluna `data_criacao`
-            timesTamp = data_criacao.strftime("%Y-%m-%d %H:%M:%S")
+                    return True, timesTamp
 
-            return True, timesTamp
-
-        else:
-            return False, "Busca nao realizada. Verifique se o ID do usuario esta correto."
-
-        cursor.close()
+                else:
+                    return False, "Busca nao realizada. Verifique se o ID do usuario esta correto."
 
     except pymysql.MySQLError as e:
         print(f"Erro ao realizar a consulta getUltimaAtualizacaoListas_MySQL: {e}")
         return False, f"Erro ao realizar a consulta getUltimaAtualizacaoListas_MySQL: {e}"
-
-    finally:
-        # Fechar o cursor
-        conn.close()
 
 @app.route('/verificar_atualizacao_tabela', methods=['POST'])
 def pegarUltimaAtualizacaoTabela():
@@ -1256,35 +1143,29 @@ def pegarUltimaAtualizacaoTabela():
 
 def salvarCartao (IDusuario, ds_operadora, tp_credito, tp_debito, saldo, limite):
     try:
-        # Inicializa a conexão com o banco de dados
-        conn = pymysql.connect(**db_config)
+        # Inicializa a conexão com o banco de dados usando o gerenciador de contexto
+        with pymysql.connect(**db_config) as conn:
+            # Abre um cursor também com gerenciador de contexto
+            with conn.cursor() as cursor:
 
-        # Query para salvar um novo cartao do usuário
-        sql = """
-            INSERT INTO cartoes (usuario, ds_operadora, tp_credito, tp_debito, saldo, limite)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """
+                # Query para salvar um novo cartao do usuário
+                sql = """
+                    INSERT INTO cartoes (usuario, ds_operadora, tp_credito, tp_debito, saldo, limite)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """
 
-        # Preparar a instrução SQL e executar a consulta
-        cursor = conn.cursor()
-        cursor.execute(sql, (IDusuario, ds_operadora, tp_credito, tp_debito, saldo, limite))
+                # Preparar a instrução SQL e executar a consulta
+                cursor.execute(sql, (IDusuario, ds_operadora, tp_credito, tp_debito, saldo, limite))
 
-        if cursor.rowcount > 0:  # Verificar se o rendimento foi salvo
-            conn.commit()  # Confirmar a transação
-            return True, "cartao salvo com sucesso."
-        else:
-            return False, "cartao nao salvo. Verifique se o ID do usuario esta correto."
-
-        cursor.close()
+                if cursor.rowcount > 0:  # Verificar se o rendimento foi salvo
+                    conn.commit()  # Confirmar a transação
+                    return True, "cartao salvo com sucesso."
+                else:
+                    return False, "cartao nao salvo. Verifique se o ID do usuario esta correto."
 
     except pymysql.MySQLError as e:
         print(f"Erro ao realizar a consulta salvar cartao: {e}")
         return False, f"Erro ao realizar a consulta salvar cartao: {e}"
-
-    finally:
-        # Fechar o cursor e a conexão
-        if conn:
-            conn.close()
 
 @app.route('/salvar_cartao', methods=['POST'])
 def salvarCartaoTabela():
@@ -1308,6 +1189,86 @@ def salvarCartaoTabela():
 
     if cartaoSalvo:
         return jsonify({"message": mensagem}), 200  # Código 200 para sucesso
+    else:
+        return jsonify({"message": mensagem}), 404  # Código 404 para erro
+
+def listar_cartoes(IDusuario):
+    try:
+        # Conexão com o banco de dados
+        with pymysql.connect(**db_config) as conn:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+
+                # Lista para armazenar as metas
+                lista_cartoes = []
+
+                # Query para selecionar as metas do usuário
+                sql = "SELECT * FROM cartoes WHERE usuario = %s"
+                cursor.execute(sql, (IDusuario,))  # Executar a consulta
+
+                resultado = cursor.fetchall()
+
+                if resultado:
+                    # Processar os resultados da consulta
+                    for row in resultado:
+                        id_cartao = row['cd_cartao']
+                        ds_operadora = row['ds_operadora']
+                        tp_credito = row['tp_credito']
+                        tp_debito = row['tp_debito']
+                        saldo = row['saldo']
+                        limite = row['limite']
+
+                        tp_cartao = ""
+                        valor = 0
+
+                        if tp_debito > 0 and tp_credito <= 0:
+                            if saldo != None:
+                                tp_cartao = "Debito"
+                                valor = saldo
+
+                        elif tp_credito > 0 and tp_debito <= 0:
+                            if limite != None:
+                                tp_cartao = "Credito"
+                                valor = limite
+
+
+                        # Criar o item com os dados do cartao
+                        item_cartao = {
+                            'id': id_cartao,
+                            'descricao': ds_operadora,
+                            'tipo_movimento': tp_cartao,
+                            'valor': valor,
+                            'data': ""
+                        }
+
+                        # Adicionar o item à lista
+                        lista_cartoes.append(item_cartao)
+
+                    return True, lista_cartoes
+
+                else:
+                    return False, "Erro ao listar cartoes ou nenhum registro encontrado"
+
+    except pymysql.MySQLError as e:
+        print(f"Erro ao listar cartoes: {e}")
+        return False, f"Erro ao listar cartoes: {e}"
+
+@app.route('/listar_cartoes', methods=['POST'])
+def listaCartoes():
+    # Converte o corpo da requisição JSON em um dicionário Python
+    data = request.json
+
+    # Verificar se os campos obrigatórios estão presentes
+    IDusuario = data.get('id')
+
+
+    if not IDusuario:
+        return jsonify({"message": "informe o id do usuario, para prosseguir"}), 400
+
+    # Chamar a função para salvar o rendimento
+    listaCartao, mensagem = listar_cartoes(IDusuario)
+
+    if listaCartao:
+        return jsonify(mensagem), 200  # Código 200 para sucesso
     else:
         return jsonify({"message": mensagem}), 404  # Código 404 para erro
 

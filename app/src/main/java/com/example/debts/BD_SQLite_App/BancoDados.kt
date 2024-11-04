@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import com.example.debts.Conexao_BD.DadosMetasFinanceiras_Usuario_BD_Debts
 import com.example.debts.CustomToast
+import com.example.debts.FormatarMoeda.formatarReal
 import com.example.debts.FormatarNome.FormatarNome
 import com.example.debts.ManipularData.ManipularData
 import com.example.debts.layout_Item_lista.OperacaoFinanceira
@@ -835,6 +836,66 @@ class BancoDados(private var context: Context) {
         return listaGastosMes.toList()
     }
 
+    fun listarCartoes(IdUsuario: Int): List<OperacaoFinanceira> {
+
+        var listaCartoes: MutableList<OperacaoFinanceira> = mutableListOf()
+
+        try {
+            // Abre o banco de dados existente no caminho especificado
+            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+            // Consulta para obter as metas do usuário
+            val regatarCartoes: Cursor = bancoDados.rawQuery("SELECT * FROM cartoes WHERE usuario = ?", arrayOf(IdUsuario.toString()))
+
+            // Verifica se há resultados e processa todos
+            if (regatarCartoes.moveToFirst()) {
+                do {
+                    val id_cartao = regatarCartoes.getString(regatarCartoes.getColumnIndexOrThrow("cd_cartao")).toInt()
+                    val ds_operadora = regatarCartoes.getString(regatarCartoes.getColumnIndexOrThrow("ds_operadora")).toString()
+                    val tp_credito = regatarCartoes.getString(regatarCartoes.getColumnIndexOrThrow("tp_credito")).toFloat()
+                    val tp_debito = regatarCartoes.getString(regatarCartoes.getColumnIndexOrThrow("tp_debito")).toFloat()
+                    val saldo = regatarCartoes.getString(regatarCartoes.getColumnIndexOrThrow("saldo")).toFloat()
+                    val limite = regatarCartoes.getString(regatarCartoes.getColumnIndexOrThrow("limite")).toFloat()
+
+                    //formatando o nome do gasto
+                    val nomeFormatado = FormatarNome().formatar(ds_operadora)
+
+                    var tp_cartao = ""
+                    var valor = ""
+
+                    if (tp_credito > 0 && tp_debito <= 0){
+                        tp_cartao = "Crédito"
+                        valor = formatarReal().formatarParaReal(limite)
+                    }
+
+                    else if (tp_debito > 0 && tp_credito <= 0){
+                        tp_cartao = "Débito"
+                        valor = formatarReal().formatarParaReal(saldo)
+                    }
+
+
+                    val itemGasto = OperacaoFinanceira(id_cartao, nomeFormatado, tp_cartao, valor, "")
+
+                    // Adiciona o item à lista de itens
+                    listaCartoes += itemGasto
+                } while (regatarCartoes.moveToNext()) // Continua para o próximo item
+            }
+
+            regatarCartoes.close()
+
+        } catch (e: Exception) {
+            CustomToast().showCustomToast(context, "Erro recuper listar Cartoes: ${e.message}")
+            Log.e("Erro Consulta listar Cartoes:", e.message ?: "Erro desconhecido")
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+
+        return listaCartoes.toList()
+    }
+
     //função para salvar uma nova meta
     fun salvarMeta(cartao: Int, vlr_inicial: Float, perc_meta: Float, dt_meta_inicio: String, dt_meta_conclusao: String, IDusuario: Int, ramo_meta: Int, idMeta: Int) {
 
@@ -1099,6 +1160,40 @@ class BancoDados(private var context: Context) {
         }
 
         return rendimentoSalvo
+    }
+
+    fun salvarCartao(id_cartao: Int, ds_operadora: String, tp_credito: Int = 0, tp_debito: Int = 0, saldo: Float = 0f, limite: Float = 0f, IDusuario: Int): Boolean {
+
+        var cartaoSalvo: Boolean = false
+
+        try {
+
+            // Abre o banco de dados existente no caminho especificado
+            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+
+            // query para salvar uma nova meta do usuário
+            val query = "INSERT INTO cartoes (cd_cartao, usuario, ds_operadora, tp_credito, tp_debito, saldo, limite) VALUES ($id_cartao, $IDusuario, '$ds_operadora', $tp_credito, $tp_debito, $saldo, $limite)"
+
+            //executa a query
+            bancoDados.execSQL(query)
+
+            //CustomToast().showCustomToast(context, "Rendimento salvo com sucesso!")
+
+            cartaoSalvo = true
+
+        } catch (e: Exception) {
+            CustomToast().showCustomToast(context, "Erro Consulta Cartao: ${e.message}")
+            Log.e("Erro Consulta Cartao:", e.message ?: "Erro desconhecido")
+
+            cartaoSalvo = false
+        } finally {
+            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+            if (::bancoDados.isInitialized) {
+                bancoDados.close()
+            }
+        }
+
+        return cartaoSalvo
     }
 
     fun salvarGasto(nomeGasto: String, tipoMovimento: String, valorGasto: Float, dataGasto: String, IDusuario: Int, idGasto: Int): Boolean {

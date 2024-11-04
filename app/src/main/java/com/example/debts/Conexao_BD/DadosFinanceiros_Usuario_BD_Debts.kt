@@ -50,4 +50,10 @@ class DadosFinanceiros_Usuario_BD_Debts(private val context: Context, private va
 
         return listaGastosRecentes
     }
+
+    fun pegarListaCartoes(): List<OperacaoFinanceira> {
+        val listaCartoes = BancoDados(context).listarCartoes(IDusuario)
+
+        return listaCartoes
+    }
 }

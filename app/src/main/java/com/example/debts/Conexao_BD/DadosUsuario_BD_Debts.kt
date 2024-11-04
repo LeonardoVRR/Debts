@@ -17,6 +17,7 @@ class DadosUsuario_BD_Debts(private val context: Context) {
         var metasUsuario: List<dados_listaMeta_DebtMap> = listOf()
         var rendimentosUsuario: List<OperacaoFinanceira> = listOf()
         var gastosUsuario: List<OperacaoFinanceira> = listOf()
+        var cartoesUsuario: List<OperacaoFinanceira> = listOf()
     }
 
     object listaMetaEstados {

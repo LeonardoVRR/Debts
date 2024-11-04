@@ -97,6 +97,10 @@ class telaPrincipal : AppCompatActivity() {
 
                     //salvando a lista de metas
                     DadosUsuario_BD_Debts.listas_MySQL.metasUsuario = Flask_Consultar_MySQL(this).listarMetas(IDusuario)
+
+                    //salvando a lista de cartoes
+                    DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario = Flask_Consultar_MySQL(this).listCartoes(IDusuario)
+
                     //salvando a lista de gastos
                     //DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario = Flask_Consultar_MySQL(this).listOpFinanceiras(IDusuario, "gastos")
                     //salvando a lista de rendimentos
@@ -105,8 +109,8 @@ class telaPrincipal : AppCompatActivity() {
                     Log.d("Lista Rendimentos SQLite", "${BancoDados(this).listaRendimentosMes(IDusuario)}")
                     Log.d("Lista Rendimentos MySQL", "${DadosUsuario_BD_Debts.listas_MySQL.rendimentosUsuario}")
 
-                    Log.d("Lista Gastos SQLite", "${BancoDados(this).listaGastosMes(IDusuario)}")
-                    Log.d("Lista Gastos MySQL", "${DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario}")
+                    Log.d("Lista Cartoes SQLite", "${BancoDados(this).listarCartoes(IDusuario)}")
+                    Log.d("Lista Cartoes MySQL", "${DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario}")
 
 
                     resultado = "Dados carregados com sucesso!"
@@ -139,6 +143,8 @@ class telaPrincipal : AppCompatActivity() {
 
                         //lista Rendimentos
                         CompararListas_MySQL_SQLite(this).adicionarNovosRendimentos(DadosUsuario_BD_Debts.listas_MySQL.rendimentosUsuario, BancoDados(this).listaRendimentosMes(IDusuario))
+
+                        CompararListas_MySQL_SQLite(this).adicionarNovosCartoes(DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario, BancoDados(this).listarCartoes(IDusuario))
 
                         CustomToast().showCustomToast(this, resultado)
 

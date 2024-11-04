@@ -14,14 +14,22 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.debts.API_Flask.Flask_Consultar_MySQL
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
+import com.example.debts.Conexao_BD.DadosFinanceiros_Usuario_BD_Debts
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.ConsultaBD_MySQL.AgendarConsulta_MySQL
+import com.example.debts.ConsultaBD_MySQL.CompararListas_MySQL_SQLite
 import com.example.debts.MsgCarregando.MensagemCarregando
 import com.example.debts.layoutExpandivel.criarListaItems
+import com.example.debts.layout_Item_lista.ItemSpacingDecoration
+import com.example.debts.layout_Item_lista.MyConstraintAdapter
 import com.example.debts.visibilidadeSenha.AlterarVisibilidade
 import kotlinx.coroutines.delay
+import org.threeten.bp.LocalDateTime
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -38,6 +46,10 @@ class configConta_Usuario : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+
+        var listaCartoesSalvos = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaCartoes().toMutableList()
 
         //--------------- config. texto do hint dos input nome e email ---------------------------//
         val hint_txt_Nome: EditText = findViewById(R.id.input_mudarNomeUsuario)
@@ -72,6 +84,21 @@ class configConta_Usuario : AppCompatActivity() {
             }
         }
 
+        val listaCartoes: RecyclerView = findViewById(R.id.lista_cartoesCadastrados)
+
+        //configurando o layout manager
+        listaCartoes.layoutManager = LinearLayoutManager(this)
+        listaCartoes.setHasFixedSize(true)
+
+        //configurando o espaçamento entre os itens
+        listaCartoes.addItemDecoration(ItemSpacingDecoration())
+
+        // Crie o adaptador para o RecyclerView
+        var adapter = MyConstraintAdapter(listaCartoesSalvos)
+
+        //adicionando os items na lista
+        listaCartoes.adapter = adapter
+
         //----- configurando o botão para voltar para a tela do perfil do usuário --------------//
         val btn_btn_voltarPerfilUsuario: ImageButton = findViewById(R.id.btn_voltarPerfilUsuario)
 
@@ -79,6 +106,58 @@ class configConta_Usuario : AppCompatActivity() {
             val navegarPerfilUsuario = Intent(this, telaPerfilUsuario::class.java)
             startActivity(navegarPerfilUsuario)
             finish()
+        }
+
+        val btn_atualizarListaCartoes: ImageButton = findViewById(R.id.btn_atualizar_listaCartoes)
+
+        btn_atualizarListaCartoes.setOnClickListener {
+            CustomToast().showCustomToast(this, "Atualizando Cartões!")
+
+            var resultado = ""
+
+            val msgCarregando = MensagemCarregando(this)
+
+            msgCarregando.mostrarMensagem()
+
+            val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+            executorService.execute {
+                try {
+
+                    //salvando a lista de cartoes
+                    DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario = Flask_Consultar_MySQL(this).listCartoes(IDusuario)
+
+                    Log.d("Lista Cartoes SQLite", "${BancoDados(this).listarCartoes(IDusuario)}")
+                    Log.d("Lista Cartoes MySQL", "${DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario}")
+
+
+                    resultado = "Cartões Atualizados!"
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    resultado = "Erro ao se conectar: ${e.message}"
+                    Log.e("Erro ao se conectar", "${e.message}")
+                } finally {
+
+                    // Atualizar a UI no thread principal
+                    runOnUiThread {
+                        msgCarregando.ocultarMensagem()
+
+                        listaCartoesSalvos.clear()
+
+                        CompararListas_MySQL_SQLite(this).adicionarNovosCartoes(DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario, BancoDados(this).listarCartoes(IDusuario))
+
+                        val novaListaCartoes = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaCartoes().toMutableList()
+
+                        // Atualizar a lista e notificar o adapter
+                        listaCartoesSalvos.addAll(novaListaCartoes)
+                        adapter.notifyDataSetChanged() // Notifica o Adapter que os dados mudaram
+
+                        CustomToast().showCustomToast(this, resultado)
+                    }
+
+                    executorService.shutdown()
+                }
+            }
         }
 
         //-------------------- config. botão de voltar do celular --------------------------------//

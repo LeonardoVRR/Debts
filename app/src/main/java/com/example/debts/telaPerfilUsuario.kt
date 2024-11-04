@@ -189,27 +189,27 @@ class telaPerfilUsuario : AppCompatActivity() {
     }
 
     //função que pega os dados do BD para colocar nas listas de items
-    private fun pegarDados(listaItems: List<OperacaoFinanceira> = emptyList()): List<OperacaoFinanceira> {
-
-        // Lista que será preenchida com os itens formatados
-        val items: MutableList<OperacaoFinanceira> = mutableListOf()
-
-        // Itera sobre cada item da lista de entrada e cria novos itens formatados
-        listaItems.forEach { item ->
-            // Adiciona um novo item à lista 'items' com os valores formatados
-            items.add(
-                OperacaoFinanceira(
-                    item.id,
-                    item.descricao,  // Descrição da compra
-                    item.tipo_movimento,  // Forma de pagamento
-                    formatToCurrency(item.valor.toFloat()),  // Valor formatado
-                    item.data  // Data formatada
-                )
-            )
-        }
-
-        return items
-    }
+//    private fun pegarDados(listaItems: List<OperacaoFinanceira> = emptyList()): List<OperacaoFinanceira> {
+//
+//        // Lista que será preenchida com os itens formatados
+//        val items: MutableList<OperacaoFinanceira> = mutableListOf()
+//
+//        // Itera sobre cada item da lista de entrada e cria novos itens formatados
+//        listaItems.forEach { item ->
+//            // Adiciona um novo item à lista 'items' com os valores formatados
+//            items.add(
+//                OperacaoFinanceira(
+//                    item.id,
+//                    item.descricao,  // Descrição da compra
+//                    item.tipo_movimento,  // Forma de pagamento
+//                    formatToCurrency(item.valor.toFloat()),  // Valor formatado
+//                    item.data  // Data formatada
+//                )
+//            )
+//        }
+//
+//        return items
+//    }
 
     //função para ir a tela de rendimentos
     fun telaQuestionario(v: View) {

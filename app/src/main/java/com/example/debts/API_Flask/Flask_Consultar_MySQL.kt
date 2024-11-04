@@ -5,6 +5,7 @@ import android.util.Log
 import com.example.debts.BD_MySQL_App.Metodos_BD_MySQL
 import com.example.debts.Conexao_BD.DadosMetasFinanceiras_Usuario_BD_Debts
 import com.example.debts.CustomToast
+import com.example.debts.FormatarMoeda.formatarReal
 import com.example.debts.FormatarNome.FormatarNome
 import com.example.debts.layout_Item_lista.OperacaoFinanceira
 import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
@@ -802,6 +803,60 @@ class Flask_Consultar_MySQL(private val context: Context) {
         }
 
         return timesTamp
+    }
+
+    fun listCartoes(IDusuario: Int): List<OperacaoFinanceira> {
+        val listaCartoes = mutableListOf<OperacaoFinanceira>()
+
+        val jsonRequest = """
+        {
+            "id": $IDusuario
+        }
+    """.trimIndent()
+
+        Log.d("lista listaOpFinanc", jsonRequest)
+
+        try {
+
+            val jsonResponse = consultarMySQL(jsonRequest, "listar_cartoes", "POST")
+            Log.d("RESPOSTA BRUTA listCartoes", jsonResponse)  // Log da resposta bruta
+
+            val json = object : TypeToken<List<OpFinanc>>() {}.type
+            val cartoesList: List<OpFinanc> = Gson().fromJson(jsonResponse, json)
+
+            Log.d("RESPOSTA BRUTA listCartoes", "${cartoesList.size}")  // Log da resposta bruta
+
+            cartoesList.forEach { item ->
+                val id: Int = item.id
+                val descricao: String = item.descricao
+                val tipoMovimento: String = item.tipo_movimento
+                val valor = item.valor
+                val data = item.data
+
+                //formatando o nome do gasto
+                val nomeFormatado = FormatarNome().formatar(descricao)
+
+                val valor_Formatado = formatarReal().formatarParaReal(valor)
+
+                val itemOpFinanc = OperacaoFinanceira(id, nomeFormatado, tipoMovimento, valor_Formatado, data)
+
+                listaCartoes += itemOpFinanc
+
+            }
+
+        } catch (e: IOException) {
+            Log.e("ERRO listCartoes", "IOException: ${e.message}")
+        } catch (e: JsonSyntaxException) {
+            Log.e("ERRO listCartoes", "Erro ao analisar o JSON: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("ERRO listCartoes", "Erro inesperado: ${e.message}")
+        }
+
+        listaCartoes.forEach { item ->
+            Log.d("listCartoes", "${item}")
+        }
+
+        return listaCartoes.toList()
     }
 
 

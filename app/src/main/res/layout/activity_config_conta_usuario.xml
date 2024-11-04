@@ -346,6 +346,7 @@
                     android:paddingLeft="0sp"
                     android:paddingRight="0sp"
                     android:text="Add+"
+                    android:textColor="#FFFFFF"
                     app:layout_constraintBottom_toBottomOf="@+id/input_numCartao"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/input_numCartao" />

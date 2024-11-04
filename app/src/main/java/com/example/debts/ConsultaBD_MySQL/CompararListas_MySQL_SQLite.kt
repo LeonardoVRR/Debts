@@ -241,4 +241,64 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
 
         Log.d("RESULTADO RENDIMENTOS", "Novos Rendimentos SQLite")
     }
+
+    fun adicionarNovosCartoes(listaCartoes_MySQL: List<OperacaoFinanceira>, listaCartoes_SQLite: List<OperacaoFinanceira>) {
+
+        Log.d("LISTA MySQL", "$listaCartoes_MySQL")
+        Log.d("LISTA SQLite", "$listaCartoes_SQLite")
+
+        val IDusuario = DadosUsuario_BD_Debts(context).pegarIdUsuario()
+
+        val listaNovosCartoes: MutableList<OperacaoFinanceira> = mutableListOf()
+
+        for (rendimento in listaCartoes_MySQL) {
+            // Comparar apenas o ID do cartao
+            if (listaCartoes_SQLite.none { it.id == rendimento.id }) {
+                listaNovosCartoes.add(rendimento)
+            }
+        }
+
+        Log.d("LISTA NOVOS RENDIMENTOS", "$listaNovosCartoes")
+
+        listaNovosCartoes.forEach { cartao ->
+
+            val id = cartao.id
+            val nome = cartao.descricao
+
+            // formatando a data
+            val data = ""
+            //val dataRendimentoFormatada = formatarDataString(dataRendimento)
+
+            val tipoMovimento = cartao.tipo_movimento
+            val valor = formatarValor(cartao.valor)
+
+            var credito = 0
+            var debito = 0
+            var saldo = 0f
+            var limite = 0f
+
+            if (tipoMovimento == "Credito"){
+                credito = 1
+                debito = 0
+
+                limite = valor
+                saldo = 0f
+            }
+
+            else if (tipoMovimento == "Debito"){
+                credito = 0
+                debito = 1
+
+                limite = 0f
+                saldo = valor
+            }
+
+            BancoDados(context).salvarCartao(id, nome, credito, debito, saldo, limite, IDusuario)
+
+        }
+
+        listaNovosCartoes.clear()
+
+        Log.d("RESULTADO Cartoes", "Novos Cartoes SQLite")
+    }
 }

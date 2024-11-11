@@ -1,16 +1,22 @@
 package com.example.debts
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.debts.API_Flask.Flask_Consultar_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
@@ -18,6 +24,11 @@ import com.example.debts.ConsultaBD_MySQL.AgendarConsulta_MySQL
 import com.example.debts.ConsultaBD_MySQL.CompararListas_MySQL_SQLite
 import com.example.debts.FormatarNome.FormatarNome
 import com.example.debts.MsgCarregando.MensagemCarregando
+import com.example.debts.layout_Item_lista.ItemSpacingDecoration
+import com.example.debts.layout_Item_lista.OperacaoFinanceira
+import com.example.debts.layout_lista_cartoes.adapter_Cartoes
+import com.example.debts.layout_lista_cartoes.converter_listaCartoes
+import com.example.debts.layout_lista_cartoes.dados_listaCartao
 import org.threeten.bp.LocalDateTime
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -173,7 +184,7 @@ class telaPrincipal : AppCompatActivity() {
 
         val btn_RelatorioGastos: Button = findViewById(R.id.btn_RelatorioGastos)
 
-        btn_RelatorioGastos.setOnClickListener { teleRelatorioGastos() }
+        btn_RelatorioGastos.setOnClickListener { selecionarCartao() }
 
 //        btn_RelatorioGastos.setOnClickListener {
 //            // Cria um Intent para disparar o BroadcastReceiver
@@ -192,7 +203,7 @@ class telaPrincipal : AppCompatActivity() {
 
     }
 
-    //configurando o evento de click no botão do Questionario
+    //configurando o evento de click no botão do Balanço
     fun telaBalanco(v: View){
         val navegartelaBalanco = Intent(this, telaAdicionarRendimentos::class.java)
         startActivity(navegartelaBalanco)
@@ -221,6 +232,45 @@ class telaPrincipal : AppCompatActivity() {
         val navegarTelaRelatorioGastos = Intent(this, tela_RelatorioGastos::class.java)
         startActivity(navegarTelaRelatorioGastos)
         finish()
+    }
+
+    @SuppressLint("MissingInflatedId")
+    fun selecionarCartao() {
+        // Inflar o layout personalizado
+        val inflater: LayoutInflater = layoutInflater
+        val dialogView = inflater.inflate(R.layout.selecionar_cartao_extrato, null)
+
+        // Constroi o dialog/pop-up
+        val builder = AlertDialog.Builder(this)
+        builder.setView(dialogView)
+
+        // Criar o dialog/pop-up
+        val dialog: AlertDialog = builder.create()
+
+        val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
+        val listaCartoes: List<OperacaoFinanceira> = BancoDados(this).listarCartoes(IDusuario)
+        val listaCartao_convertida: List<dados_listaCartao> = converter_listaCartoes().listaConvertida(listaCartoes)
+
+        //config o layout manager
+        val listaSelecionarCartoes: RecyclerView = dialogView.findViewById(R.id.lista_cartao_extrato)
+
+        listaSelecionarCartoes.layoutManager = LinearLayoutManager(this)
+        listaSelecionarCartoes.setHasFixedSize(true)
+
+        //configurando o espaçamento entre os itens
+        listaSelecionarCartoes.addItemDecoration(ItemSpacingDecoration())
+
+        val adapterListaCartoes = adapter_Cartoes(listaCartao_convertida, this)
+
+        listaSelecionarCartoes.adapter = adapterListaCartoes
+
+        val btn_sair: ImageButton = dialogView.findViewById(R.id.btn_sairSelecaoCartao)
+
+        btn_sair.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
 

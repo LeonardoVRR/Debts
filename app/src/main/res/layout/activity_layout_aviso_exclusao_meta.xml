@@ -5,8 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/itemlist_style"
     android:layout_marginHorizontal="20dp"
+    android:background="@drawable/itemlist_style"
     tools:context=".Dialog_Style.layout_AvisoExclusaoMeta">
 
     <TextView

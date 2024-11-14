@@ -3,6 +3,7 @@ from datetime import datetime
 import locale
 from flask import Flask, request, jsonify
 import pymysql
+import requests
 
 # Definir a localidade para o formato brasileiro
 locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
@@ -536,6 +537,8 @@ def novaMeta():
         return jsonify({"message": mensagem}), 400
 
 #----------------- Rota p/ atualizar as Metas do Usuário ----------------------------
+
+#----------------- Arrumar Rota ------------------------------------
 
 # Função para atualizar metas no banco de dados
 def atualizar_meta(IDusuario, IdMeta):
@@ -1115,7 +1118,7 @@ def get_ultima_atualizacao_listas_mysql(IDusuario, consultarLista):
                     return True, timesTamp
 
                 else:
-                    return False, "Busca nao realizada. Verifique se o ID do usuario esta correto."
+                    return False, "Atualizacao nao encontrada. Verifique se o ID do usuario esta correto."
 
     except pymysql.MySQLError as e:
         print(f"Erro ao realizar a consulta getUltimaAtualizacaoListas_MySQL: {e}")
@@ -1221,12 +1224,12 @@ def listar_cartoes(IDusuario):
                         valor = 0
 
                         if tp_debito > 0 and tp_credito <= 0:
-                            if saldo != None:
+                            if saldo is not None:
                                 tp_cartao = "Debito"
                                 valor = saldo
 
                         elif tp_credito > 0 and tp_debito <= 0:
-                            if limite != None:
+                            if limite is not None:
                                 tp_cartao = "Credito"
                                 valor = limite
 
@@ -1271,6 +1274,310 @@ def listaCartoes():
         return jsonify(mensagem), 200  # Código 200 para sucesso
     else:
         return jsonify({"message": mensagem}), 404  # Código 404 para erro
+
+def cpf_cartao_usuario(IDusuario):
+    try:
+        # Conexão com o banco de dados
+        with pymysql.connect(**db_config) as conn:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+
+                lista_cpf_cartao = []
+
+                # Query para selecionar os cartões do usuário
+                numeroCartao = "SELECT * FROM cartoes WHERE usuario = %s"
+                cursor.execute(numeroCartao, (IDusuario,))  # Executa a consulta para obter os cartões
+
+                resultadoCartao = cursor.fetchall()  # Recupera todos os cartões do usuário
+
+                # Query para selecionar o CPF do usuário
+                cpf_usuario = "SELECT cpf_usuario FROM usuario WHERE id_usuario = %s"
+                cursor.execute(cpf_usuario, (IDusuario,))  # Executa a consulta para obter o CPF
+                resultadoCPF = cursor.fetchone()  # Recupera o CPF do usuário
+
+                if resultadoCartao and resultadoCPF:
+                    # Se encontrou tanto o CPF quanto os cartões
+                    item = {
+                        "cpf": resultadoCPF['cpf_usuario'],  # Acessa o CPF retornado pelo banco
+                        "cartao": resultadoCartao  # Todos os cartões do usuário
+                    }
+
+                    lista_cpf_cartao.append(item)  # Adiciona o item à lista
+
+                    return True, lista_cpf_cartao  # Retorna sucesso e os dados
+
+                else:
+                    return False, "Erro ao listar cartoes e o cpf do usuario"  # Caso algo não tenha sido encontrado
+
+    except Exception as e:
+        # Em caso de erro, retorna uma mensagem com a exceção
+        return False, f"Erro ao acessar o banco de dados: {str(e)}"
+
+
+@app.route('/open_finance_habilitado', methods = ['POST'])
+def open_finance_request():
+    # Converte o corpo da requisição JSON em um dicionário Python
+    data = request.json
+
+    # Verificar se os campos obrigatórios estão presentes
+    cd_cartao = data.get('num_cartao')
+    cpf_usuario = data.get('cpf')
+
+    if not cd_cartao or not cpf_usuario:
+        return jsonify({"message": "informe o codigo do cartao e o cpf do usuario, para prosseguir"}), 400
+
+    return jsonify({"Open Finance Habilitado": True}), 200
+
+    # # URL da API Flask
+    # url = "http://localhost:5001/open_finance_request"
+    #
+    # # Dados a serem enviados no formato JSON
+    # dados = {
+    #     "cpf": cpf_usuario,
+    #     "num_cartao": cd_cartao
+    # }
+    #
+    # # Realizar a requisição POST e enviar os dados como JSON
+    # response = requests.post(url, json=dados)
+    #
+    # if response.status_code == 200:
+    #
+    #     resposta_json = response.json()
+    #
+    #     # Acessar o campo 'error'
+    #     erro = resposta_json["error"]
+    #
+    #     # Acessar o objeto 'dados' e seus campos
+    #     dados_cartao = resposta_json["dados"]
+    #     operadora = dados_cartao["operadora"]
+    #     open_fin = bool(int(dados_cartao["open_fin"]))  # Converte "1" ou "0" para True ou False
+    #
+    #     # Exibir os dados
+    #     # print("Erro:", erro)
+    #     # print("Operadora:", operadora)
+    #     # print("Open Finance:", open_fin)
+    #
+    #     if open_fin:
+    #         return jsonify({"Open Finance Habilitado", True}), 200
+    #
+    #     else:
+    #         return jsonify({"Open Finance Habilitado", False}), 200
+    # else:
+    #     return jsonify({"Open Finance Habilitado", f"Erro na requisicao Open Finance Habilitado"}), 404
+
+
+
+
+def dt_ultima_transacao(cd_cartao):
+    try:
+        # Conexão com o banco de dados
+        with pymysql.connect(**db_config) as conn:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+
+                tipoCartao = "SELECT tp_credito, tp_debito FROM cartoes WHERE cd_cartao = %s"
+                cursor.execute(tipoCartao, (cd_cartao,))
+
+                resultadoCartao = cursor.fetchone()
+
+                if resultadoCartao:
+
+                    if resultadoCartao['tp_credito'] > 0 and resultadoCartao['tp_debito'] <= 0:
+
+                        ultima_transacao = "SELECT dt_transacao FROM trans_credito WHERE cd_cartao = %s ORDER BY dt_transacao DESC LIMIT 1"
+                        cursor.execute(ultima_transacao, (cd_cartao,))  # Executa a consulta para obter o CPF
+                        resultadoDt_Transacao = cursor.fetchone()  # Recupera o CPF do usuário
+
+                        if resultadoDt_Transacao:
+
+                            dt_transacao = resultadoDt_Transacao['dt_transacao']
+
+                            # Formatando a data no formato yyyy-mm-dd
+                            formatted_date = dt_transacao.strftime("%Y-%m-%d")
+
+                            return True, formatted_date
+
+                        else:
+                            return False, "erro ao obter a ultima data de transacao de credito"
+
+                    elif resultadoCartao['tp_debito'] > 0 and resultadoCartao['tp_credito'] <= 0:
+                        ultima_transacao = "SELECT dt_transacao FROM trans_conta WHERE cd_cartao = %s ORDER BY id_trans DESC LIMIT 1"
+                        cursor.execute(ultima_transacao, (cd_cartao,))  # Executa a consulta para obter o CPF
+                        resultadoDt_Transacao = cursor.fetchone()  # Recupera o CPF do usuário
+
+                        if resultadoDt_Transacao:
+                            dt_transacao = resultadoDt_Transacao['dt_transacao']
+
+                            return True, dt_transacao
+
+                        else:
+                            return False, "erro ao obter a ultima data de transacao de debito"
+
+                else:
+                    return False, "Erro ao listar cartao"  # Caso algo não tenha sido encontrado
+
+    except Exception as e:
+        # Em caso de erro, retorna uma mensagem com a exceção
+        return False, f"Erro ao acessar o banco de dados: {str(e)}"
+
+@app.route('/open_finance_refresh', methods=['POST'])
+def open_finance_refresh():
+    data = request.json
+
+    cd_cartao = data.get('num_cartao')
+    cpf_usuario = data.get('cpf')
+
+    if not cd_cartao or not cpf_usuario:
+        return jsonify({"message": "Informe o código do cartão e o CPF do usuário para prosseguir"}), 400
+
+    cartao, mensagem = dt_ultima_transacao(cd_cartao)
+
+    lista_gastos = []
+    valor_gasto = ""
+
+    if cartao:
+        dt_ultima_transacao_cartao = jsonify(mensagem)
+
+        url = "http://localhost:5001/open_finance_refresh"
+        dados = {
+            "cpf": cpf_usuario,
+            "num_cartao": cd_cartao,
+            "dt_atualizacao": dt_ultima_transacao_cartao
+        }
+
+        response_test = {
+            "error": "0",
+            "dados": {
+                "12345": {
+                    "dt_transacao": "11/11/2024 14:30:00",
+                    "tp_transacao": "DEBITO A VISTA",
+                    "ds_transacao": "Supermercado ABC",
+                    "credito": "",
+                    "debito": "250,75",
+                    "saldo": "1200,50"
+                },
+                "67890": {
+                    "dt_transacao": "12/11/2024 10:15:45",
+                    "tp_transacao": "DEBITO A VISTA",
+                    "ds_transacao": "Posto de Gasolina",
+                    "credito": "",
+                    "debito": "100,00",
+                    "saldo": "1100,50"
+                },
+                "54321": {
+                    "dt_transacao": "13/11/2024 18:45:30",
+                    "tp_transacao": "DEBITO A VISTA",
+                    "ds_transacao": "Lanchonete Central",
+                    "credito": "",
+                    "debito": "45,30",
+                    "saldo": "1055,20"
+                }
+            }
+        }
+
+        resposta_json = response_test
+
+        erro = resposta_json["error"]
+        print("Erro:", erro)
+
+        dados = resposta_json["dados"]
+
+        for doc_id, transacao in dados.items():
+            dt_transacao = transacao["dt_transacao"]
+            tp_transacao = transacao["tp_transacao"]
+            ds_transacao = transacao["ds_transacao"]
+
+            dt_formatada = str(dt_transacao).split(" ")[0]
+
+            credito = transacao["credito"]
+            debito = transacao["debito"]
+
+            credito_fomatado = float(transacao["credito"].replace(",", ".")) if transacao["credito"] else None
+            debito_fomatado = float(transacao["debito"].replace(",", ".")) if transacao["debito"] else None
+            saldo = float(transacao["saldo"].replace(",", "."))
+
+            if credito != "" and debito == "":
+                valor_gasto = credito_fomatado
+            elif credito == "" and debito != "":
+                valor_gasto = debito_fomatado
+
+            item_gasto = {
+                'id': doc_id,
+                'descricao': ds_transacao,
+                'tipo_movimento': tp_transacao,
+                'valor': valor_gasto,
+                'data': dt_formatada
+            }
+
+            lista_gastos.append(item_gasto)
+
+        return jsonify(lista_gastos), 200
+
+    else:
+        return jsonify({"message": "Lista vazia"}), 404
+
+
+    #     # Realizar a requisição POST e enviar os dados como JSON
+    #     response = requests.post(url, json=dados)
+    #
+    #     # Verificar o status da resposta e o conteúdo
+    #     if response.status_code == 200:
+    #         # Obter a resposta JSON como um dicionário
+    #         resposta_json = response.json()
+    #
+    #         # Acessar o campo 'error'
+    #         erro = resposta_json["error"]
+    #         print("Erro:", erro)
+    #
+    #         # Acessar o objeto 'dados'
+    #         dados = resposta_json["dados"]
+    #
+    #         # Percorrer cada transação usando o número do documento como chave
+    #         for doc_id, transacao in dados.items():
+    #             dt_transacao = transacao["dt_transacao"]
+    #             tp_transacao = transacao["tp_transacao"]
+    #             ds_transacao = transacao["ds_transacao"]
+    #
+    #             dt_formatada = str(dt_transacao).split(" ")[0]
+    #
+    #             # Convertendo valores de crédito e débito para float, ou atribuindo None caso estejam vazios
+    #             credito = float(transacao["credito"].replace(",", ".")) if transacao["credito"] else None
+    #             debito = float(transacao["debito"].replace(",", ".")) if transacao["debito"] else None
+    #             saldo = float(transacao["saldo"].replace(",", "."))
+    #
+    #             if credito != "" and debito == "":
+    #                 valor_gasto = credito
+    #
+    #             elif credito == "" and debito != "":
+    #                 valor_gasto = debito
+    #
+    #             # Criar um dicionário representando a operação financeira
+    #             item_gasto = {
+    #                 'id': doc_id,
+    #                 'descricao': ds_transacao,
+    #                 'tipo_movimento': tp_transacao,
+    #                 'valor': valor_gasto,
+    #                 'data': dt_formatada
+    #             }
+    #
+    #             # Adicionar o item à lista
+    #             lista_gastos.append(item_gasto)
+    #
+    #             # Exibir os dados da transação
+    #             # print(f"Documento: {doc_id}")
+    #             # print("Data da Transação:", dt_transacao)
+    #             # print("Tipo de Transação:", tp_transacao)
+    #             # print("Descrição:", ds_transacao)
+    #             # print("Crédito:", credito)
+    #             # print("Débito:", debito)
+    #             # print("Saldo:", saldo)
+    #             # print("----")
+    #
+    #         return jsonify(lista_gastos), 200
+    #
+    #     else:
+    #         return jsonify({"Erro na requisição": response.status_code})
+    #
+    # else:
+    #     return jsonify({"message": mensagem}), 404  # Código 404 para erro
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=36366)

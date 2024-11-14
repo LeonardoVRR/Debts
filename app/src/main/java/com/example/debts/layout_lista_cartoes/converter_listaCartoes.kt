@@ -11,7 +11,8 @@ class converter_listaCartoes {
             listaCartoes.add(
                 dados_listaCartao(
                     cartao.descricao,
-                    cartao.tipo_movimento
+                    cartao.tipo_movimento,
+                    cartao.id
                 )
             )
         }

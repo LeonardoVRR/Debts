@@ -106,7 +106,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
         //private val listaDespesas = DadosFinanceiros_Usuario_BD_Debts().pegarListaDespesasMes()
 
-        var listaGastos = DadosFinanceiros_Usuario_BD_Debts(this, usuarioID).pegarListaGastosMes(mes_graf, ano_graf)
+        var listaGastos = DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario
 
         //-------------------- config. somas dos gastos dos items de cada campo --------------------------//
 
@@ -128,7 +128,17 @@ class tela_RelatorioGastos : AppCompatActivity() {
         var legendaColunas = criarLegendas(qtdDiasMes, calendar)
 
         //lista que vai conter os gastos diarios do mes
-        var listaValores: MutableList<Float> = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID, ano_graf).toMutableList()
+        var listaValores: MutableList<MovintoDia> = mutableListOf()
+
+        listaGastos.forEach { item ->
+            listaValores.add(
+                MovintoDia(item.data.split("/")[0].toInt() -1, formatarValor(item.valor))
+            )
+        }
+
+        listaValores.forEach { item ->
+            Log.d("lista Valores Graf.", "dia: ${item.dia}, valor: ${item.valor}")
+        }
 
         //lista que vai conter os rendimentos diarios do mes
         //var listaValoresRendimento = BancoDados(this).rendimentosDiariosMesGraf(nomeMes.lowercase(), usuarioID).toMutableList()
@@ -173,7 +183,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
                 entries.clear() // Esvazia a lista
                 legendaColunas = arrayOf() // Esvazia a lista
 
-                listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID, ano_graf).toMutableList()
+                //listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID, ano_graf).toMutableList()
                 criarColunasGraf(entries, qtdDiasMes, nomeMes, usuarioID, ano_graf)
                 legendaColunas = criarLegendas(qtdDiasMes, calendar)
 
@@ -233,7 +243,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
                 entries.clear() // Esvazia a lista
                 legendaColunas = arrayOf() // Esvazia a lista
 
-                listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID, ano_graf).toMutableList()
+                //listaValores = BancoDados(this).gastosDiariosMes(nomeMes.lowercase(), usuarioID, ano_graf).toMutableList()
                 criarColunasGraf(entries, qtdDiasMes, nomeMes, usuarioID, ano_graf)
                 legendaColunas = criarLegendas(qtdDiasMes, calendar)
 
@@ -565,31 +575,39 @@ class tela_RelatorioGastos : AppCompatActivity() {
         }
     }
 
-//    fun formatarValor(valorString: String): Float {
-//        // Remover o símbolo de moeda "R$", remover os espaços e os separadores de milhar.
-//        val valorLimpo = valorString
-//            .replace("R$", "") // Remove o símbolo "R$"
-//            .replace(".", "")  // Remove os separadores de milhar
-//            .replace(",", ".") // Substitui a vírgula decimal por ponto
-//            .trim()            // Remove espaços em branco extras
-//
-//        // Converte a string limpa para Float
-//        return valorLimpo.toFloat()
-//    }
+    fun formatarValor(valorString: String): Float {
+        // Remover o símbolo de moeda "R$", remover os espaços e os separadores de milhar.
+        val valorLimpo = valorString
+            .replace("R$", "") // Remove o símbolo "R$"
+            .replace(".", "")  // Remove os separadores de milhar
+            .replace(",", ".") // Substitui a vírgula decimal por ponto
+            .trim()            // Remove espaços em branco extras
+
+        // Converte a string limpa para Float
+        return valorLimpo.toFloat()
+    }
 
     //função que cria as colunas do grafico
     private fun criarColunasGraf(entries: MutableList<BarEntry>, qtdDiasMes: Int, nomeMes: String, usuarioID: Int, ano_graf: String) {
         entries.clear()
 
         // Recuperar a lista de valores do banco de dados
-        val listaGastos = BancoDados(this).gastosDiariosMesGraf(nomeMes, usuarioID, ano_graf)
+        val listaGastos = DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario
         val listaRendimentos = BancoDados(this).rendimentosDiariosMesGraf(nomeMes, usuarioID, ano_graf)
+
+        var listaValores: MutableList<MovintoDia> = mutableListOf()
+
+        listaGastos.forEach { item ->
+            listaValores.add(
+                MovintoDia(item.data.split("/")[0].toInt() -1, formatarValor(item.valor))
+            )
+        }
 
         // lista preenchida com zeros
         val listaGastosAjustados = MutableList(qtdDiasMes) { 0f }
         val listaRendimentosAjustadas = MutableList(qtdDiasMes) { 0f }
 
-        listaGastos.forEach { item ->
+        listaValores.forEach { item ->
             val dia = item.dia
             val valor = item.valor
 

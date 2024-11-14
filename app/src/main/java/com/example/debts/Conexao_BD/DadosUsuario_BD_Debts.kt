@@ -24,6 +24,10 @@ class DadosUsuario_BD_Debts(private val context: Context) {
         var estados: MutableList<Boolean> = mutableListOf()
     }
 
+    object cartaoSelecionado {
+        var numeroCartao: Int = 0
+    }
+
     var usuarioLogado: String = recuperarUsuarioLogado()
 
     //private val dadosUsuario_MySQL = Metodos_BD_MySQL()

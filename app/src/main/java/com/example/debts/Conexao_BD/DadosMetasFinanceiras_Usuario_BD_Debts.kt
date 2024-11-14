@@ -30,6 +30,7 @@ class DadosMetasFinanceiras_Usuario_BD_Debts {
         return listaMetasItens
     }
 
+    //fun converter_listaGastosCartao ()
 
     fun criarItemDebtMap(idMeta:String, dt_meta_inicio:String, vlr_inicial: Float, perc_meta: Float): List<dados_listaMeta_DebtMap> {
         val itemDebtMap: MutableList<dados_listaMeta_DebtMap> = mutableListOf()

@@ -859,5 +859,110 @@ class Flask_Consultar_MySQL(private val context: Context) {
         return listaCartoes.toList()
     }
 
+    fun habilitado_open_finance(cpf_usuario: String, num_cartao: Int): Boolean {
+        val jsonRequest = """
+        {
+            "cpf": $cpf_usuario,
+            "num_cartao": $num_cartao
+        }
+    """.trimIndent()
+
+        Log.d("cartao habilitado open finance", jsonRequest)
+
+        var open_finance_habilitado: Boolean = false
+
+        try {
+
+            val jsonResponse = consultarMySQL(jsonRequest, "open_finance_habilitado", "POST")
+            Log.d("RESPOSTA BRUTA OpFinHabilitado", jsonResponse)  // Log da resposta bruta
+
+            // Cria um objeto JSONObject a partir da string JSON
+            val jsonObject = JSONObject(jsonResponse)
+
+            // Extraindo o valor da chave "message"
+            val OpFinHabilitado = jsonObject.getString("Open Finance Habilitado")
+
+            // Verificando a mensagem da resposta
+            if (OpFinHabilitado != "Erro na requisicao Open Finance Habilitado") {
+                if (OpFinHabilitado.toBoolean()) {
+                    open_finance_habilitado =true
+                }
+
+                else {
+                    open_finance_habilitado = false
+                }
+            }
+
+        } catch (e: IOException) {
+            Log.e("ERRO OpFinHabilitado", "IOException: ${e.message}")
+        } catch (e: JsonSyntaxException) {
+            Log.e("ERRO OpFinHabilitado", "Erro ao analisar o JSON: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("ERRO OpFinHabilitado", "Erro inesperado: ${e.message}")
+        }
+
+        return open_finance_habilitado
+    }
+
+    fun extratoCartao(num_cartao: Int, cpf: String): List<OperacaoFinanceira> {
+        val listaOpFinanc = mutableListOf<OperacaoFinanceira>()
+
+        val jsonRequest = """
+        {
+            "cpf": $cpf,
+            "num_cartao": $num_cartao
+        }
+    """.trimIndent()
+
+        Log.d("Extrato Cartao", jsonRequest)
+
+        try {
+
+            val jsonResponse = consultarMySQL(jsonRequest, "open_finance_refresh", "POST")
+            Log.d("RESPOSTA BRUTA Extrato Cartao", jsonResponse)  // Log da resposta bruta
+
+            val json = object : TypeToken<List<OpFinanc>>() {}.type
+            val OpFinancList: List<OpFinanc> = Gson().fromJson(jsonResponse, json)
+
+            Log.d("RESPOSTA BRUTA Extrato Cartao", "${OpFinancList}")  // Log da resposta bruta
+
+            OpFinancList.forEach { item ->
+                val id: Int = item.id
+                val descricao: String = item.descricao
+                val tipoMovimento: String = item.tipo_movimento
+                val valor = item.valor
+                val data = item.data
+
+                //formatando o nome do gasto
+                val nomeGastoFormatado = FormatarNome().formatar(descricao)
+
+                //formatando o a forma de pagamento
+                val forma_pagamento_formatada = FormatarNome().formatar(tipoMovimento)
+
+                // formatando o valor da Operação Financeira
+                val formatacaoReal = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+
+                val valorOpFinanc_Formatado = (formatacaoReal.format(valor)).toString()
+
+                val itemOpFinanc = OperacaoFinanceira(id, descricao, tipoMovimento, valorOpFinanc_Formatado, data)
+
+                listaOpFinanc += itemOpFinanc
+
+            }
+
+        } catch (e: IOException) {
+            Log.e("ERRO Extrato Cartao", "IOException: ${e.message}")
+        } catch (e: JsonSyntaxException) {
+            Log.e("ERRO Extrato Cartao", "Erro ao analisar o JSON: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("ERRO Extrato Cartao", "Erro inesperado: ${e.message}")
+        }
+
+        listaOpFinanc.forEach { item ->
+            Log.d("Extrato Cartao", "${item}")
+        }
+
+        return listaOpFinanc.toList()
+    }
 
 }

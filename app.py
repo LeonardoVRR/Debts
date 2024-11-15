@@ -243,7 +243,7 @@ def consultarQuestionario():
 #----------------- Rota Salvar Questionário ----------------------------------------------------------------------------
 
 # função para salvar/atualizar o questionário no BD
-def salvarQuestionario(nvl_conhecimeto_financ, tps_investimentos, tx_uso_ecommerce, tx_uso_app_transporte, tx_uso_app_entrega, IDusuario):
+def salvarQuestionario(tps_investimentos, tx_uso_ecommerce, tx_uso_app_transporte, tx_uso_app_entrega, IDusuario):
 
     try:
         with pymysql.connect(**db_config) as conn:
@@ -258,14 +258,13 @@ def salvarQuestionario(nvl_conhecimeto_financ, tps_investimentos, tx_uso_ecommer
                 if questionarioPreenchido:
                     update = """
                                 UPDATE questionario
-                                SET nvl_conhecimeto_financ = %s, 
-                                    tps_investimentos = %s, 
+                                SET tps_investimentos = %s, 
                                     tx_uso_ecommerce = %s, 
                                     tx_uso_transporte = %s, 
                                     tx_uso_app_entrega = %s 
                                 WHERE id_usuario = %s
                                 """
-                    cursor.execute(update, (nvl_conhecimeto_financ, tps_investimentosJSON, tx_uso_ecommerce, tx_uso_app_transporte, tx_uso_app_entrega, IDusuario))
+                    cursor.execute(update, (tps_investimentosJSON, tx_uso_ecommerce, tx_uso_app_transporte, tx_uso_app_entrega, IDusuario))
                     conn.commit() # Confirmar a transação
 
                     # Verificar se algum dado foi atualizado
@@ -276,10 +275,10 @@ def salvarQuestionario(nvl_conhecimeto_financ, tps_investimentos, tx_uso_ecommer
                     # Se o questionário não existir, ele sera salvo no BD
                     insert = """
                                 INSERT INTO questionario
-                                (id_usuario, nvl_conhecimeto_financ, tps_investimentos, tx_uso_ecommerce, tx_uso_transporte, tx_uso_app_entrega) 
-                                VALUES (%s, %s, %s, %s, %s, %s)
+                                (id_usuario, tps_investimentos, tx_uso_ecommerce, tx_uso_transporte, tx_uso_app_entrega) 
+                                VALUES (%s, %s, %s, %s, %s)
                                 """
-                    cursor.execute(insert, (IDusuario, nvl_conhecimeto_financ, tps_investimentosJSON, tx_uso_ecommerce, tx_uso_app_transporte, tx_uso_app_entrega))
+                    cursor.execute(insert, (IDusuario, tps_investimentosJSON, tx_uso_ecommerce, tx_uso_app_transporte, tx_uso_app_entrega))
                     conn.commit()  # Confirmar a transação
 
                     return True, "Questionario salvo com sucesso"
@@ -295,21 +294,20 @@ def atualizarQuestionario():
     data = request.json
 
     # Verificar se os campos obrigatórios estão presentes
-    nvl_conhecimeto_financ = data.get('nvl_conhecimeto_financ')
     tps_investimentos = data.get('tp_investimentos')
     tx_uso_ecommerce = data.get('tx_uso_ecommerce')
     tx_uso_app_transporte = data.get('tx_uso_transporte')
     tx_uso_app_entrega = data.get('tx_uso_app_entrega')
     IDusuario = data.get('id')
 
-    if not nvl_conhecimeto_financ or not tps_investimentos or not tx_uso_ecommerce or not tx_uso_app_transporte or not tx_uso_app_entrega or not IDusuario:
+    if not tps_investimentos or not tx_uso_ecommerce or not tx_uso_app_transporte or not tx_uso_app_entrega or not IDusuario:
         return jsonify({"message": "Informe todos os dados obrigatorios!"}), 400
 
     usuario, mensagem = validarUsuario(IDusuario)
 
     if usuario:
         # Chamar a função para salvar/atualizar o questionário
-        questionario, mensagem = salvarQuestionario(nvl_conhecimeto_financ, tps_investimentos, tx_uso_ecommerce,
+        questionario, mensagem = salvarQuestionario(tps_investimentos, tx_uso_ecommerce,
                                                     tx_uso_app_transporte, tx_uso_app_entrega, IDusuario)
 
         if questionario:  # `questionario` é True se a operação foi bem-sucedida
@@ -469,7 +467,7 @@ def deletarUsuario():
 
 #----------------- Rota p/ salvar as Metas do Usuário ----------------------------
 # Função para salvar meta no banco de dados
-def salvar_meta(IDusuario, cartao, vlr_inicial, perc_meta, ramo_meta):
+def salvar_meta(IDusuario, cartao, vlr_inicial, perc_meta, ramo_meta = 0):
     # Inicializa a conexão com o banco de dados
     try:
         # Inicializa a conexão com o banco de dados usando o gerenciador de contexto
@@ -678,6 +676,7 @@ def listar_metas(IDusuario):
                         vlr_inicial = row['vlr_inicial']
                         perc_meta = row['perc_meta']
                         dt_meta_inicio = row['dt_meta_inicio']
+                        dt_meta_conclusao = row['dt_meta_conclusao']
 
                         # Verificar e formatar a data
                         if isinstance(dt_meta_inicio, datetime):
@@ -690,7 +689,8 @@ def listar_metas(IDusuario):
                             "id_meta": id_meta,
                             "vlr_inicial": vlr_inicial,
                             "perc_meta": perc_meta,
-                            "data_meta": data_meta_formatada
+                            "data_meta": data_meta_formatada,
+                            "dt_meta_conclusao": dt_meta_conclusao
                         }
 
                         # Adicionar o item à lista
@@ -1492,7 +1492,7 @@ def dt_ultima_transacao(cd_cartao):
         # Em caso de erro, retorna uma mensagem com a exceção
         return False, f"Erro ao acessar o banco de dados: {str(e)}"
 
-@app.route('/open_finance_refresh', methods=['POST'])
+@app.route('/extrato_cartao', methods=['POST'])
 def open_finance_refresh():
     data = request.json
 

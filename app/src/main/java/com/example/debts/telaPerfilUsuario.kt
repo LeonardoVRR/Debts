@@ -1,9 +1,13 @@
 package com.example.debts
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
@@ -12,9 +16,13 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.debts.API_Flask.Flask_Consultar_MySQL
+import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosFinanceiros_Usuario_BD_Debts
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+import com.example.debts.ConsultaBD_MySQL.CompararListas_MySQL_SQLite
 import com.example.debts.FormatarNome.FormatarNome
+import com.example.debts.MsgCarregando.MensagemCarregando
 import com.example.debts.SomarValoresCampo.Somar
 import com.example.debts.layout_Item_lista.ItemSpacingDecoration
 import com.example.debts.layout_Item_lista.MyConstraintAdapter
@@ -27,6 +35,8 @@ import com.github.mikephil.charting.formatter.PercentFormatter
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class telaPerfilUsuario : AppCompatActivity() {
 
@@ -41,6 +51,7 @@ class telaPerfilUsuario : AppCompatActivity() {
         NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(value)
 
     //@SuppressLint("MissingInflatedId")
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -53,6 +64,8 @@ class telaPerfilUsuario : AppCompatActivity() {
 
         val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
 
+        var listaCartoesSalvos = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaCartoes().toMutableList()
+
         val listaEntradas = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaEntradasMes()
 
         val listaGastos = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaGastosMes()
@@ -61,36 +74,32 @@ class telaPerfilUsuario : AppCompatActivity() {
 
         //--------------- config. nome do mes grafico de pizza -----------------------------------//
 
-        //manipulando data
-        var calendar = Calendar.getInstance() // Cria uma instância de Calendar
-        var anoAtual = calendar.get(Calendar.YEAR) //pegando o ano atual
-        var mesAtual = calendar.get(Calendar.MONTH) //pegando o mes atual
+//        //manipulando data
+//        var calendar = Calendar.getInstance() // Cria uma instância de Calendar
+//        var anoAtual = calendar.get(Calendar.YEAR) //pegando o ano atual
+//        var mesAtual = calendar.get(Calendar.MONTH) //pegando o mes atual
+//
+//        // Obtém o nome do mês atual para exibição
+//        var nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+//
+//        val nomeMesFormatado = "${FormatarNome().formatar(nomeMes)} $anoAtual"
 
-        // Obtém o nome do mês atual para exibição
-        var nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale("pt", "BR"))
+        //-------------- config. lista de items Entradas Não Rastreadas --------------------------------//
 
-        val nomeMesFormatado = "${FormatarNome().formatar(nomeMes)} $anoAtual"
-
-        val txtMesAtual: TextView = findViewById(R.id.txtMesAtual)
-
-        txtMesAtual.text = nomeMesFormatado
-
-        //-------------- config. lista de items Despesas Recentes --------------------------------//
-
-        val listaDespesasRecentes: RecyclerView = findViewById(R.id.listaDespesasRecentes)
+        val listaEntradas_N_Rastreadas: RecyclerView = findViewById(R.id.listaEntradas_N_Rastreadas)
 
         //configurando o layout manager
-        listaDespesasRecentes.layoutManager = LinearLayoutManager(this)
-        listaDespesasRecentes.setHasFixedSize(true)
+        listaEntradas_N_Rastreadas.layoutManager = LinearLayoutManager(this)
+        listaEntradas_N_Rastreadas.setHasFixedSize(true)
 
         //configurando o espaçamento entre os itens
-        listaDespesasRecentes.addItemDecoration(ItemSpacingDecoration())
+        listaEntradas_N_Rastreadas.addItemDecoration(ItemSpacingDecoration())
 
         // Crie o adaptador para o RecyclerView
-        val adapter = MyConstraintAdapter(listaGastosRecentes)
+        val adapter = MyConstraintAdapter(listaEntradas)
 
         //adicionando os items na lista
-        listaDespesasRecentes.adapter = adapter
+        listaEntradas_N_Rastreadas.adapter = adapter
 
         //--------------------- config. indicador de progresso circular --------------------------//
 //        val indicadorProgressoCircular: CircularProgressBar = findViewById(R.id.circularProgressBar_TelaPerfilUsuario)
@@ -105,52 +114,89 @@ class telaPerfilUsuario : AppCompatActivity() {
 //            setProgressWithAnimation(progressoAtual_IndicadorProgresso, 1000) //indica o progresso
 //        }
 
-        //--------------------- config. Texto Relatoiro Resumo Mes -------------------------------//
-        val somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
-        val somarItemsListaGastos = Somar().valoresCampo(listaGastos)
+        //----- config. area de salvar cartão ----------------------------------------------------//
 
-        var valorTotal = 0f
+        val cpfUsuario = DadosUsuario_BD_Debts(this).pegarCPFUsuario()
 
-        val txtValorOrçamento: TextView = findViewById(R.id.txtValor_Orcamento)
-        val txtValorDespesasMes: TextView = findViewById(R.id.txt_valorDespesasMes)
-        val txtValorTotal: TextView = findViewById(R.id.txtValorTotal)
+        val input_numCartao: EditText = findViewById(R.id.input_numCartao)
+        val btn_add_cartao: Button = findViewById(R.id.btn_cadastrarCartao)
 
-        txtValorOrçamento.text = "${formatToCurrency(somarItemsListaEntradas)}"
-        txtValorDespesasMes.text = "${formatToCurrency(somarItemsListaGastos)}"
+        btn_add_cartao.setOnClickListener {
+            val numCartao = input_numCartao.text.toString()
 
-        if (somarItemsListaEntradas > somarItemsListaGastos) {
-            valorTotal = somarItemsListaEntradas - somarItemsListaGastos
-            txtValorTotal.text = "${formatToCurrency(valorTotal)}"
-        } else {
-            valorTotal = somarItemsListaGastos - somarItemsListaEntradas
-            txtValorTotal.text = "${formatToCurrency(valorTotal*-1)}"
+            if (numCartao.isNotEmpty()) {
+                salvarCartao(numCartao.toInt(), cpfUsuario, IDusuario)
+            }
         }
 
+        val listaCartoes: RecyclerView = findViewById(R.id.lista_cartoesCadastrados)
 
-        //-------------------------- config. grafico pizza ---------------------------------------//
+        //configurando o layout manager
+        listaCartoes.layoutManager = LinearLayoutManager(this)
+        listaCartoes.setHasFixedSize(true)
 
-        val graficoPizza: PieChart = findViewById(R.id.pieChart)
+        //configurando o espaçamento entre os itens
+        listaCartoes.addItemDecoration(ItemSpacingDecoration())
 
-        var listaDados = mutableListOf(
-            PieEntry(somarItemsListaEntradas, ""),
-            PieEntry(somarItemsListaGastos, ""),
-            PieEntry(valorTotal, "")
-        )
+        // Crie o adaptador para o RecyclerView
+        var adapterCartao = MyConstraintAdapter(listaCartoesSalvos)
 
-        val pieDataSet: PieDataSet = PieDataSet(listaDados, "")
-        pieDataSet.setColors(listaCoresPieChart) //definindo as cores do grafico de pizza
+        //adicionando os items na lista
+        listaCartoes.adapter = adapterCartao
 
-        graficoPizza.legend.isEnabled = false // Desativar a legenda
-        graficoPizza.description.isEnabled = false // Desativar a descrição que aparece no canto inferior direito do grafico
+        //------------- config botao de atualizar lista cartoes ---------------------------------//
 
-        graficoPizza.setUsePercentValues(true) //tornar os valores do grafico em porcentagem
+        val btn_atualizarListaCartoes: ImageButton = findViewById(R.id.btn_atualizar_listaCartoes)
 
-        val pieData: PieData = PieData(pieDataSet)
-        pieData.setValueTextSize(12f) // Define o tamanho do texto
-        pieData.setValueFormatter(PercentFormatter(graficoPizza)) // Formata os valores como porcentagem
+        btn_atualizarListaCartoes.setOnClickListener {
+            CustomToast().showCustomToast(this, "Atualizando Cartões!")
 
-        graficoPizza.data = pieData
-        graficoPizza.invalidate()
+            var resultado = ""
+
+            val msgCarregando = MensagemCarregando(this)
+
+            msgCarregando.mostrarMensagem()
+
+            val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+            executorService.execute {
+                try {
+
+                    //salvando a lista de cartoes
+                    DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario = Flask_Consultar_MySQL(this).listCartoes(IDusuario)
+
+                    Log.d("Lista Cartoes SQLite", "${BancoDados(this).listarCartoes(IDusuario)}")
+                    Log.d("Lista Cartoes MySQL", "${DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario}")
+
+
+                    resultado = "Cartões Atualizados!"
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    resultado = "Erro ao se conectar: ${e.message}"
+                    Log.e("Erro ao se conectar", "${e.message}")
+                } finally {
+
+                    // Atualizar a UI no thread principal
+                    runOnUiThread {
+                        msgCarregando.ocultarMensagem()
+
+                        listaCartoesSalvos.clear()
+
+                        CompararListas_MySQL_SQLite(this).adicionarNovosCartoes(DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario, BancoDados(this).listarCartoes(IDusuario))
+
+                        val novaListaCartoes = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaCartoes().toMutableList()
+
+                        // Atualizar a lista e notificar o adapter
+                        listaCartoesSalvos.addAll(novaListaCartoes)
+                        adapter.notifyDataSetChanged() // Notifica o Adapter que os dados mudaram
+
+                        CustomToast().showCustomToast(this, resultado)
+                    }
+
+                    executorService.shutdown()
+                }
+            }
+        }
 
         //--------------------------- config. navegação da pagina --------------------------------//
         val btn_Configuracoes: Button = findViewById(R.id.btn_Configuracoes)
@@ -210,6 +256,39 @@ class telaPerfilUsuario : AppCompatActivity() {
 //
 //        return items
 //    }
+
+    // função para salvar um novo cartão no banco de dados
+    fun salvarCartao(numCartao: Int, cpf_usuario: String, IDusuario: Int) {
+        var resultado = ""
+
+        val msgCarregando = MensagemCarregando(this)
+
+        msgCarregando.mostrarMensagem()
+
+        val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+        executorService.execute {
+            try {
+
+                //salvando o cartão
+                resultado = Flask_Consultar_MySQL(this).salvarCartao(IDusuario,cpf_usuario, numCartao)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                resultado = "Erro ao salvar cartao: ${e.message}"
+                Log.e("Erro ao salvar cartao", "${e.message}")
+            } finally {
+
+                // Atualizar a UI no thread principal
+                runOnUiThread {
+                    msgCarregando.ocultarMensagem()
+
+                    CustomToast().showCustomToast(this, resultado)
+                }
+
+                executorService.shutdown()
+            }
+        }
+    }
 
     //função para ir a tela de rendimentos
     fun telaQuestionario(v: View) {

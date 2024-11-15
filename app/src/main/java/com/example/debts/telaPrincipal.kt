@@ -251,6 +251,8 @@ class telaPrincipal : AppCompatActivity() {
         val listaCartoes: List<OperacaoFinanceira> = BancoDados(this).listarCartoes(IDusuario)
         val listaCartao_convertida: List<dados_listaCartao> = converter_listaCartoes().listaConvertida(listaCartoes)
 
+        Log.d("Lista Cartao", "$listaCartoes")
+
         //config o layout manager
         val listaSelecionarCartoes: RecyclerView = dialogView.findViewById(R.id.lista_cartao_extrato)
 

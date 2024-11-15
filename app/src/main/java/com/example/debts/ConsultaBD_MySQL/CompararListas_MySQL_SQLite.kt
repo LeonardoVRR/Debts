@@ -258,7 +258,7 @@ class CompararListas_MySQL_SQLite (private val context: Context) {
             }
         }
 
-        Log.d("LISTA NOVOS RENDIMENTOS", "$listaNovosCartoes")
+        Log.d("LISTA NOVOS Cartoes", "$listaNovosCartoes")
 
         listaNovosCartoes.forEach { cartao ->
 

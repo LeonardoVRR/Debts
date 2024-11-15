@@ -414,39 +414,104 @@ class BancoDados(private var context: Context) {
         return listaGastos.toList()
     }
 
-    //função que retorna todos os rendimentos do mes do usuario para usar no grafico
-    fun rendimentosDiariosMesGraf(mesRendimento: String, IdUsuario: Int, ano: String): List<MovintoDia> {
-        // Abre o banco de dados existente no caminho especificado
-        bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+//    //função que retorna todos os rendimentos do mes do usuario para usar no grafico
+//    fun rendimentosDiariosMesGraf(mesRendimento: String, IdUsuario: Int, ano: String): List<MovintoDia> {
+//        // Abre o banco de dados existente no caminho especificado
+//        bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+//
+//        var listaRendimentos = mutableListOf<MovintoDia>()
+//
+//        try {
+//            // Consulta para obter os dados do usuário com base no id
+//            val rendimentos = bancoDados.rawQuery(
+//                "SELECT dt_rendimento, SUM(valor_rendimento) AS total_rendimento FROM Rendimentos WHERE id_user_rendimento = ? AND mes = ? AND strftime('%Y', dt_rendimento) = ? GROUP BY dt_rendimento ORDER BY dt_rendimento ASC",
+//                arrayOf(IdUsuario.toString(), mesRendimento, ano)
+//            )
+//
+//            // Processa todos os resultados da consulta
+//            while (rendimentos.moveToNext()) {
+//                val valorRendimento = rendimentos.getString(rendimentos.getColumnIndexOrThrow("total_rendimento"))
+//                val diaRendimento = rendimentos.getString(rendimentos.getColumnIndexOrThrow("dt_rendimento"))
+//                listaRendimentos.add(
+//                    MovintoDia(
+//                        diaRendimento.split("-")[2].trim().toInt() - 1,
+//                        valorRendimento.toFloat()
+//                    )
+//                )
+//            }
+//
+//            rendimentos.close()
+//        } catch (e: Exception) {
+//            // Mostra uma mensagem de erro ao usuário
+//            CustomToast().showCustomToast(context, "Erro ao recuperar os gastos: ${e.message}")
+//            // Loga o erro
+//            Log.e("Erro Inserção", e.message ?: "Erro desconhecido")
+//
+//        } finally {
+//            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+//            if (::bancoDados.isInitialized) {
+//                bancoDados.close()
+//            }
+//        }
+//
+//        return listaRendimentos.toList()
+//    }
 
-        var listaRendimentos = mutableListOf<MovintoDia>()
+    //função que retorna todos os rendimentos do mes do usuario para usar no grafico
+    fun rendimentos_n_rastreados(IdUsuario: Int): List<OperacaoFinanceira> {
+
+        var listaRendimentosMes: MutableList<OperacaoFinanceira> = mutableListOf()
 
         try {
-            // Consulta para obter os dados do usuário com base no id
-            val rendimentos = bancoDados.rawQuery(
-                "SELECT dt_rendimento, SUM(valor_rendimento) AS total_rendimento FROM Rendimentos WHERE id_user_rendimento = ? AND mes = ? AND strftime('%Y', dt_rendimento) = ? GROUP BY dt_rendimento ORDER BY dt_rendimento ASC",
-                arrayOf(IdUsuario.toString(), mesRendimento, ano)
-            )
+            // Abre o banco de dados existente no caminho especificado
+            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
-            // Processa todos os resultados da consulta
-            while (rendimentos.moveToNext()) {
-                val valorRendimento = rendimentos.getString(rendimentos.getColumnIndexOrThrow("total_rendimento"))
-                val diaRendimento = rendimentos.getString(rendimentos.getColumnIndexOrThrow("dt_rendimento"))
-                listaRendimentos.add(
-                    MovintoDia(
-                        diaRendimento.split("-")[2].trim().toInt() - 1,
-                        valorRendimento.toFloat()
-                    )
-                )
+            // Consulta para obter os rendimentos do usuário
+            val regatarRendimento: Cursor = bancoDados.rawQuery(" SELECT * FROM Rendimentos WHERE id_user_rendimento = ? ORDER BY dt_rendimento ASC", arrayOf(IdUsuario.toString()))
+
+            // Verifica se há resultados e processa todos
+            if (regatarRendimento.moveToFirst()) {
+                do {
+                    val idRendimento = regatarRendimento.getString(regatarRendimento.getColumnIndexOrThrow("id_rendimento")).toInt()
+                    val nomeRendimento = regatarRendimento.getString(regatarRendimento.getColumnIndexOrThrow("tp_movimento")).toString()
+                    //val forma_pagamento = regatarRendimento.getString(regatarRendimento.getColumnIndexOrThrow("tp_transacao"))
+                    val dataRendimento = regatarRendimento.getString(regatarRendimento.getColumnIndexOrThrow("dt_rendimento")).toString()
+                    val valorRendimento = regatarRendimento.getString(regatarRendimento.getColumnIndexOrThrow("valor_rendimento"))
+
+                    //formatando o nome do gasto
+                    val nomeRendimentoFormatado = FormatarNome().formatar(nomeRendimento)
+
+                    //formatando o a forma de pagamento
+                    val forma_pagamento_formatada = ""
+
+                    //faz o fatiamento da data
+                    val dia = dataRendimento.split("-")[2].trim()
+                    val mes = dataRendimento.split("-")[1].trim().toInt()
+                    val ano = dataRendimento.split("-")[0].trim()
+
+                    val nomeMes = ManipularData().pegarNomeMes(mes)
+
+                    val dataFormatada = "$dia de $nomeMes de $ano"
+
+                    //formatando o valor do gasto
+                    // Obtém a instância de NumberFormat para a localidade do Brasil
+                    val formatacaoReal = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+
+                    val valorRendimentoFormatado = (formatacaoReal.format(valorRendimento.toFloat())).toString()
+
+
+                    val itemGasto = OperacaoFinanceira(idRendimento, nomeRendimentoFormatado, forma_pagamento_formatada, valorRendimentoFormatado, dataFormatada)
+
+                    // Adiciona o item à lista de itens
+                    listaRendimentosMes += itemGasto
+                } while (regatarRendimento.moveToNext()) // Continua para o próximo item
             }
 
-            rendimentos.close()
-        } catch (e: Exception) {
-            // Mostra uma mensagem de erro ao usuário
-            CustomToast().showCustomToast(context, "Erro ao recuperar os gastos: ${e.message}")
-            // Loga o erro
-            Log.e("Erro Inserção", e.message ?: "Erro desconhecido")
+            regatarRendimento.close()
 
+        } catch (e: Exception) {
+            CustomToast().showCustomToast(context, "Erro recuper listaRendimentosMes: ${e.message}")
+            Log.e("Erro Consulta listaRendimentosMes:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
             if (::bancoDados.isInitialized) {
@@ -454,7 +519,7 @@ class BancoDados(private var context: Context) {
             }
         }
 
-        return listaRendimentos.toList()
+        return listaRendimentosMes.toList()
     }
 
     fun listaRendimentosMes(IdUsuario: Int, mes: String = "", ano: String = ""): List<OperacaoFinanceira> {

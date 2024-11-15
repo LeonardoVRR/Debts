@@ -47,10 +47,6 @@ class configConta_Usuario : AppCompatActivity() {
             insets
         }
 
-        val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
-
-        var listaCartoesSalvos = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaCartoes().toMutableList()
-
         //--------------- config. texto do hint dos input nome e email ---------------------------//
         val hint_txt_Nome: EditText = findViewById(R.id.input_mudarNomeUsuario)
         val hint_txt_email: EditText = findViewById(R.id.input_NovoEmail)
@@ -71,34 +67,6 @@ class configConta_Usuario : AppCompatActivity() {
         btn_IconeRedefinirSenha.setOnClickListener { AlterarVisibilidade(input_RedefinirSenha, btn_IconeRedefinirSenha).verSenha() }
         btn_IconeConfirmarRedefinirSenha.setOnClickListener { AlterarVisibilidade(input_ConfirmarRedefinirSenha, btn_IconeConfirmarRedefinirSenha).verSenha() }
 
-        //----- config. area de salvar cartão ----------------------------------------------------//
-
-        val input_numCartao: EditText = findViewById(R.id.input_numCartao)
-        val btn_add_cartao: Button = findViewById(R.id.btn_cadastrarCartao)
-
-        btn_add_cartao.setOnClickListener {
-            val numCartao = input_numCartao.text.toString()
-
-            if (numCartao != "") {
-                salvarCartao(numCartao.toInt())
-            }
-        }
-
-        val listaCartoes: RecyclerView = findViewById(R.id.lista_cartoesCadastrados)
-
-        //configurando o layout manager
-        listaCartoes.layoutManager = LinearLayoutManager(this)
-        listaCartoes.setHasFixedSize(true)
-
-        //configurando o espaçamento entre os itens
-        listaCartoes.addItemDecoration(ItemSpacingDecoration())
-
-        // Crie o adaptador para o RecyclerView
-        var adapter = MyConstraintAdapter(listaCartoesSalvos)
-
-        //adicionando os items na lista
-        listaCartoes.adapter = adapter
-
         //----- configurando o botão para voltar para a tela do perfil do usuário --------------//
         val btn_btn_voltarPerfilUsuario: ImageButton = findViewById(R.id.btn_voltarPerfilUsuario)
 
@@ -106,58 +74,6 @@ class configConta_Usuario : AppCompatActivity() {
             val navegarPerfilUsuario = Intent(this, telaPerfilUsuario::class.java)
             startActivity(navegarPerfilUsuario)
             finish()
-        }
-
-        val btn_atualizarListaCartoes: ImageButton = findViewById(R.id.btn_atualizar_listaCartoes)
-
-        btn_atualizarListaCartoes.setOnClickListener {
-            CustomToast().showCustomToast(this, "Atualizando Cartões!")
-
-            var resultado = ""
-
-            val msgCarregando = MensagemCarregando(this)
-
-            msgCarregando.mostrarMensagem()
-
-            val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-            executorService.execute {
-                try {
-
-                    //salvando a lista de cartoes
-                    DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario = Flask_Consultar_MySQL(this).listCartoes(IDusuario)
-
-                    Log.d("Lista Cartoes SQLite", "${BancoDados(this).listarCartoes(IDusuario)}")
-                    Log.d("Lista Cartoes MySQL", "${DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario}")
-
-
-                    resultado = "Cartões Atualizados!"
-
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    resultado = "Erro ao se conectar: ${e.message}"
-                    Log.e("Erro ao se conectar", "${e.message}")
-                } finally {
-
-                    // Atualizar a UI no thread principal
-                    runOnUiThread {
-                        msgCarregando.ocultarMensagem()
-
-                        listaCartoesSalvos.clear()
-
-                        CompararListas_MySQL_SQLite(this).adicionarNovosCartoes(DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario, BancoDados(this).listarCartoes(IDusuario))
-
-                        val novaListaCartoes = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaCartoes().toMutableList()
-
-                        // Atualizar a lista e notificar o adapter
-                        listaCartoesSalvos.addAll(novaListaCartoes)
-                        adapter.notifyDataSetChanged() // Notifica o Adapter que os dados mudaram
-
-                        CustomToast().showCustomToast(this, resultado)
-                    }
-
-                    executorService.shutdown()
-                }
-            }
         }
 
         //-------------------- config. botão de voltar do celular --------------------------------//
@@ -174,11 +90,6 @@ class configConta_Usuario : AppCompatActivity() {
                 finish()
             }
         })
-    }
-
-    // função para salvar um novo cartão no banco de dados
-    fun salvarCartao(numCartao: Int) {
-
     }
 
     //configurando a função para o botão que altera o nome e email do usuário

@@ -102,7 +102,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
         Log.d("grafico", "graf: $ano_mes_Atual_graf, mes: $mes_graf, ano: $ano_graf")
 
-        var listaEntradas = DadosFinanceiros_Usuario_BD_Debts(this, usuarioID).pegarListaEntradasMes(mes_graf, ano_graf)
+        //var listaEntradas = DadosFinanceiros_Usuario_BD_Debts(this, usuarioID).pegarListaEntradasMes(mes_graf, ano_graf)
 
         //private val listaDespesas = DadosFinanceiros_Usuario_BD_Debts().pegarListaDespesasMes()
 
@@ -110,7 +110,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
         //-------------------- config. somas dos gastos dos items de cada campo --------------------------//
 
-        var somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
+        //var somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
         //val somarItemsListaDespesas = somarValoresCampo(pegarDados(listaDespesas))
         var somarItemsListaGastos = Somar().valoresCampo(listaGastos)
 
@@ -118,7 +118,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
         //val txt_valorDespesas: TextView = findViewById(R.id.txt_valorDespesas)
         var txt_valorGastos: TextView = findViewById(R.id.txt_valorGastos)
 
-        txt_valorEntradas.text = "${formatToCurrency(somarItemsListaEntradas)}"
+        //txt_valorEntradas.text = "${formatToCurrency(somarItemsListaEntradas)}"
         txt_valorGastos.text = "${formatToCurrency(somarItemsListaGastos)}"
         //txt_valorDespesas.text = "${formatToCurrency(somarItemsListaDespesas)}"
 
@@ -166,7 +166,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
             mes_graf = ManipularData().pegarNumeroMes(ano_mes_Atual_graf.split(" ")[0])
             ano_graf = ano_mes_Atual_graf.split(" ")[1]
 
-            listaEntradas = DadosFinanceiros_Usuario_BD_Debts(this, usuarioID).pegarListaEntradasMes(mes_graf, ano_graf)
+            //listaEntradas = DadosFinanceiros_Usuario_BD_Debts(this, usuarioID).pegarListaEntradasMes(mes_graf, ano_graf)
             listaGastos = DadosFinanceiros_Usuario_BD_Debts(this, usuarioID).pegarListaGastosMes(mes_graf, ano_graf)
 
             Log.d("grafico avança", "graf: $ano_mes_Atual_graf, mes: $mes_graf, ano: $ano_graf")
@@ -189,10 +189,10 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
                 Log.d("Gastos do Mes", "$listaValores")
 
-                somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
+                //somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
                 somarItemsListaGastos = Somar().valoresCampo(listaGastos)
 
-                txt_valorEntradas.text = "${formatToCurrency(somarItemsListaEntradas)}"
+                //txt_valorEntradas.text = "${formatToCurrency(somarItemsListaEntradas)}"
                 txt_valorGastos.text = "${formatToCurrency(somarItemsListaGastos)}"
 
                 //atualiza as legendas do grafico
@@ -226,7 +226,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
             mes_graf = ManipularData().pegarNumeroMes(ano_mes_Atual_graf.split(" ")[0])
             ano_graf = ano_mes_Atual_graf.split(" ")[1]
 
-            listaEntradas = DadosFinanceiros_Usuario_BD_Debts(this, usuarioID).pegarListaEntradasMes(mes_graf, ano_graf)
+            //listaEntradas = DadosFinanceiros_Usuario_BD_Debts(this, usuarioID).pegarListaEntradasMes(mes_graf, ano_graf)
             listaGastos = DadosFinanceiros_Usuario_BD_Debts(this, usuarioID).pegarListaGastosMes(mes_graf, ano_graf)
 
             Log.d("grafico retrocede", "graf: $ano_mes_Atual_graf, mes: $mes_graf, ano: $ano_graf")
@@ -249,10 +249,10 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
                 Log.d("Gastos do Mes", "$listaValores")
 
-                somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
+                //somarItemsListaEntradas = Somar().valoresCampo(listaEntradas)
                 somarItemsListaGastos = Somar().valoresCampo(listaGastos)
 
-                txt_valorEntradas.text = "${formatToCurrency(somarItemsListaEntradas)}"
+                //txt_valorEntradas.text = "${formatToCurrency(somarItemsListaEntradas)}"
                 txt_valorGastos.text = "${formatToCurrency(somarItemsListaGastos)}"
 
                 //atualiza as legendas do grafico
@@ -402,9 +402,9 @@ class tela_RelatorioGastos : AppCompatActivity() {
                 removerListaItems.removerListaItems(lytExp_Gastos)
 
                 // Crie o adaptador para o RecyclerView
-                val adapter = MyConstraintAdapter(listaEntradas)
+                //val adapter = MyConstraintAdapter(listaEntradas)
                 //chamando a função para criar a lista de items do campo
-                recyclerViewManager.criarListaItems(lytExp_Entradas, adapter)
+                //recyclerViewManager.criarListaItems(lytExp_Entradas, adapter)
             } else {
                 lytParams_Entradas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
 
@@ -593,7 +593,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
         // Recuperar a lista de valores do banco de dados
         val listaGastos = DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario
-        val listaRendimentos = BancoDados(this).rendimentosDiariosMesGraf(nomeMes, usuarioID, ano_graf)
+        //val listaRendimentos = BancoDados(this).rendimentosDiariosMesGraf(nomeMes, usuarioID, ano_graf)
 
         var listaValores: MutableList<MovintoDia> = mutableListOf()
 
@@ -614,12 +614,12 @@ class tela_RelatorioGastos : AppCompatActivity() {
             listaGastosAjustados.add(dia, valor)
         }
 
-        listaRendimentos.forEach { item ->
-            val dia = item.dia
-            val valor = item.valor
-
-            listaRendimentosAjustadas.add(dia, valor)
-        }
+//        listaRendimentos.forEach { item ->
+//            val dia = item.dia
+//            val valor = item.valor
+//
+//            listaRendimentosAjustadas.add(dia, valor)
+//        }
 
         // Iterar e adicionar os valores ao gráfico
         for (i in 0 until qtdDiasMes) {

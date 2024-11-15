@@ -8,7 +8,7 @@ class DadosFinanceiros_Usuario_BD_Debts(private val context: Context, private va
 
     fun pegarListaEntradasMes(mes: String = "", ano: String = ""): List<OperacaoFinanceira> {
         if (mes != "" && ano != "") {
-            var listaEntradas = BancoDados(context).listaRendimentosMes(IDusuario, mes, ano)
+            var listaEntradas = BancoDados(context).rendimentos_n_rastreados(IDusuario)
 
             return listaEntradas
         }

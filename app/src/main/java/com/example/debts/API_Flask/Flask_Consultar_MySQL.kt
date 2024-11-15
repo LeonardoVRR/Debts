@@ -378,16 +378,7 @@ class Flask_Consultar_MySQL(private val context: Context) {
     fun salvarBalanco(tipoMovimento: Int, data: String, valor: Float, descricao: String, IDusuario: Int, tp_OpFinanc: String, nomeBalanco:String = ""): String {
         var resultado = ""
 
-        var jsonRequest = ""
-
-        var rota = when (tp_OpFinanc) {
-            "rendimento" -> "salvar_rendimento"
-            "gasto" -> "salvar_gasto"
-            else -> "operacao_invalida"
-        }
-
-        if (tp_OpFinanc == "rendimento"){
-            jsonRequest = """
+        val jsonRequest = """
                 {
                     "tipo_movimento": "$tipoMovimento",
                     "data_rendimento": "$data",
@@ -395,19 +386,12 @@ class Flask_Consultar_MySQL(private val context: Context) {
                     "descricao": "$descricao",
                     "id": "$IDusuario"
                 }
-            """.trimIndent()
-        }
-
-        else {
-            jsonRequest = """
-            {
-                    "descricao_gasto": "$nomeBalanco",
-                    "tipo_movimento":"$tipoMovimento",
-                    "data_gasto":"$data",
-                    "valor_gasto": $valor,
-                    "id": $IDusuario
-            }
         """.trimIndent()
+
+        var rota = when (tp_OpFinanc) {
+            "rendimento" -> "salvar_rendimento"
+            "gasto" -> "salvar_gasto"
+            else -> "operacao_invalida"
         }
 
         try {
@@ -803,6 +787,48 @@ class Flask_Consultar_MySQL(private val context: Context) {
         }
 
         return timesTamp
+    }
+
+    fun salvarCartao (IDusuario: Int, cpf_usuario: String, num_cartao: Int): String {
+        var resultado = ""
+
+        val jsonRequest = """
+                {
+                    "id": "$IDusuario",
+                    "cpf": "$cpf_usuario",
+                    "num_cartao": "$num_cartao"
+                }
+        """.trimIndent()
+
+        try {
+            val jsonResponse = consultarMySQL(jsonRequest, "salvar_cartao", "POST")
+            Log.d("RESPOSTA BRUTA salvarCartao", jsonResponse)  // Log da resposta bruta
+
+            // Cria um objeto JSONObject a partir da string JSON
+            val jsonObject = JSONObject(jsonResponse)
+
+            // Extraindo o valor da chave "message"
+            val salvarCartaoResponse = jsonObject.getString("message")
+
+            // Verificando a mensagem da resposta
+
+            if (salvarCartaoResponse == "cartao salvo com sucesso.") {
+                resultado = "Cartão salvo com sucesso."
+            } else {
+                resultado = "Cartão não salvo."
+            }
+
+            Log.d("RESPOSTA salvarCartao", "$salvarCartaoResponse - $resultado")
+
+        } catch (e: IOException) {
+            Log.e("ERRO salvarCartao", "IOException: ${e.message}")
+        } catch (e: JsonSyntaxException) {
+            Log.e("ERRO salvarCartao", "Erro ao analisar o JSON: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("ERRO salvarCartao", "Erro inesperado: ${e.message}")
+        }
+
+        return resultado
     }
 
     fun listCartoes(IDusuario: Int): List<OperacaoFinanceira> {

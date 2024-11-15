@@ -75,6 +75,7 @@
             android:layout_marginBottom="5dp"
             android:backgroundTint="#00FFFFFF"
             android:src="@drawable/keyboard_arrow_right"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/bar_chart"
@@ -100,6 +101,7 @@
             android:layout_marginBottom="5dp"
             android:backgroundTint="#00FFFFFF"
             android:src="@drawable/keyboard_arrow_left"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/bar_chart"
@@ -141,6 +143,7 @@
         android:layout_marginEnd="10dp"
         android:background="@drawable/layout_graf_custom"
 
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -244,11 +247,13 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/lytExp_Gastos"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
         android:background="@drawable/layout_graf_custom"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lytExp_Despesas">
@@ -257,7 +262,7 @@
             android:id="@+id/textView19"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="14dp"
             android:text="Gastos:"
             android:textColor="#000000"
@@ -269,14 +274,12 @@
             android:id="@+id/txt_valorGastos"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
             android:layout_marginTop="14dp"
+            android:layout_marginEnd="15dp"
             android:text="R$ 0"
             android:textColor="#000000"
             android:textSize="20sp"
-            app:layout_constraintEnd_toStartOf="@+id/btnExp_Gastos"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/textView19"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
@@ -285,10 +288,24 @@
             android:layout_height="60dp"
             android:layout_marginEnd="16dp"
             android:backgroundTint="#00FFFFFF"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/arrow_down"
             tools:ignore="SpeakableTextPresentCheck" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/lista_gastos"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView19" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

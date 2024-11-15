@@ -1,5 +1,6 @@
 package com.example.debts
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -14,6 +15,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import java.util.Locale
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosFinanceiros_Usuario_BD_Debts
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
@@ -21,6 +24,7 @@ import com.example.debts.ManipularData.ManipularData
 import com.example.debts.SomarValoresCampo.Somar
 import com.example.debts.layoutExpandivel.criarListaItems
 import com.example.debts.layoutExpandivel.removerListaItems
+import com.example.debts.layout_Item_lista.ItemSpacingDecoration
 import com.example.debts.layout_Item_lista.MyConstraintAdapter
 import com.example.debts.layout_Item_lista.OperacaoFinanceira
 import com.example.debts.models.MovintoDia
@@ -48,6 +52,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
     fun formatToCurrency(value: Float): String =
         NumberFormat.getCurrencyInstance(Locale("pt", "BR")).format(value)
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -286,7 +291,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
         barDataSet1.setColors(coresColunas)
 
         // Definindo os rótulos para as legenda das cores do grafico
-        barDataSet1.stackLabels = arrayOf("Despesas", "Rendimentos")
+        //barDataSet1.stackLabels = arrayOf("Despesas")
 
         // Desativando o fundo de grade e rotulos que aparecem nos eixos X e Y
         val xAxis = grafico.xAxis
@@ -335,7 +340,7 @@ class tela_RelatorioGastos : AppCompatActivity() {
         //aplicando a formatação criada em "valueFormatter" nos textos que ficam acima de cada coluna
         barDataSet1.valueFormatter = createValueFormatter()
 
-        grafico.legend.isEnabled = true // Desativar a legenda
+        grafico.legend.isEnabled = false // Desativar a legenda
         grafico.description.isEnabled = false // Desativar a descrição que aparece no canto inferior direito do grafico
         //grafico.isScaleXEnabled = false //bloqueando o zoom no eixo x no grafico
         grafico.isScaleYEnabled = false //bloqueando o zoom no eixo y no grafico
@@ -369,55 +374,67 @@ class tela_RelatorioGastos : AppCompatActivity() {
         val btnExp_Gastos: ImageButton = findViewById(R.id.btnExp_Gastos)
         val lytExp_Gastos: ConstraintLayout = findViewById(R.id.lytExp_Gastos)
 
-        //obtendo os parametros da minha view "lytExp_Gastos" e as convertendo para `ConstraintLayout.LayoutParams` para poderem ser manipuladas
-        val lytParams_Gastos = lytExp_Gastos.layoutParams as ConstraintLayout.LayoutParams
+        //-------------- config lista gastos ------------------------------------//
 
+        val listaGastos_lyt: RecyclerView = findViewById(R.id.lista_gastos)
+
+        //configurando o layout manager
+        listaGastos_lyt.layoutManager = LinearLayoutManager(this)
+        listaGastos_lyt.setHasFixedSize(true)
+
+        //configurando o espaçamento entre os itens
+        listaGastos_lyt.addItemDecoration(ItemSpacingDecoration())
+
+        // Crie o adaptador para o RecyclerView
+        val adapter_extrato = MyConstraintAdapter(listaGastos)
+
+        listaGastos_lyt.adapter = adapter_extrato
 
         //------------------------ configs. botões dos campos ------------------------//
-        btnExp_Entradas.setOnClickListener {
-
-            if (campoEntradas_isExpanded) {
-                // Aumentar a altura da view
-                lytParams_Entradas.height = 500
-
-                //trocar o icone do "btnExp_Entradas"
-                btnExp_Entradas.setImageResource(R.drawable.arrow_up)
-
-                //aplicando o aumento na view "lytExp_Entradas"
-                lytExp_Entradas.layoutParams = lytParams_Entradas
-
-                //trocando os icones dos botoes
-                //btnExp_Despesas.setImageResource(R.drawable.arrow_down)
-                btnExp_Gastos.setImageResource(R.drawable.arrow_down)
-
-                //fechando os outros campos
-//                lytParams_Despesas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
-//                lytExp_Despesas.layoutParams = lytParams_Despesas
-
-                lytParams_Gastos.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
-                lytExp_Gastos.layoutParams = lytParams_Gastos
-
-                //chamando a função para remover a lista de items do campo
-                //removerListaItems.removerListaItems(lytExp_Despesas)
-                removerListaItems.removerListaItems(lytExp_Gastos)
-
-                // Crie o adaptador para o RecyclerView
-                //val adapter = MyConstraintAdapter(listaEntradas)
-                //chamando a função para criar a lista de items do campo
-                //recyclerViewManager.criarListaItems(lytExp_Entradas, adapter)
-            } else {
-                lytParams_Entradas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
-
-                //trocar o icone do "btnExp_Entradas"
-                btnExp_Entradas.setImageResource(R.drawable.arrow_down)
-
-                //chamando a função para remover a lista de items do campo
-                removerListaItems.removerListaItems(lytExp_Entradas)
-
-                lytExp_Entradas.layoutParams = lytParams_Entradas
-            }
-            campoEntradas_isExpanded = !campoEntradas_isExpanded
-        }
+//        btnExp_Entradas.setOnClickListener {
+//
+//            if (campoEntradas_isExpanded) {
+//                // Aumentar a altura da view
+//                lytParams_Entradas.height = 500
+//
+//                //trocar o icone do "btnExp_Entradas"
+//                btnExp_Entradas.setImageResource(R.drawable.arrow_up)
+//
+//                //aplicando o aumento na view "lytExp_Entradas"
+//                lytExp_Entradas.layoutParams = lytParams_Entradas
+//
+//                //trocando os icones dos botoes
+//                //btnExp_Despesas.setImageResource(R.drawable.arrow_down)
+//                btnExp_Gastos.setImageResource(R.drawable.arrow_down)
+//
+//                //fechando os outros campos
+////                lytParams_Despesas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+////                lytExp_Despesas.layoutParams = lytParams_Despesas
+//
+//                lytParams_Gastos.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+//                lytExp_Gastos.layoutParams = lytParams_Gastos
+//
+//                //chamando a função para remover a lista de items do campo
+//                //removerListaItems.removerListaItems(lytExp_Despesas)
+//                removerListaItems.removerListaItems(lytExp_Gastos)
+//
+//                // Crie o adaptador para o RecyclerView
+//                //val adapter = MyConstraintAdapter(listaEntradas)
+//                //chamando a função para criar a lista de items do campo
+//                //recyclerViewManager.criarListaItems(lytExp_Entradas, adapter)
+//            } else {
+//                lytParams_Entradas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+//
+//                //trocar o icone do "btnExp_Entradas"
+//                btnExp_Entradas.setImageResource(R.drawable.arrow_down)
+//
+//                //chamando a função para remover a lista de items do campo
+//                removerListaItems.removerListaItems(lytExp_Entradas)
+//
+//                lytExp_Entradas.layoutParams = lytParams_Entradas
+//            }
+//            campoEntradas_isExpanded = !campoEntradas_isExpanded
+//        }
 
 //        btnExp_Despesas.setOnClickListener {
 //
@@ -468,53 +485,53 @@ class tela_RelatorioGastos : AppCompatActivity() {
 //            campoDespesas_isExpanded = !campoDespesas_isExpanded
 //        }
 
-        btnExp_Gastos.setOnClickListener {
-
-            if (campoGastos_isExpanded) {
-                // Aumentar a altura da view
-                lytParams_Gastos.height = 500
-
-                campoEntradas_isExpanded = false
-                campoDespesas_isExpanded = false
-
-                //trocar o icone do "btnExp_Gastos"
-                btnExp_Gastos.setImageResource(R.drawable.arrow_up)
-
-                //aplicando o aumento na view "lytExp_Gastos"
-                lytExp_Gastos.layoutParams = lytParams_Gastos
-
-                //trocando os icones dos botoes
-                btnExp_Entradas.setImageResource(R.drawable.arrow_down)
-                //btnExp_Despesas.setImageResource(R.drawable.arrow_down)
-
-                //fechando os outros campos
-                lytParams_Entradas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
-                lytExp_Entradas.layoutParams = lytParams_Entradas
-
-                //lytParams_Despesas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
-                //lytExp_Despesas.layoutParams = lytParams_Despesas
-
-                //chamando a função para remover a lista de items do campo
-                removerListaItems.removerListaItems(lytExp_Entradas)
-                //removerListaItems.removerListaItems(lytExp_Despesas)
-
-                // Crie o adaptador para o RecyclerView
-                val adapter = MyConstraintAdapter(listaGastos)
-                //chamando a função para criar a lista de items do campo
-                recyclerViewManager.criarListaItems(lytExp_Gastos, adapter)
-            } else {
-                lytParams_Gastos.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
-
-                //trocar o icone do "btnExp_Gastos"
-                btnExp_Gastos.setImageResource(R.drawable.arrow_down)
-
-                //chamando a função para remover a lista de items do campo
-                removerListaItems.removerListaItems(lytExp_Gastos)
-
-                lytExp_Gastos.layoutParams = lytParams_Gastos
-            }
-            campoGastos_isExpanded = !campoGastos_isExpanded
-        }
+//        btnExp_Gastos.setOnClickListener {
+//
+//            if (campoGastos_isExpanded) {
+//                // Aumentar a altura da view
+//                lytParams_Gastos.height = 700
+//
+//                campoEntradas_isExpanded = false
+//                campoDespesas_isExpanded = false
+//
+//                //trocar o icone do "btnExp_Gastos"
+//                btnExp_Gastos.setImageResource(R.drawable.arrow_up)
+//
+//                //aplicando o aumento na view "lytExp_Gastos"
+//                lytExp_Gastos.layoutParams = lytParams_Gastos
+//
+//                //trocando os icones dos botoes
+//                btnExp_Entradas.setImageResource(R.drawable.arrow_down)
+//                //btnExp_Despesas.setImageResource(R.drawable.arrow_down)
+//
+//                //fechando os outros campos
+//                lytParams_Entradas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+//                lytExp_Entradas.layoutParams = lytParams_Entradas
+//
+//                //lytParams_Despesas.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+//                //lytExp_Despesas.layoutParams = lytParams_Despesas
+//
+//                //chamando a função para remover a lista de items do campo
+//                removerListaItems.removerListaItems(lytExp_Entradas)
+//                //removerListaItems.removerListaItems(lytExp_Despesas)
+//
+//                // Crie o adaptador para o RecyclerView
+//                val adapter = MyConstraintAdapter(listaGastos)
+//                //chamando a função para criar a lista de items do campo
+//                recyclerViewManager.criarListaItems(lytExp_Gastos, adapter)
+//            } else {
+//                lytParams_Gastos.height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+//
+//                //trocar o icone do "btnExp_Gastos"
+//                btnExp_Gastos.setImageResource(R.drawable.arrow_down)
+//
+//                //chamando a função para remover a lista de items do campo
+//                removerListaItems.removerListaItems(lytExp_Gastos)
+//
+//                lytExp_Gastos.layoutParams = lytParams_Gastos
+//            }
+//            campoGastos_isExpanded = !campoGastos_isExpanded
+//        }
 
         //-------------------- config. botão de voltar do celular --------------------------------//
 
@@ -652,6 +669,16 @@ class tela_RelatorioGastos : AppCompatActivity() {
 
         val barData = BarData(barDataSet)
         grafico.data = barData
+
+        // Focar na primeira barra com valor maior que zero
+        val firstNonZeroIndex = entries.indexOfFirst { entry ->
+            entry.yVals?.any { it > 0f } == true // Verifica valores para barras empilhadas
+        }
+
+        if (firstNonZeroIndex != -1) {
+            grafico.moveViewToX(firstNonZeroIndex.toFloat()) // Foca no índice encontrado
+        }
+
         grafico.invalidate() // Atualiza o gráfico
     }
 

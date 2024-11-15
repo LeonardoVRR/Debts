@@ -157,7 +157,7 @@ class telaPrincipal : AppCompatActivity() {
 
                         CompararListas_MySQL_SQLite(this).adicionarNovosCartoes(DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario, BancoDados(this).listarCartoes(IDusuario))
 
-                        CustomToast().showCustomToast(this, resultado)
+                        //CustomToast().showCustomToast(this, resultado)
 
                         val alarmeAtivo = AgendarConsulta_MySQL(this).alarmeAtivo("listaMetas", 1)
                         if (alarmeAtivo) {

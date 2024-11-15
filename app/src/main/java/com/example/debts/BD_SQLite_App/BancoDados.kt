@@ -1032,6 +1032,7 @@ class BancoDados(private var context: Context) {
                     val vlr_inicial = resgatarMetas.getFloat(resgatarMetas.getColumnIndexOrThrow("vlr_inicial"))
                     val perc_meta = resgatarMetas.getFloat(resgatarMetas.getColumnIndexOrThrow("perc_meta"))
                     val dt_meta_inicio = resgatarMetas.getString(resgatarMetas.getColumnIndexOrThrow("dt_meta_inicio")).toString()
+                    val dt_meta_conclusao = resgatarMetas.getString(resgatarMetas.getColumnIndexOrThrow("dt_meta_conclusao")).toString()
 
                     val dataMeta = dt_meta_inicio.split(" ")[0]
 
@@ -1045,7 +1046,7 @@ class BancoDados(private var context: Context) {
                     val dataFormatada = "$dia de $nomeMes de $ano"
 
                     // Cria o item DebtMap
-                    val itemDebtMap = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap(idMeta, dataFormatada, vlr_inicial, perc_meta)
+                    val itemDebtMap = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap(idMeta, dataFormatada, dt_meta_conclusao, vlr_inicial, perc_meta)
 
                     // Adiciona o item à lista de itens
                     listasItemsMetas += itemDebtMap

@@ -1,5 +1,6 @@
 package com.example.debts.layout_lista_cartoes
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
@@ -99,6 +100,12 @@ class adapter_Cartoes(private val items: List<dados_listaCartao>, private val co
                         if (cartaoHabilitado) {
                             val navegarTelaRelatorioGastos = Intent(context, tela_RelatorioGastos::class.java)
                             context.startActivity(navegarTelaRelatorioGastos)
+
+                            // Se context for Activity, chama finish()
+                            if (context is Activity) {
+                                context.finish()
+                            }
+
                         } else {
                             CustomToast().showCustomToast(
                                 context,

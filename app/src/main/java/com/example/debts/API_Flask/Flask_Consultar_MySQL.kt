@@ -480,14 +480,13 @@ class Flask_Consultar_MySQL(private val context: Context) {
 
 //--------------------------------------------------------------------------------------------------------------------------------//
 
-    fun salvarQuestionario(nvl_conhecimeto_financ: Int, tps_investimentos: List<String>, tx_uso_ecommerce: Int, tx_uso_app_transporte: Int, tx_uso_app_entrega: Int, IDusuario: Int): String {
+    fun salvarQuestionario(tps_investimentos: List<String>, tx_uso_ecommerce: Int, tx_uso_app_transporte: Int, tx_uso_app_entrega: Int, IDusuario: Int): String {
         var resultado = ""
 
         var metodo_requisicao = ""
 
         val jsonRequest = """
         {
-            "nvl_conhecimeto_financ": "$nvl_conhecimeto_financ",
             "tp_investimentos": "$tps_investimentos",
             "tx_uso_ecommerce": "$tx_uso_ecommerce",
             "tx_uso_transporte":"$tx_uso_app_transporte",
@@ -652,6 +651,7 @@ class Flask_Consultar_MySQL(private val context: Context) {
                 val dataCriacao: String = meta.data_meta
                 val vlr_inicial: Float = meta.vlr_inicial
                 val perc_meta: Float = meta.perc_meta
+                val dt_meta_conclusao: String = meta.dt_meta_conclusao
 
                 //val progressoMeta: Float = meta.progresso_meta
 
@@ -662,7 +662,7 @@ class Flask_Consultar_MySQL(private val context: Context) {
                 //val listaConvertida = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas, listaMetasConcluidas)
 
                 // Cria o item DebtMap
-                val itemDebtMap = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap(idMeta.toString(), dataCriacao, vlr_inicial, perc_meta)
+                val itemDebtMap = DadosMetasFinanceiras_Usuario_BD_Debts().criarItemDebtMap(idMeta.toString(), dataCriacao, dt_meta_conclusao, vlr_inicial, perc_meta)
 
                 // Adiciona o item à lista de itens
                 listasItemsMetas += itemDebtMap
@@ -944,7 +944,7 @@ class Flask_Consultar_MySQL(private val context: Context) {
 
         try {
 
-            val jsonResponse = consultarMySQL(jsonRequest, "open_finance_refresh", "POST")
+            val jsonResponse = consultarMySQL(jsonRequest, "extrato_cartao", "POST")
             Log.d("RESPOSTA BRUTA Extrato Cartao", jsonResponse)  // Log da resposta bruta
 
             val json = object : TypeToken<List<OpFinanc>>() {}.type

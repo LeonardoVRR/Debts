@@ -80,11 +80,11 @@
         android:id="@+id/txt_dtCriacaoMeta"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="10dp"
         android:text="Data Criação Meta"
         android:textColor="#D8000000"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -101,17 +101,17 @@
 
     <ImageButton
         android:id="@+id/btn_ExcluirMeta"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="5dp"
         android:backgroundTint="#00FFFFFF"
         android:src="@drawable/baseline_delete_24"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lista_Metas_Item_DebtMap"
-        tools:ignore="SpeakableTextPresentCheck" />
+        app:layout_constraintTop_toBottomOf="@+id/txt_dtCriacaoMeta"
+        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
     <TextView
         android:id="@+id/txt_gastoInicial"
@@ -142,5 +142,16 @@
         android:textColor="#4CAF50"
         app:layout_constraintStart_toStartOf="@+id/textView46"
         app:layout_constraintTop_toBottomOf="@+id/textView46" />
+
+    <TextView
+        android:id="@+id/txt_dt_meta_conclusao"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="DtMetaConclusao"
+        android:textColor="#00000000"
+        app:layout_constraintEnd_toEndOf="@+id/txt_dtCriacaoMeta"
+        app:layout_constraintStart_toStartOf="@+id/txt_dtCriacaoMeta"
+        app:layout_constraintTop_toBottomOf="@+id/txt_dtCriacaoMeta" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

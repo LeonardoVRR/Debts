@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.Visibility
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts.listaMetaEstados
@@ -50,6 +51,7 @@ class adapter_DebtMap(private val items: List<dados_listaMeta_DebtMap>, private 
         holder.lista_Meta_ID.text = item.idMeta
         holder.txt_perc_meta.text = formatarReal().formatarParaReal(item.perc_meta)
         holder.txt_valor_inicial.text = formatarReal().formatarParaReal(item.vlr_inicial)
+        holder.txt_meta_conclusao.text = item.dt_meta_conclusao.split(" ")[4]
 
         // Obtém os LayoutParams do ConstraintLayout
         val lyt_Item_DebtMap_Params = holder.lyt_Item_DebtMap.layoutParams
@@ -58,6 +60,14 @@ class adapter_DebtMap(private val items: List<dados_listaMeta_DebtMap>, private 
 //        holder.lista_Metas_Item_DebtMap.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 //        holder.lista_Metas_Item_DebtMap.setHasFixedSize(true)
 //        holder.lista_Metas_Item_DebtMap.isNestedScrollingEnabled = false // Desative o scroll aninhado
+
+        if (holder.txt_meta_conclusao.text != "00:00:00") {
+            holder.btn_ExcluirMeta.visibility = View.VISIBLE
+        }
+
+        else {
+            holder.btn_ExcluirMeta.visibility = View.GONE
+        }
 
         //configurando o click do botão excluir meta
         holder.btn_ExcluirMeta.setOnClickListener {
@@ -117,5 +127,6 @@ class adapter_DebtMap(private val items: List<dados_listaMeta_DebtMap>, private 
         val btn_ExcluirMeta: ImageButton = view.findViewById(R.id.btn_ExcluirMeta)
         val txt_valor_inicial: TextView = view.findViewById(R.id.txt_gastoInicial)
         val txt_perc_meta: TextView = view.findViewById(R.id.txt_perc_meta)
+        val txt_meta_conclusao: TextView = view.findViewById(R.id.txt_dt_meta_conclusao)
     }
 }

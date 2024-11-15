@@ -292,7 +292,7 @@ class tela_Consulta_IA : AppCompatActivity() {
 
             try {
 
-                salvar = Flask_Consultar_MySQL(this).salvarQuestionario(valorSeekBarFinal, listaOpcoesSelecionadas, valor_painel_opc1.toInt(), valor_painel_opc2.toInt(), valor_painel_opc3.toInt(), idUsuario)
+                salvar = Flask_Consultar_MySQL(this).salvarQuestionario(listaOpcoesSelecionadas, valor_painel_opc1.toInt(), valor_painel_opc2.toInt(), valor_painel_opc3.toInt(), idUsuario)
 
             } catch (e: Exception) {
                 e.printStackTrace()

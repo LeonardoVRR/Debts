@@ -22,7 +22,8 @@ data class Meta(
     val data_meta: String,
     val id_meta: Int,
     val perc_meta: Float,
-    val vlr_inicial: Float
+    val vlr_inicial: Float,
+    val dt_meta_conclusao: String = ""
 )
 
 data class OpFinanc (

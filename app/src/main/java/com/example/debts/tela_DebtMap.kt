@@ -98,10 +98,13 @@ class tela_DebtMap : AppCompatActivity() {
         val listaDadosMetasEmProgresso: MutableList<dados_listaMeta_DebtMap> = mutableListOf()
         val listaDadosMetasConcluidas: MutableList<dados_listaMeta_DebtMap> = mutableListOf()
 
-        listaDados.mapIndexedNotNull { index, item ->
+        listaDados.forEach { item ->
 
-
-            listaDadosMetasNovas.add(item)
+            if (item.dt_meta_conclusao.split(" ")[4] == "00:00:00") {
+                listaDadosMetasNovas.add(item)
+            } else {
+                listaDadosMetasConcluidas.add(item)
+            }
 
 //            if (item.progressoMeta == 0f) {
 //                Log.d("Lista Metas Novas", "${item}")

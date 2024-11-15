@@ -1144,7 +1144,7 @@ def pegarUltimaAtualizacaoTabela():
     else:
         return jsonify({"message": mensagem}), 404  # Código 404 para erro
 
-def salvarCartao (IDusuario, ds_operadora, tp_credito, tp_debito, saldo, limite):
+def salvarCartao (num_cartao, IDusuario, ds_operadora, tp_credito, tp_debito, saldo, limite):
     try:
         # Inicializa a conexão com o banco de dados usando o gerenciador de contexto
         with pymysql.connect(**db_config) as conn:
@@ -1153,12 +1153,12 @@ def salvarCartao (IDusuario, ds_operadora, tp_credito, tp_debito, saldo, limite)
 
                 # Query para salvar um novo cartao do usuário
                 sql = """
-                    INSERT INTO cartoes (usuario, ds_operadora, tp_credito, tp_debito, saldo, limite)
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    INSERT INTO cartoes (cd_cartao, usuario, ds_operadora, tp_credito, tp_debito, saldo, limite)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """
 
                 # Preparar a instrução SQL e executar a consulta
-                cursor.execute(sql, (IDusuario, ds_operadora, tp_credito, tp_debito, saldo, limite))
+                cursor.execute(sql, (num_cartao, IDusuario, ds_operadora, tp_credito, tp_debito, saldo, limite))
 
                 if cursor.rowcount > 0:  # Verificar se o rendimento foi salvo
                     conn.commit()  # Confirmar a transação
@@ -1177,23 +1177,94 @@ def salvarCartaoTabela():
 
     # Verificar se os campos obrigatórios estão presentes
     IDusuario = data.get('id')
-    ds_operadora = data.get('ds_operadora')
-    tp_credito = data.get('tp_credito')
-    tp_debito = data.get('tp_debito')
-    saldo = data.get('saldo')
-    limite = data.get('limite')
+    # ds_operadora = data.get('ds_operadora')
+    # tp_credito = data.get('tp_credito')
+    # tp_debito = data.get('tp_debito')
+    # saldo = data.get('saldo')
+    # limite = data.get('limite')
 
+    cpf_usuario = data.get("cpf")
+    cd_cartao = data.get("num_cartao")
 
-    if not IDusuario or not ds_operadora or not tp_credito or not tp_debito:
+    if not cpf_usuario or not cd_cartao or not IDusuario:
         return jsonify({"message": "Informe todos os dados obrigatorios para salvar o rendimento!"}), 400
 
+    response_test = {
+        "error": "0",
+        "dados":{
+            "operadora": "NUBANK",
+            "tp_credito": 0,
+            "tp_debito": 1
+        }
+    }
+
+    # Obter a resposta JSON como um dicionário
+    resposta_json = response_test
+
+    # Acessar o campo 'error'
+    erro = resposta_json["error"]
+
+    # Acessar o objeto 'dados' e seus campos
+    dados = resposta_json["dados"]
+    operadora = dados["operadora"]
+    tp_credito = int(dados["tp_credito"])  # Converte "1" ou "0" para True ou False
+    tp_debito = int(dados["tp_debito"])  # Converte "1" ou "0" para True ou False
+
+    # # Exibir os dados
+    # print("Erro:", erro)
+    # print("Operadora:", operadora)
+    # print("Tipo Crédito:", tp_credito)
+    # print("Tipo Débito:", tp_debito)
+
     # Chamar a função para salvar o rendimento
-    cartaoSalvo, mensagem = salvarCartao(IDusuario, ds_operadora, tp_credito, tp_debito, saldo, limite)
+    cartaoSalvo, mensagem = salvarCartao(cd_cartao, IDusuario, operadora, tp_credito, tp_debito, saldo=None, limite=None)
 
     if cartaoSalvo:
         return jsonify({"message": mensagem}), 200  # Código 200 para sucesso
     else:
         return jsonify({"message": mensagem}), 404  # Código 404 para erro
+
+    # # URL da API Flask
+    # url = "http://localhost:5001/valida cartão"
+    #
+    # # Dados a serem enviados no formato JSON
+    # dados = {
+    #     "cpf": cpf_usuario,
+    #     "num_cartao": cd_cartao
+    # }
+    #
+    # # Realizar a requisição POST e enviar os dados como JSON
+    # response = requests.post(url, json=dados)
+    #
+    # if response.status_code == 200:
+    #     # Obter a resposta JSON como um dicionário
+    #     resposta_json = response.json()
+    #
+    #     # Acessar o campo 'error'
+    #     erro = resposta_json["error"]
+    #
+    #     # Acessar o objeto 'dados' e seus campos
+    #     dados = resposta_json["dados"]
+    #     operadora = dados["operadora"]
+    #     tp_credito = int(dados["tp_credito"])  # Converte "1" ou "0" para True ou False
+    #     tp_debito = int(dados["tp_debito"])  # Converte "1" ou "0" para True ou False
+    #
+    #     # # Exibir os dados
+    #     # print("Erro:", erro)
+    #     # print("Operadora:", operadora)
+    #     # print("Tipo Crédito:", tp_credito)
+    #     # print("Tipo Débito:", tp_debito)
+    #
+    #     # Chamar a função para salvar o rendimento
+    #     cartaoSalvo, mensagem = salvarCartao(cd_cartao, IDusuario, operadora, tp_credito, tp_debito, saldo=None, limite=None)
+    #
+    #     if cartaoSalvo:
+    #         return jsonify({"message": mensagem}), 200  # Código 200 para sucesso
+    #     else:
+    #         return jsonify({"message": mensagem}), 404  # Código 404 para erro
+    #
+    # else:
+    #     return jsonify({"Salvar Cartao", f"Erro ao salvar cartao"}), 404
 
 def listar_cartoes(IDusuario):
     try:
@@ -1224,13 +1295,15 @@ def listar_cartoes(IDusuario):
                         valor = 0
 
                         if tp_debito > 0 and tp_credito <= 0:
+                            tp_cartao = "Debito"
+
                             if saldo is not None:
-                                tp_cartao = "Debito"
                                 valor = saldo
 
                         elif tp_credito > 0 and tp_debito <= 0:
+                            tp_cartao = "Credito"
+                            
                             if limite is not None:
-                                tp_cartao = "Credito"
                                 valor = limite
 
 
@@ -1399,6 +1472,7 @@ def dt_ultima_transacao(cd_cartao):
                             return False, "erro ao obter a ultima data de transacao de credito"
 
                     elif resultadoCartao['tp_debito'] > 0 and resultadoCartao['tp_credito'] <= 0:
+
                         ultima_transacao = "SELECT dt_transacao FROM trans_conta WHERE cd_cartao = %s ORDER BY id_trans DESC LIMIT 1"
                         cursor.execute(ultima_transacao, (cd_cartao,))  # Executa a consulta para obter o CPF
                         resultadoDt_Transacao = cursor.fetchone()  # Recupera o CPF do usuário

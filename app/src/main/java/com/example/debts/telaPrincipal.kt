@@ -54,7 +54,7 @@ class telaPrincipal : AppCompatActivity() {
 
         val nomeUsuario: String = FormatarNome().formatar(DadosUsuario_BD_Debts(this).pegarNomeUsuario())
 
-        txt_nomeUsuario.text = "Bem-Vindo, ${nomeUsuario}"
+        txt_nomeUsuario.text = nomeUsuario
 
         //configurando o botão voltar do celular quando for prescionado p/ voltar na tela de login
         val voltarTelaLogin = Intent(this, MainActivity::class.java)

@@ -930,12 +930,12 @@ class BancoDados(private var context: Context) {
 
                     if (tp_credito > 0 && tp_debito <= 0){
                         tp_cartao = "Crédito"
-                        valor = formatarReal().formatarParaReal(limite)
+                        //valor = formatarReal().formatarParaReal(limite)
                     }
 
                     else if (tp_debito > 0 && tp_credito <= 0){
                         tp_cartao = "Débito"
-                        valor = formatarReal().formatarParaReal(saldo)
+                        //valor = formatarReal().formatarParaReal(saldo)
                     }
 
 

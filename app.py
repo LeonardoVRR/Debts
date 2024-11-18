@@ -477,10 +477,12 @@ def salvar_meta(IDusuario, cartao, vlr_inicial, perc_meta, ramo_meta = 0):
 
                 perc_meta_calc = vlr_inicial * (1 - perc_meta)
 
-                dt_meta_conclusao = datetime.now()
+                dt_meta = datetime.now()
 
                 # Formata a data e hora no formato compatível com MySQL (YYYY-MM-DD HH:MM:SS)
-                data_hora_mysql = dt_meta_conclusao.strftime('%Y-%m-%d 00:00:00')
+                data_hora_mysql = dt_meta.strftime('%Y-%m-%d 00:00:00')
+
+                data_criacao_meta = dt_meta.strftime('%Y-%m-%d %H:%M:%S')
 
                 # Converter listas para JSON
                 #listaMetasJSON = json.dumps(lista_metas)
@@ -489,15 +491,15 @@ def salvar_meta(IDusuario, cartao, vlr_inicial, perc_meta, ramo_meta = 0):
                 # Query para inserir a meta
                 insert = """
                     INSERT INTO metas
-                    (usuario, cartao, vlr_inicial, perc_meta, dt_meta_conclusao, ramo_meta) 
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    (usuario, cartao, vlr_inicial, perc_meta, dt_meta_inicio, dt_meta_conclusao, ramo_meta) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """
 
                 # Preparar a instrução SQL
 
                 # Executar a consulta com os parâmetros
                 cursor.execute(insert,
-                               (IDusuario, cartao, vlr_inicial, perc_meta_calc, data_hora_mysql, ramo_meta))
+                               (IDusuario, cartao, vlr_inicial, perc_meta_calc, data_criacao_meta, data_hora_mysql, ramo_meta))
 
                 # Verificar se a inserção foi bem-sucedida
                 if cursor.rowcount > 0:
@@ -556,7 +558,7 @@ def atualizar_meta(IDusuario, IdMeta):
                     horaCadastro = str(resultado[0]).split(" ")[1]  # Extrai a hora da data
 
                     # Verifica se a hora não é "00:00:00", então atualiza a meta
-                    if horaCadastro != "00:00:00":
+                    if horaCadastro == "00:00:00" or horaCadastro == None:
                         dt_meta_conclusao = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Formato MySQL
 
                         # Query para atualizar a meta
@@ -570,12 +572,26 @@ def atualizar_meta(IDusuario, IdMeta):
                         with conn.cursor() as cursorUpdate:
                             cursorUpdate.execute(update_query, (dt_meta_conclusao, IDusuario, IdMeta))
 
+                            hr_conclusaoMeta = dt_meta_conclusao.split(" ")[1]
+
+                            dadosMetaAtualizada = {
+                                "status": "Meta MySQL atualizada com sucesso.",
+                                "hr_conclusaoMeta": dt_meta_conclusao
+                            }
+
                             # Confirma a transação se houver atualização
                             if cursorUpdate.rowcount > 0:
                                 conn.commit()
-                                return True, "Meta MySQL atualizada com sucesso."
+                                return True, dadosMetaAtualizada
                             else:
                                 return False, "Meta não encontrada."
+
+                    else:
+                        return False, "Hora de cadastro não é válida para atualização."
+
+                else:
+                    return False, "Meta não encontrada no banco de dados."
+
 
     except pymysql.MySQLError as e:
         print(f"Erro ao atualizar meta: {e}")
@@ -599,7 +615,7 @@ def atualizarMetaUsuario():
     metaAtualizada, mensagem = atualizar_meta(IDusuario, IdMeta)
 
     if metaAtualizada:
-        return jsonify({"message": mensagem}), 200
+        return jsonify(mensagem), 200
     else:
         return jsonify({"message": mensagem}), 404 # Usando 404 para indicar que o ID do usuário não existe ou erro na atualização da senha
 
@@ -678,6 +694,8 @@ def listar_metas(IDusuario):
                         dt_meta_inicio = row['dt_meta_inicio']
                         dt_meta_conclusao = row['dt_meta_conclusao']
 
+                        data_conclusao_meta_Formatada = dt_meta_conclusao.strftime('%Y-%m-%d %H:%M:%S')
+
                         # Verificar e formatar a data
                         if isinstance(dt_meta_inicio, datetime):
                             data_meta_formatada = dt_meta_inicio.strftime("%Y-%m-%d")
@@ -690,7 +708,7 @@ def listar_metas(IDusuario):
                             "vlr_inicial": vlr_inicial,
                             "perc_meta": perc_meta,
                             "data_meta": data_meta_formatada,
-                            "dt_meta_conclusao": dt_meta_conclusao
+                            "dt_meta_conclusao": data_conclusao_meta_Formatada
                         }
 
                         # Adicionar o item à lista
@@ -798,77 +816,63 @@ def salvar_rendimento_route():
 
 #----------------- Rotas p/ Salvar os Gastos do Usuário ----------------------------------------------------------------
 
-#----------- Rota desativada -----------------------------
-def salvar_Gasto(nomeGasto, tipoMovimento, dataRendimento, valorRendimento, IDusuario):
+def salvar_Gasto(numCartao, dt_transacao, cnpj_transacao, parc_pgto, vlr_total):
     try:
-        # Inicializa a conexão com o banco de dados
-        conn = pymysql.connect(**db_config)
 
-        if conn.is_connected():
-            # Formatar a data recebida (dd/MM/yyyy) para o formato (yyyy-MM-dd)
-            dia, mes, ano = dataRendimento.split("/")
-            dia = dia.strip()
-            mes = int(mes.strip())
-            ano = ano.strip()
+        # Inicializa a conexão com o banco de dados usando o gerenciador de contexto
+        with pymysql.connect(**db_config) as conn:
+            # Abre um cursor também com gerenciador de contexto
+            with conn.cursor() as cursor:
+                # Formatar a data recebida (dd/MM/yyyy) para o formato (yyyy-MM-dd)
+                dia, mes, ano = dt_transacao.split("/")
+                dia = dia.strip()
+                mes = int(mes.strip())
+                ano = ano.strip()
 
-            # Obter o nome do mês usando a biblioteca calendar
-            nomeMes = pegar_nome_mes(mes)  # Pega o nome completo do mês (ex: Janeiro)
+                # Obter o nome do mês usando a biblioteca calendar
+                # nomeMes = pegar_nome_mes(mes)  # Pega o nome completo do mês (ex: Janeiro)
 
-            # Formatar a data para o formato yyyy-MM-dd
-            mes_formatado = f"{mes:02d}"
-            data_formatada = f"{ano}-{mes_formatado}-{dia}"
+                # Formatar a data para o formato yyyy-MM-dd
+                mes_formatado = f"{mes:02d}"
+                data_formatada = f"{ano}-{mes_formatado}-{dia}"
 
-            # Query para salvar um novo rendimento do usuário
-            sql = """
-                INSERT INTO gastos (descricao_gasto, tp_transacao, valor_gasto, dt_gasto, mes, id_user_gasto)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """
-
-            usuarioExiste, mensagem = validarUsuario(IDusuario)
-
-            if usuarioExiste:
+                # Query para salvar um novo rendimento do usuário
+                sql = """
+                                INSERT INTO trans_credito (cd_cartao, dt_transacao, cnpj_transacao, parc_pgto, vlr_total)
+                                VALUES (%s, %s, %s, %s, %s)
+                            """
 
                 # Preparar a instrução SQL e executar a consulta
-                cursor = conn.cursor()
-                cursor.execute(sql, (nomeGasto, tipoMovimento, valorRendimento, data_formatada, nomeMes, IDusuario))
+                cursor.execute(sql, (numCartao, data_formatada, cnpj_transacao, parc_pgto, vlr_total))
 
                 if cursor.rowcount > 0:  # Verificar se o gasto foi salvo
                     conn.commit()  # Confirmar a transação
                     return True, "Gasto salvo com sucesso."
                 else:
-                    return False, "Gasto nao salvo. Verifique se o ID do usuario esta correto."
-
-                cursor.close()
-
-            else:
-                return False, mensagem
+                    return False, "Gasto nao salvo."
 
     except pymysql.MySQLError as e:
         print(f"Erro ao realizar a consulta salvar gasto: {e}")
         return False, f"Erro ao realizar a consulta salvar gasto: {e}"
 
-    finally:
-        # Fechar o cursor e a conexão
-        if conn:
-            conn.close()
-
+# rota p/ salvar gastos do cartão de credito
 @app.route('/salvar_gasto', methods=['POST'])
 def salvar_gasto_route():
     # Converte o corpo da requisição JSON em um dicionário Python
     data = request.json
 
     # Verificar se os campos obrigatórios estão presentes
-    nomeGasto = data.get('descricao_gasto')
-    tipoMovimento = data.get('tipo_movimento')
-    dataGasto = data.get('data_gasto')
-    valorGasto = data.get('valor_gasto')
-    IDusuario = data.get('id')
+    numCartao = data.get('cd_cartao')
+    dt_transacao = data.get('dt_transacao')
+    cnpj_transacao = data.get('cnpj_transacao')
+    parc_pgto = data.get('parc_pgto')
+    vlr_total = data.get('vlr_total')
 
-    if not nomeGasto or not tipoMovimento or not dataGasto or not valorGasto or not IDusuario:
+    if not numCartao or not dt_transacao or not cnpj_transacao or not parc_pgto or not vlr_total:
         return jsonify({"message": "Informe todos os dados obrigatorios para salvar o gasto!"}), 400
 
     # Chamar a função para salvar o rendimento
-    gastoSalvo, mensagem = salvar_Gasto(nomeGasto, tipoMovimento, dataGasto, valorGasto, IDusuario)
+    gastoSalvo, mensagem = salvar_Gasto(numCartao, dt_transacao, cnpj_transacao, parc_pgto, vlr_total)
 
     if gastoSalvo:
         return jsonify({"message": mensagem}), 200  # Código 200 para sucesso
@@ -1177,38 +1181,39 @@ def salvarCartaoTabela():
 
     # Verificar se os campos obrigatórios estão presentes
     IDusuario = data.get('id')
+    cpf_usuario = data.get("cpf")
+    cd_cartao = data.get("num_cartao")
+
     # ds_operadora = data.get('ds_operadora')
     # tp_credito = data.get('tp_credito')
     # tp_debito = data.get('tp_debito')
     # saldo = data.get('saldo')
     # limite = data.get('limite')
 
-    cpf_usuario = data.get("cpf")
-    cd_cartao = data.get("num_cartao")
-
     if not cpf_usuario or not cd_cartao or not IDusuario:
         return jsonify({"message": "Informe todos os dados obrigatorios para salvar o rendimento!"}), 400
 
-    response_test = {
-        "error": "0",
-        "dados":{
-            "operadora": "NUBANK",
-            "tp_credito": 0,
-            "tp_debito": 1
-        }
-    }
-
-    # Obter a resposta JSON como um dicionário
-    resposta_json = response_test
-
-    # Acessar o campo 'error'
-    erro = resposta_json["error"]
-
-    # Acessar o objeto 'dados' e seus campos
-    dados = resposta_json["dados"]
-    operadora = dados["operadora"]
-    tp_credito = int(dados["tp_credito"])  # Converte "1" ou "0" para True ou False
-    tp_debito = int(dados["tp_debito"])  # Converte "1" ou "0" para True ou False
+    #------------------- teste da função -------------------------------------
+    # response_test = {
+    #     "error": "0",
+    #     "dados":{
+    #         "operadora": "NUBANK",
+    #         "tp_credito": 0,
+    #         "tp_debito": 1
+    #     }
+    # }
+    #
+    # # Obter a resposta JSON como um dicionário
+    # resposta_json = response_test
+    #
+    # # Acessar o campo 'error'
+    # erro = resposta_json["error"]
+    #
+    # # Acessar o objeto 'dados' e seus campos
+    # dados = resposta_json["dados"]
+    # operadora = dados["operadora"]
+    # tp_credito = int(dados["tp_credito"])  # Converte "1" ou "0" para True ou False
+    # tp_debito = int(dados["tp_debito"])  # Converte "1" ou "0" para True ou False
 
     # # Exibir os dados
     # print("Erro:", erro)
@@ -1216,55 +1221,56 @@ def salvarCartaoTabela():
     # print("Tipo Crédito:", tp_credito)
     # print("Tipo Débito:", tp_debito)
 
-    # Chamar a função para salvar o rendimento
-    cartaoSalvo, mensagem = salvarCartao(cd_cartao, IDusuario, operadora, tp_credito, tp_debito, saldo=None, limite=None)
-
-    if cartaoSalvo:
-        return jsonify({"message": mensagem}), 200  # Código 200 para sucesso
-    else:
-        return jsonify({"message": mensagem}), 404  # Código 404 para erro
-
-    # # URL da API Flask
-    # url = "http://localhost:5001/valida cartão"
+    # # Chamar a função para salvar o rendimento
+    # cartaoSalvo, mensagem = salvarCartao(cd_cartao, IDusuario, operadora, tp_credito, tp_debito, saldo=None, limite=None)
     #
-    # # Dados a serem enviados no formato JSON
-    # dados = {
-    #     "cpf": cpf_usuario,
-    #     "num_cartao": cd_cartao
-    # }
-    #
-    # # Realizar a requisição POST e enviar os dados como JSON
-    # response = requests.post(url, json=dados)
-    #
-    # if response.status_code == 200:
-    #     # Obter a resposta JSON como um dicionário
-    #     resposta_json = response.json()
-    #
-    #     # Acessar o campo 'error'
-    #     erro = resposta_json["error"]
-    #
-    #     # Acessar o objeto 'dados' e seus campos
-    #     dados = resposta_json["dados"]
-    #     operadora = dados["operadora"]
-    #     tp_credito = int(dados["tp_credito"])  # Converte "1" ou "0" para True ou False
-    #     tp_debito = int(dados["tp_debito"])  # Converte "1" ou "0" para True ou False
-    #
-    #     # # Exibir os dados
-    #     # print("Erro:", erro)
-    #     # print("Operadora:", operadora)
-    #     # print("Tipo Crédito:", tp_credito)
-    #     # print("Tipo Débito:", tp_debito)
-    #
-    #     # Chamar a função para salvar o rendimento
-    #     cartaoSalvo, mensagem = salvarCartao(cd_cartao, IDusuario, operadora, tp_credito, tp_debito, saldo=None, limite=None)
-    #
-    #     if cartaoSalvo:
-    #         return jsonify({"message": mensagem}), 200  # Código 200 para sucesso
-    #     else:
-    #         return jsonify({"message": mensagem}), 404  # Código 404 para erro
-    #
+    # if cartaoSalvo:
+    #     return jsonify({"message": mensagem}), 200  # Código 200 para sucesso
     # else:
-    #     return jsonify({"Salvar Cartao", f"Erro ao salvar cartao"}), 404
+    #     return jsonify({"message": mensagem}), 404  # Código 404 para erro
+    # ------------------- fim do teste da função -------------------------------------
+
+    # URL da API Flask
+    url = "http://localhost:5001/valida cartão"
+
+    # Dados a serem enviados no formato JSON
+    dados = {
+        "cpf": cpf_usuario,
+        "num_cartao": cd_cartao
+    }
+
+    # Realizar a requisição POST e enviar os dados como JSON
+    response = requests.post(url, json=dados)
+
+    if response.status_code == 200:
+        # Obter a resposta JSON como um dicionário
+        resposta_json = response.json()
+
+        # Acessar o campo 'error'
+        erro = resposta_json["error"]
+
+        # Acessar o objeto 'dados' e seus campos
+        dados = resposta_json["dados"]
+        operadora = dados["operadora"]
+        tp_credito = int(dados["tp_credito"])  # Converte "1" ou "0" para True ou False
+        tp_debito = int(dados["tp_debito"])  # Converte "1" ou "0" para True ou False
+
+        # # Exibir os dados
+        # print("Erro:", erro)
+        # print("Operadora:", operadora)
+        # print("Tipo Crédito:", tp_credito)
+        # print("Tipo Débito:", tp_debito)
+
+        # Chamar a função para salvar o rendimento
+        cartaoSalvo, mensagem = salvarCartao(cd_cartao, IDusuario, operadora, tp_credito, tp_debito, saldo=None, limite=None)
+
+        if cartaoSalvo:
+            return jsonify({"message": mensagem}), 200  # Código 200 para sucesso
+        else:
+            return jsonify({"message": mensagem}), 404  # Código 404 para erro
+
+    else:
+        return jsonify({"Salvar Cartao", f"Erro ao salvar cartao"}), 404
 
 def listar_cartoes(IDusuario):
     try:
@@ -1398,44 +1404,46 @@ def open_finance_request():
     if not cd_cartao or not cpf_usuario:
         return jsonify({"message": "informe o codigo do cartao e o cpf do usuario, para prosseguir"}), 400
 
-    return jsonify({"Open Finance Habilitado": True}), 200
+    # ------------------- teste da função --------------------------------------------
+    #return jsonify({"Open Finance Habilitado": True}), 200
+    # ------------------- fim do teste da função -------------------------------------
 
-    # # URL da API Flask
-    # url = "http://localhost:5001/open_finance_request"
-    #
-    # # Dados a serem enviados no formato JSON
-    # dados = {
-    #     "cpf": cpf_usuario,
-    #     "num_cartao": cd_cartao
-    # }
-    #
-    # # Realizar a requisição POST e enviar os dados como JSON
-    # response = requests.post(url, json=dados)
-    #
-    # if response.status_code == 200:
-    #
-    #     resposta_json = response.json()
-    #
-    #     # Acessar o campo 'error'
-    #     erro = resposta_json["error"]
-    #
-    #     # Acessar o objeto 'dados' e seus campos
-    #     dados_cartao = resposta_json["dados"]
-    #     operadora = dados_cartao["operadora"]
-    #     open_fin = bool(int(dados_cartao["open_fin"]))  # Converte "1" ou "0" para True ou False
-    #
-    #     # Exibir os dados
-    #     # print("Erro:", erro)
-    #     # print("Operadora:", operadora)
-    #     # print("Open Finance:", open_fin)
-    #
-    #     if open_fin:
-    #         return jsonify({"Open Finance Habilitado", True}), 200
-    #
-    #     else:
-    #         return jsonify({"Open Finance Habilitado", False}), 200
-    # else:
-    #     return jsonify({"Open Finance Habilitado", f"Erro na requisicao Open Finance Habilitado"}), 404
+    # URL da API Flask
+    url = "http://localhost:5001/open_finance_request"
+
+    # Dados a serem enviados no formato JSON
+    dados = {
+        "cpf": cpf_usuario,
+        "num_cartao": cd_cartao
+    }
+
+    # Realizar a requisição POST e enviar os dados como JSON
+    response = requests.post(url, json=dados)
+
+    if response.status_code == 200:
+
+        resposta_json = response.json()
+
+        # Acessar o campo 'error'
+        erro = resposta_json["error"]
+
+        # Acessar o objeto 'dados' e seus campos
+        dados_cartao = resposta_json["dados"]
+        operadora = dados_cartao["operadora"]
+        open_fin = bool(int(dados_cartao["open_fin"]))  # Converte "1" ou "0" para True ou False
+
+        # Exibir os dados
+        # print("Erro:", erro)
+        # print("Operadora:", operadora)
+        # print("Open Finance:", open_fin)
+
+        if open_fin:
+            return jsonify({"Open Finance Habilitado", True}), 200
+
+        else:
+            return jsonify({"Open Finance Habilitado", False}), 200
+    else:
+        return jsonify({"Open Finance Habilitado", f"Erro na requisicao Open Finance Habilitado"}), 404
 
 
 
@@ -1517,141 +1525,142 @@ def open_finance_refresh():
             "dt_atualizacao": dt_ultima_transacao_cartao
         }
 
-        response_test = {
-            "error": "0",
-            "dados": {
-                "12345": {
-                    "dt_transacao": "11/11/2024 14:30:00",
-                    "tp_transacao": "DEBITO A VISTA",
-                    "ds_transacao": "Supermercado ABC",
-                    "credito": "",
-                    "debito": "250,75",
-                    "saldo": "1200,50"
-                },
-                "67890": {
-                    "dt_transacao": "12/11/2024 10:15:45",
-                    "tp_transacao": "DEBITO A VISTA",
-                    "ds_transacao": "Posto de Gasolina",
-                    "credito": "",
-                    "debito": "100,00",
-                    "saldo": "1100,50"
-                },
-                "54321": {
-                    "dt_transacao": "13/11/2024 18:45:30",
-                    "tp_transacao": "DEBITO A VISTA",
-                    "ds_transacao": "Lanchonete Central",
-                    "credito": "",
-                    "debito": "45,30",
-                    "saldo": "1055,20"
-                }
-            }
-        }
-
-        resposta_json = response_test
-
-        erro = resposta_json["error"]
-        print("Erro:", erro)
-
-        dados = resposta_json["dados"]
-
-        for doc_id, transacao in dados.items():
-            dt_transacao = transacao["dt_transacao"]
-            tp_transacao = transacao["tp_transacao"]
-            ds_transacao = transacao["ds_transacao"]
-
-            dt_formatada = str(dt_transacao).split(" ")[0]
-
-            credito = transacao["credito"]
-            debito = transacao["debito"]
-
-            credito_fomatado = float(transacao["credito"].replace(",", ".")) if transacao["credito"] else None
-            debito_fomatado = float(transacao["debito"].replace(",", ".")) if transacao["debito"] else None
-            saldo = float(transacao["saldo"].replace(",", "."))
-
-            if credito != "" and debito == "":
-                valor_gasto = credito_fomatado
-            elif credito == "" and debito != "":
-                valor_gasto = debito_fomatado
-
-            item_gasto = {
-                'id': doc_id,
-                'descricao': ds_transacao,
-                'tipo_movimento': tp_transacao,
-                'valor': valor_gasto,
-                'data': dt_formatada
-            }
-
-            lista_gastos.append(item_gasto)
-
-        return jsonify(lista_gastos), 200
-
-    else:
-        return jsonify({"message": "Lista vazia"}), 404
-
-
-    #     # Realizar a requisição POST e enviar os dados como JSON
-    #     response = requests.post(url, json=dados)
-    #
-    #     # Verificar o status da resposta e o conteúdo
-    #     if response.status_code == 200:
-    #         # Obter a resposta JSON como um dicionário
-    #         resposta_json = response.json()
-    #
-    #         # Acessar o campo 'error'
-    #         erro = resposta_json["error"]
-    #         print("Erro:", erro)
-    #
-    #         # Acessar o objeto 'dados'
-    #         dados = resposta_json["dados"]
-    #
-    #         # Percorrer cada transação usando o número do documento como chave
-    #         for doc_id, transacao in dados.items():
-    #             dt_transacao = transacao["dt_transacao"]
-    #             tp_transacao = transacao["tp_transacao"]
-    #             ds_transacao = transacao["ds_transacao"]
-    #
-    #             dt_formatada = str(dt_transacao).split(" ")[0]
-    #
-    #             # Convertendo valores de crédito e débito para float, ou atribuindo None caso estejam vazios
-    #             credito = float(transacao["credito"].replace(",", ".")) if transacao["credito"] else None
-    #             debito = float(transacao["debito"].replace(",", ".")) if transacao["debito"] else None
-    #             saldo = float(transacao["saldo"].replace(",", "."))
-    #
-    #             if credito != "" and debito == "":
-    #                 valor_gasto = credito
-    #
-    #             elif credito == "" and debito != "":
-    #                 valor_gasto = debito
-    #
-    #             # Criar um dicionário representando a operação financeira
-    #             item_gasto = {
-    #                 'id': doc_id,
-    #                 'descricao': ds_transacao,
-    #                 'tipo_movimento': tp_transacao,
-    #                 'valor': valor_gasto,
-    #                 'data': dt_formatada
+    # ------------------- teste da função --------------------------------------------
+    #     response_test = {
+    #         "error": "0",
+    #         "dados": {
+    #             "12345": {
+    #                 "dt_transacao": "11/11/2024 14:30:00",
+    #                 "tp_transacao": "DEBITO A VISTA",
+    #                 "ds_transacao": "Supermercado ABC",
+    #                 "credito": "",
+    #                 "debito": "250,75",
+    #                 "saldo": "1200,50"
+    #             },
+    #             "67890": {
+    #                 "dt_transacao": "12/11/2024 10:15:45",
+    #                 "tp_transacao": "DEBITO A VISTA",
+    #                 "ds_transacao": "Posto de Gasolina",
+    #                 "credito": "",
+    #                 "debito": "100,00",
+    #                 "saldo": "1100,50"
+    #             },
+    #             "54321": {
+    #                 "dt_transacao": "13/11/2024 18:45:30",
+    #                 "tp_transacao": "DEBITO A VISTA",
+    #                 "ds_transacao": "Lanchonete Central",
+    #                 "credito": "",
+    #                 "debito": "45,30",
+    #                 "saldo": "1055,20"
     #             }
+    #         }
+    #     }
     #
-    #             # Adicionar o item à lista
-    #             lista_gastos.append(item_gasto)
+    #     resposta_json = response_test
     #
-    #             # Exibir os dados da transação
-    #             # print(f"Documento: {doc_id}")
-    #             # print("Data da Transação:", dt_transacao)
-    #             # print("Tipo de Transação:", tp_transacao)
-    #             # print("Descrição:", ds_transacao)
-    #             # print("Crédito:", credito)
-    #             # print("Débito:", debito)
-    #             # print("Saldo:", saldo)
-    #             # print("----")
+    #     erro = resposta_json["error"]
+    #     print("Erro:", erro)
     #
-    #         return jsonify(lista_gastos), 200
+    #     dados = resposta_json["dados"]
     #
-    #     else:
-    #         return jsonify({"Erro na requisição": response.status_code})
+    #     for doc_id, transacao in dados.items():
+    #         dt_transacao = transacao["dt_transacao"]
+    #         tp_transacao = transacao["tp_transacao"]
+    #         ds_transacao = transacao["ds_transacao"]
+    #
+    #         dt_formatada = str(dt_transacao).split(" ")[0]
+    #
+    #         credito = transacao["credito"]
+    #         debito = transacao["debito"]
+    #
+    #         credito_fomatado = float(transacao["credito"].replace(",", ".")) if transacao["credito"] else None
+    #         debito_fomatado = float(transacao["debito"].replace(",", ".")) if transacao["debito"] else None
+    #         saldo = float(transacao["saldo"].replace(",", "."))
+    #
+    #         if credito != "" and debito == "":
+    #             valor_gasto = credito_fomatado
+    #         elif credito == "" and debito != "":
+    #             valor_gasto = debito_fomatado
+    #
+    #         item_gasto = {
+    #             'id': doc_id,
+    #             'descricao': ds_transacao,
+    #             'tipo_movimento': tp_transacao,
+    #             'valor': valor_gasto,
+    #             'data': dt_formatada
+    #         }
+    #
+    #         lista_gastos.append(item_gasto)
+    #
+    #     return jsonify(lista_gastos), 200
     #
     # else:
-    #     return jsonify({"message": mensagem}), 404  # Código 404 para erro
+    #     return jsonify({"message": "Lista vazia"}), 404
+    # ------------------- fim do teste da função --------------------------------------------
+
+        # Realizar a requisição POST e enviar os dados como JSON
+        response = requests.post(url, json=dados)
+
+        # Verificar o status da resposta e o conteúdo
+        if response.status_code == 200:
+            # Obter a resposta JSON como um dicionário
+            resposta_json = response.json()
+
+            # Acessar o campo 'error'
+            erro = resposta_json["error"]
+            print("Erro:", erro)
+
+            # Acessar o objeto 'dados'
+            dados = resposta_json["dados"]
+
+            # Percorrer cada transação usando o número do documento como chave
+            for doc_id, transacao in dados.items():
+                dt_transacao = transacao["dt_transacao"]
+                tp_transacao = transacao["tp_transacao"]
+                ds_transacao = transacao["ds_transacao"]
+
+                dt_formatada = str(dt_transacao).split(" ")[0]
+
+                # Convertendo valores de crédito e débito para float, ou atribuindo None caso estejam vazios
+                credito = float(transacao["credito"].replace(",", ".")) if transacao["credito"] else None
+                debito = float(transacao["debito"].replace(",", ".")) if transacao["debito"] else None
+                saldo = float(transacao["saldo"].replace(",", "."))
+
+                if credito != "" and debito == "":
+                    valor_gasto = credito
+
+                elif credito == "" and debito != "":
+                    valor_gasto = debito
+
+                # Criar um dicionário representando a operação financeira
+                item_gasto = {
+                    'id': doc_id,
+                    'descricao': ds_transacao,
+                    'tipo_movimento': tp_transacao,
+                    'valor': valor_gasto,
+                    'data': dt_formatada
+                }
+
+                # Adicionar o item à lista
+                lista_gastos.append(item_gasto)
+
+                # Exibir os dados da transação
+                # print(f"Documento: {doc_id}")
+                # print("Data da Transação:", dt_transacao)
+                # print("Tipo de Transação:", tp_transacao)
+                # print("Descrição:", ds_transacao)
+                # print("Crédito:", credito)
+                # print("Débito:", debito)
+                # print("Saldo:", saldo)
+                # print("----")
+
+            return jsonify(lista_gastos), 200
+
+        else:
+            return jsonify({"Erro na requisição": response.status_code})
+
+    else:
+        return jsonify({"message": mensagem}), 404  # Código 404 para erro
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=36366)

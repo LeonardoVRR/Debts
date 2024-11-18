@@ -8,6 +8,18 @@
     android:background="@drawable/itemlist_style"
     android:paddingBottom="15dp">
 
+    <ImageButton
+        android:id="@+id/btn_concluirMeta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="16dp"
+        android:background="#00FFFFFF"
+        android:src="@drawable/baseline_fact_check_24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txt_dtCriacaoMeta"
+        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
     <TextView
         android:id="@+id/txt_id_Meta"
         android:layout_width="wrap_content"

@@ -534,16 +534,12 @@ class Flask_Consultar_MySQL(private val context: Context) {
 
 //--------------------------------------------------------------------------------------------------------------------------------//
 
-    fun atualizarMeta(IDusuario: Int, IdMeta: Int, metas_concluidas: List<Boolean>, progresso_meta: Float): String {
-        var resultado = ""
-
-        val metas_concluidasJSON = Gson().toJson(metas_concluidas)
+    fun atualizarMeta(IDusuario: Int, IdMeta: Int): MutableMap<String, String> {
+        var resultado = mutableMapOf<String, String>()
 
         val jsonRequest = """
         {
             "id_meta": $IdMeta,
-            "metas_concluidas": $metas_concluidasJSON,
-            "progresso_meta": $progresso_meta,
             "id": $IDusuario
         }
     """.trimIndent()
@@ -559,13 +555,15 @@ class Flask_Consultar_MySQL(private val context: Context) {
             val jsonObject = JSONObject(jsonResponse)
 
             // Extraindo o valor da chave "message"
-            val atualizarMetaResponse = jsonObject.getString("message")
+            val atualizarMetaResponse = jsonObject.getString("status")
+            val hr_conclusaoMeta = jsonObject.getString("hr_conclusaoMeta")
 
             // Verificando a mensagem da resposta
-            if (atualizarMetaResponse == "Meta MySQL atualizada") {
-                resultado = "Metas atualizadas com sucesso."
+            if (atualizarMetaResponse == "Meta MySQL atualizada com sucesso.") {
+                resultado.put("status", "Metas atualizadas com sucesso.")
+                resultado.put("hr_conclusaoMeta", hr_conclusaoMeta)
             } else {
-                resultado = "Não existem metas para atualizar."
+                resultado.put("status", "Não há metas para atualizar")
             }
 
             Log.d("RESPOSTA FLASK", "$atualizarMetaResponse - $resultado")

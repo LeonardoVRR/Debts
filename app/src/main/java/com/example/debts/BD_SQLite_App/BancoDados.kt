@@ -1069,104 +1069,98 @@ class BancoDados(private var context: Context) {
     }
 
     //função que retorna a lista de estados da metas (lista guarda qual meta já foi concluida ou não concluida)
-    fun MetasConcluidas(IdUsuario: Int, IdMeta: String): MutableList<Boolean> {
-        var estadosMetas: MutableList<Boolean> = mutableListOf()
+    fun MetasConcluidas(IdUsuario: Int, IdMeta: String, dt_meta_conclusao: String) {
+        var bancoDados: SQLiteDatabase? = null
 
         try {
             // Abre o banco de dados existente no caminho especificado
             bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
 
-            // Consulta para obter as metas do usuário
-            val listaEstadoMetas: Cursor = bancoDados.rawQuery("SELECT metas_concluidas FROM Metas_Financeiras WHERE id_user_meta = ? AND id_meta = ?", arrayOf(IdUsuario.toString(), IdMeta))
+            // Consulta para atualizar as metas do usuário
+            val sql = "UPDATE metas SET dt_meta_conclusao = ? WHERE usuario = ? AND id_metas = ?"
 
-            if (listaEstadoMetas.moveToFirst()) {
-                val estadosMetasJSON = listaEstadoMetas.getString(listaEstadoMetas.getColumnIndexOrThrow("metas_concluidas")).toString()
+            // Executa o comando de atualização
+            bancoDados.execSQL(sql, arrayOf(dt_meta_conclusao, IdUsuario.toString(), IdMeta))
 
-                // Especifica o tipo da lista para deserialização
-                val tipoLista = object : TypeToken<List<Boolean>>() {}.type
-
-                // Converte a lista JSON resgatada do BD para o tipo "List<String>"
-                estadosMetas = Gson().fromJson(estadosMetasJSON, tipoLista)
-            }
+            // Log para sucesso (opcional)
+            Log.d("MetasConcluidas", "Meta $IdMeta do usuário $IdUsuario foi atualizada com sucesso.")
 
         } catch (e: Exception) {
+            // Exibe a mensagem de erro
             CustomToast().showCustomToast(context, "Erro Consulta Meta Concluida: ${e.message}")
             Log.e("Erro Consulta Metas Concluidas:", e.message ?: "Erro desconhecido")
         } finally {
             // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
-            if (::bancoDados.isInitialized) {
-                bancoDados.close()
-            }
-        }
-
-        return estadosMetas
-    }
-
-    fun pegarProgressoAtualMeta(IDusuario: Int, idMeta:String): Float {
-        var progressoMetaAtual: Float = 0f
-
-        try {
-            // Abre o banco de dados existente no caminho especificado
-            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
-
-            // Consulta para obter o progresso da meta do usuário
-            val progressoMetaSalvo = bancoDados.rawQuery(
-                "SELECT progresso_meta FROM Metas_Financeiras WHERE id_user_meta = ? AND id_meta = ?",
-                arrayOf(IDusuario.toString(), idMeta)
-            )
-
-            // Verifica se há resultados e extrai o valor do progresso_meta
-            if (progressoMetaSalvo.moveToFirst()) {
-                progressoMetaAtual = progressoMetaSalvo.getFloat(progressoMetaSalvo.getColumnIndexOrThrow("progresso_meta"))
-            }
-
-            // Fecha o cursor após o uso
-            progressoMetaSalvo.close()
-
-        } catch (e: Exception) {
-            CustomToast().showCustomToast(context, "Erro Consulta Prog. Meta: ${e.message}")
-            Log.e("Erro Consulta Progesso Meta:", e.message ?: "Erro desconhecido")
-        } finally {
-            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
-            if (::bancoDados.isInitialized) {
-                bancoDados.close()
-            }
-        }
-
-        return progressoMetaAtual
-    }
-
-    fun salvarEstadoMetas(IDusuario: Int, listaEstadoMetas: List<Boolean>, idMeta:String, progressoMeta: Float){
-        try {
-
-            // Abre o banco de dados existente no caminho especificado
-            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
-
-            //convertendo a lista de estados para JSON para poder salvar no banco de dados
-            val listaJSON = Gson().toJson(listaEstadoMetas)
-
-            // Cria um objeto ContentValues para usar parâmetros seguros
-            val salvarEstados = ContentValues().apply {
-                put("metas_concluidas", listaJSON)
-                put("progresso_meta", progressoMeta)
-            }
-
-            // Consulta para obter as metas do usuário
-            val query = "id_user_meta = ? AND id_meta = ?"
-            val values = arrayOf(IDusuario.toString(), idMeta)
-
-            bancoDados.update("Metas_Financeiras", salvarEstados, query, values)
-
-        } catch (e: Exception) {
-            CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")
-            Log.e("Erro Consulta Estado Meta:", e.message ?: "Erro desconhecido")
-        } finally {
-            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
-            if (::bancoDados.isInitialized) {
-                bancoDados.close()
-            }
+            bancoDados?.close()
         }
     }
+
+
+//    fun pegarProgressoAtualMeta(IDusuario: Int, idMeta:String): Float {
+//        var progressoMetaAtual: Float = 0f
+//
+//        try {
+//            // Abre o banco de dados existente no caminho especificado
+//            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+//
+//            // Consulta para obter o progresso da meta do usuário
+//            val progressoMetaSalvo = bancoDados.rawQuery(
+//                "SELECT progresso_meta FROM Metas_Financeiras WHERE id_user_meta = ? AND id_meta = ?",
+//                arrayOf(IDusuario.toString(), idMeta)
+//            )
+//
+//            // Verifica se há resultados e extrai o valor do progresso_meta
+//            if (progressoMetaSalvo.moveToFirst()) {
+//                progressoMetaAtual = progressoMetaSalvo.getFloat(progressoMetaSalvo.getColumnIndexOrThrow("progresso_meta"))
+//            }
+//
+//            // Fecha o cursor após o uso
+//            progressoMetaSalvo.close()
+//
+//        } catch (e: Exception) {
+//            CustomToast().showCustomToast(context, "Erro Consulta Prog. Meta: ${e.message}")
+//            Log.e("Erro Consulta Progesso Meta:", e.message ?: "Erro desconhecido")
+//        } finally {
+//            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+//            if (::bancoDados.isInitialized) {
+//                bancoDados.close()
+//            }
+//        }
+//
+//        return progressoMetaAtual
+//    }
+//
+//    fun salvarEstadoMetas(IDusuario: Int, listaEstadoMetas: List<Boolean>, idMeta:String, progressoMeta: Float){
+//        try {
+//
+//            // Abre o banco de dados existente no caminho especificado
+//            bancoDados = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE)
+//
+//            //convertendo a lista de estados para JSON para poder salvar no banco de dados
+//            val listaJSON = Gson().toJson(listaEstadoMetas)
+//
+//            // Cria um objeto ContentValues para usar parâmetros seguros
+//            val salvarEstados = ContentValues().apply {
+//                put("metas_concluidas", listaJSON)
+//                put("progresso_meta", progressoMeta)
+//            }
+//
+//            // Consulta para obter as metas do usuário
+//            val query = "id_user_meta = ? AND id_meta = ?"
+//            val values = arrayOf(IDusuario.toString(), idMeta)
+//
+//            bancoDados.update("Metas_Financeiras", salvarEstados, query, values)
+//
+//        } catch (e: Exception) {
+//            CustomToast().showCustomToast(context, "Erro Consulta: ${e.message}")
+//            Log.e("Erro Consulta Estado Meta:", e.message ?: "Erro desconhecido")
+//        } finally {
+//            // Garante que a conexão seja fechada mesmo se ocorrer uma exceção
+//            if (::bancoDados.isInitialized) {
+//                bancoDados.close()
+//            }
+//        }
+//    }
 
     fun salvarRendimento(tipoMovimento: String, dataRendimento: String, valorRendimento: Float, IDusuario: Int, idRendimento: Int): Boolean {
         Log.d("SALVANDO RENDIMENTO", "FUNÇÂO CHAMADA")

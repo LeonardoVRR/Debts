@@ -1,7 +1,10 @@
 package com.example.debts.lista_DebtMap
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -14,9 +17,11 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.Visibility
+import com.example.debts.API_Flask.Flask_Consultar_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts.listaMetaEstados
+import com.example.debts.ConsultaBD_MySQL.CompararListas_MySQL_SQLite
 import com.example.debts.CustomToast
 import com.example.debts.FormatarMoeda.formatarReal
 import com.example.debts.MainActivity
@@ -28,6 +33,9 @@ import com.example.debts.layout_Item_lista.MyConstraintAdapter
 import com.example.debts.layout_Item_lista.MyConstraintAdapter.MyViewHolder
 import com.example.debts.lista_DebtMap.dados_listaMeta_DebtMap
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
+import org.threeten.bp.LocalDateTime
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class adapter_DebtMap(private val items: List<dados_listaMeta_DebtMap>, private val context: Context): RecyclerView.Adapter<adapter_DebtMap.MyViewHolder>(){
 
@@ -51,7 +59,7 @@ class adapter_DebtMap(private val items: List<dados_listaMeta_DebtMap>, private 
         holder.lista_Meta_ID.text = item.idMeta
         holder.txt_perc_meta.text = formatarReal().formatarParaReal(item.perc_meta)
         holder.txt_valor_inicial.text = formatarReal().formatarParaReal(item.vlr_inicial)
-        holder.txt_meta_conclusao.text = item.dt_meta_conclusao.split(" ")[4]
+        holder.txt_meta_conclusao.text = item.dt_meta_conclusao.split(" ")[1]
 
         // Obtém os LayoutParams do ConstraintLayout
         val lyt_Item_DebtMap_Params = holder.lyt_Item_DebtMap.layoutParams
@@ -63,15 +71,67 @@ class adapter_DebtMap(private val items: List<dados_listaMeta_DebtMap>, private 
 
         if (holder.txt_meta_conclusao.text != "00:00:00") {
             holder.btn_ExcluirMeta.visibility = View.VISIBLE
+            holder.btnConcluirMeta.visibility = View.GONE
         }
 
         else {
+            holder.btnConcluirMeta.visibility = View.VISIBLE
             holder.btn_ExcluirMeta.visibility = View.GONE
         }
 
         //configurando o click do botão excluir meta
         holder.btn_ExcluirMeta.setOnClickListener {
             avisoDeletarMeta(context, holder.lista_Meta_ID.text.toString(), IDusuario).AvisoDeletarMeta()
+        }
+
+        holder.btnConcluirMeta.setOnClickListener {
+
+            var resultado = ""
+            var hr_meta_conclusao = ""
+
+            val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+            executorService.execute {
+                try {
+
+                    val statusMeta = Flask_Consultar_MySQL(context).atualizarMeta(IDusuario, holder.lista_Meta_ID.text.toString().toInt())
+
+                    Log.d("Meta Status", statusMeta["status"].toString())
+
+                    if (statusMeta["status"].toString() == "Metas atualizadas com sucesso.") {
+                        hr_meta_conclusao = statusMeta["hr_conclusaoMeta"].toString()
+                        resultado = "Metas atualizadas com sucesso."
+                    }
+
+                    else {
+                        hr_meta_conclusao = "00:00:00"
+                    }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Log.e(
+                        "Atualizar Meta",
+                        "Erro ao executar consulta: ${e.message}"
+                    )
+                } finally {
+                    // Handler para rodar na UI thread
+                    val handler = Handler(Looper.getMainLooper())
+                    handler.post {
+                        CustomToast().showCustomToast(
+                            context,
+                            resultado
+                        )
+
+                        if (resultado == "Metas atualizadas com sucesso.") {
+                            BancoDados(context).MetasConcluidas(IDusuario, holder.lista_Meta_ID.text.toString(), hr_meta_conclusao)
+
+                            // Isso faz com que a atividade atual seja destruída e recriada, essencialmente funcionando como um "refresh" completo da atividade.
+                            context as Activity
+                            context.recreate()
+                        }
+                    }
+                    executorService.shutdown()
+                }
+            }
         }
 
         //configurando o click do botão detalhes
@@ -124,6 +184,7 @@ class adapter_DebtMap(private val items: List<dados_listaMeta_DebtMap>, private 
         val txt_dtCriacaoMeta: TextView = view.findViewById(R.id.txt_dtCriacaoMeta)
         val lyt_Item_DebtMap: ConstraintLayout = view.findViewById(R.id.lyt_Item_DebtMap)
         val lista_Meta_ID: TextView = view.findViewById(R.id.txt_id_Meta)
+        val btnConcluirMeta: ImageButton = view.findViewById(R.id.btn_concluirMeta)
         val btn_ExcluirMeta: ImageButton = view.findViewById(R.id.btn_ExcluirMeta)
         val txt_valor_inicial: TextView = view.findViewById(R.id.txt_gastoInicial)
         val txt_perc_meta: TextView = view.findViewById(R.id.txt_perc_meta)

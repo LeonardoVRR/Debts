@@ -7,6 +7,6 @@ data class dados_listaMeta_DebtMap (
     val vlr_inicial: Float,
     val perc_meta: Float,
     val dt_meta_inicio:String,
-    val dt_meta_conclusao: String = "",
+    var dt_meta_conclusao: String = "",
     val ramo_meta: Int = 0
 )

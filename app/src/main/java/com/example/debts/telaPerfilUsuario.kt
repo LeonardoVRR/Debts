@@ -1,6 +1,7 @@
 package com.example.debts
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -149,7 +150,7 @@ class telaPerfilUsuario : AppCompatActivity() {
         val btn_atualizarListaCartoes: ImageButton = findViewById(R.id.btn_atualizar_listaCartoes)
 
         btn_atualizarListaCartoes.setOnClickListener {
-            CustomToast().showCustomToast(this, "Atualizando Cartões!")
+            //CustomToast().showCustomToast(this, "Atualizando Cartões!")
 
             var resultado = ""
 
@@ -191,6 +192,9 @@ class telaPerfilUsuario : AppCompatActivity() {
                         adapter.notifyDataSetChanged() // Notifica o Adapter que os dados mudaram
 
                         CustomToast().showCustomToast(this, resultado)
+
+                        // Isso faz com que a atividade atual seja destruída e recriada, essencialmente funcionando como um "refresh" completo da atividade.
+                        this.recreate()
                     }
 
                     executorService.shutdown()

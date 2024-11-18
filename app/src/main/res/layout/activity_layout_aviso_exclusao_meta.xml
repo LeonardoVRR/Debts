@@ -56,7 +56,7 @@
         android:id="@+id/btn_ConfirmarExclusaoMeta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="88dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="10dp"
         android:backgroundTint="#ff3131"
@@ -66,6 +66,8 @@
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/textView18"
+        app:layout_constraintHorizontal_bias="0.8"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txt_nomeMetaEcluir" />
 
@@ -73,7 +75,7 @@
         android:id="@+id/btn_CancelarExclusaoMeta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="88dp"
+        android:layout_marginEnd="20dp"
         android:backgroundTint="#42D547"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
@@ -82,6 +84,19 @@
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@+id/btn_ConfirmarExclusaoMeta"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.2"
+        app:layout_constraintStart_toEndOf="@+id/textView18"
         app:layout_constraintTop_toTopOf="@+id/btn_ConfirmarExclusaoMeta" />
+
+    <TextView
+        android:id="@+id/textView18"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="s"
+        android:textColor="#00000000"
+        app:layout_constraintEnd_toEndOf="@+id/textView303456"
+        app:layout_constraintStart_toStartOf="@+id/textView303456"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteY="136dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

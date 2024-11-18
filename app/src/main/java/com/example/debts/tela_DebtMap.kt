@@ -28,35 +28,35 @@ import java.util.concurrent.Executors
 
 class tela_DebtMap : AppCompatActivity() {
 
-    var resultado = ""
-
-    //manipulando data
-    var calendar = Calendar.getInstance() // Cria uma instância de Calendar
-    var diaAtual = calendar.get(Calendar.DAY_OF_MONTH) //pegando o dia do mes atual
-    val anoAtual = calendar.get(Calendar.YEAR) //pegando o ano atual
-
-    // Obtém o nome do mês atual para exibição
-    var nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, java.util.Locale.getDefault())
-
-    var dataFormatada = "${diaAtual} de ${nomeMes} de ${anoAtual}" // formata a data
-
-    val listaMetas_STR: List<String> = listOf(
-        "economizar R$ 1000,00 para uma viagem",
-        "quitar uma dívida de R$ 500,00",
-        "acumular R$ 2000,00 em fundo de emergência",
-        "investir R$ 300,00 por mês em ações",
-        "economizar R$ 1500,00 para a compra de um novo eletrônico"
-    )
-
-    val listaMetas2_STR: List<String> = listOf(
-        "pagar R$ 800,00 de despesas médicas",
-        "construir uma reserva de R$ 1200,00 para o futuro",
-        "reduzir o saldo da dívida do cartão de crédito em R$ 600,00",
-        "aumentar a poupança em R$ 1000,00 até o fim do ano",
-        "economizar R$ 700,00 para um curso de aprimoramento profissional"
-    )
-
-    var listasMetas_STR: MutableList<String> = mutableListOf()
+//    var resultado = ""
+//
+//    //manipulando data
+//    var calendar = Calendar.getInstance() // Cria uma instância de Calendar
+//    var diaAtual = calendar.get(Calendar.DAY_OF_MONTH) //pegando o dia do mes atual
+//    val anoAtual = calendar.get(Calendar.YEAR) //pegando o ano atual
+//
+//    // Obtém o nome do mês atual para exibição
+//    var nomeMes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, java.util.Locale.getDefault())
+//
+//    var dataFormatada = "${diaAtual} de ${nomeMes} de ${anoAtual}" // formata a data
+//
+//    val listaMetas_STR: List<String> = listOf(
+//        "economizar R$ 1000,00 para uma viagem",
+//        "quitar uma dívida de R$ 500,00",
+//        "acumular R$ 2000,00 em fundo de emergência",
+//        "investir R$ 300,00 por mês em ações",
+//        "economizar R$ 1500,00 para a compra de um novo eletrônico"
+//    )
+//
+//    val listaMetas2_STR: List<String> = listOf(
+//        "pagar R$ 800,00 de despesas médicas",
+//        "construir uma reserva de R$ 1200,00 para o futuro",
+//        "reduzir o saldo da dívida do cartão de crédito em R$ 600,00",
+//        "aumentar a poupança em R$ 1000,00 até o fim do ano",
+//        "economizar R$ 700,00 para um curso de aprimoramento profissional"
+//    )
+//
+//    var listasMetas_STR: MutableList<String> = mutableListOf()
 
     //chama a função para converter uma lista de metas do tipo "String" para o tipo "dados_listaMeta_Item_DebtMap"
     //val listaMetas = DadosMetasFinanceiras_Usuario_BD_Debts().converter_Lista_MetasFinanceiras(listaMetas_STR)
@@ -74,8 +74,8 @@ class tela_DebtMap : AppCompatActivity() {
             insets
         }
 
-        listasMetas_STR += listasMetas_STR
-        listasMetas_STR += listaMetas2_STR
+//        listasMetas_STR += listasMetas_STR
+//        listasMetas_STR += listaMetas2_STR
 
         val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
 
@@ -90,17 +90,17 @@ class tela_DebtMap : AppCompatActivity() {
         val listaDados = BancoDados(this).listarMetas(IDusuario)
 
         val listaMetasNovas: RecyclerView = findViewById(R.id.listaMetasNovas)
-        val listaMetasEmProgresso: RecyclerView = findViewById(R.id.lista_Items_DebtMap)
+        //val listaMetasEmProgresso: RecyclerView = findViewById(R.id.lista_Items_DebtMap)
         val listaMetasConcluidas: RecyclerView = findViewById(R.id.listaMetasConcluidas)
 
         //lista de dados dos campos metas
         val listaDadosMetasNovas: MutableList<dados_listaMeta_DebtMap> = mutableListOf()
-        val listaDadosMetasEmProgresso: MutableList<dados_listaMeta_DebtMap> = mutableListOf()
+        //val listaDadosMetasEmProgresso: MutableList<dados_listaMeta_DebtMap> = mutableListOf()
         val listaDadosMetasConcluidas: MutableList<dados_listaMeta_DebtMap> = mutableListOf()
 
         listaDados.forEach { item ->
 
-            if (item.dt_meta_conclusao.split(" ")[4] == "00:00:00") {
+            if (item.dt_meta_conclusao.split(" ")[1] == "00:00:00" || item.dt_meta_conclusao.isEmpty()) {
                 listaDadosMetasNovas.add(item)
             } else {
                 listaDadosMetasConcluidas.add(item)
@@ -138,19 +138,6 @@ class tela_DebtMap : AppCompatActivity() {
         // Crie o adaptador para o RecyclerView
         listaMetasNovas.adapter = adapterListaMetasNovas
 
-        //--------------- configurando o layout manager do listaMetasEmProgresso -----------------//
-        listaMetasEmProgresso.layoutManager = LinearLayoutManager(this)
-        listaMetasEmProgresso.setHasFixedSize(true)
-
-        //configurando o espaçamento entre os itens
-        listaMetasEmProgresso.addItemDecoration(ItemSpacingDecoration())
-
-        // Crie o adaptador para o RecyclerView
-        val adapterListaMetasEmProgresso = adapter_DebtMap(listaDadosMetasEmProgresso, this)
-
-        // Crie o adaptador para o RecyclerView
-        listaMetasEmProgresso.adapter = adapterListaMetasEmProgresso
-
         //----------- configurando o layout manager do listaMetasConcluidas ----------------------//
         listaMetasConcluidas.layoutManager = LinearLayoutManager(this)
         listaMetasConcluidas.setHasFixedSize(true)
@@ -163,6 +150,19 @@ class tela_DebtMap : AppCompatActivity() {
 
         // Crie o adaptador para o RecyclerView
         listaMetasConcluidas.adapter = adapterListaMetasConcluidas
+
+        //--------------- configurando o layout manager do listaMetasEmProgresso -----------------//
+//        listaMetasEmProgresso.layoutManager = LinearLayoutManager(this)
+//        listaMetasEmProgresso.setHasFixedSize(true)
+//
+//        //configurando o espaçamento entre os itens
+//        listaMetasEmProgresso.addItemDecoration(ItemSpacingDecoration())
+//
+//        // Crie o adaptador para o RecyclerView
+//        val adapterListaMetasEmProgresso = adapter_DebtMap(listaDadosMetasEmProgresso, this)
+//
+//        // Crie o adaptador para o RecyclerView
+//        listaMetasEmProgresso.adapter = adapterListaMetasEmProgresso
 
         //-------------------- config. botão de voltar do celular --------------------------------//
 

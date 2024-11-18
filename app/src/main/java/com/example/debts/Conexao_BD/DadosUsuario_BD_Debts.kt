@@ -78,6 +78,30 @@ class DadosUsuario_BD_Debts(private val context: Context) {
         return sharedPreferences.getString("usuarioLogado", "") ?: ""
     }
 
+    // Função para salvar o nome do usuário logado nas preferências compartilhadas.
+    fun salvarIpRede(ip: String) {
+        // Obtém o SharedPreferences para armazenar dados com o nome "UserPrefs".
+        val sharedPreferences = context.getSharedPreferences("ipv4", Context.MODE_PRIVATE)
+
+        // Obtém o editor para modificar as preferências.
+        val editor = sharedPreferences.edit()
+
+        // Salva o nome do usuário com a chave "usuarioLogado".
+        editor.putString("ip_rede_local", ip)
+
+        // Aplica as mudanças de forma assíncrona.
+        editor.apply()
+    }
+
+    // Função para recuperar o nome do usuário logado das preferências compartilhadas.
+    fun recuperarIpRede(): String {
+        // Obtém o SharedPreferences para ler dados com o nome "UserPrefs".
+        val sharedPreferences = context.getSharedPreferences("ipv4", Context.MODE_PRIVATE)
+
+        // Recupera o valor associado à chave "ip_rede_local". Retorna uma string vazia se não encontrado.
+        return sharedPreferences.getString("ip_rede_local", "") ?: ""
+    }
+
     //função para salvar a ultima vez que foi feito a consulta em uma tabela no BD
     fun setLastUpdateTimestamp_ListaMySQL(timestamp: LocalDateTime, salvarConsultaLista: String) {
 
@@ -177,11 +201,11 @@ class DadosUsuario_BD_Debts(private val context: Context) {
         return emailUsuario ?: "Email não encontrado"
     }
 
-    fun pegarListaEstadosMetas(IDusuario: Int, IDmeta: String): MutableList<Boolean> {
-
-        listaMetaEstados.estados = BancoDados(context).MetasConcluidas(IDusuario, IDmeta)
-
-        return listaMetaEstados.estados
-    }
+//    fun pegarListaEstadosMetas(IDusuario: Int, IDmeta: String): MutableList<Boolean> {
+//
+//        listaMetaEstados.estados = BancoDados(context).MetasConcluidas(IDusuario, IDmeta)
+//
+//        return listaMetaEstados.estados
+//    }
 
 }

@@ -1625,9 +1625,10 @@ def open_finance_refresh():
                 debito = float(transacao["debito"].replace(",", ".")) if transacao["debito"] else None
                 saldo = float(transacao["saldo"].replace(",", "."))
 
-                if credito is not None and debito is None:
+                if credito != "" and debito == "":
                     valor_gasto = credito
-                elif credito is None and debito is not None:
+
+                elif credito == "" and debito != "":
                     valor_gasto = debito
 
                 # Criar um dicionário representando a operação financeira

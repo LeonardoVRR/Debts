@@ -1438,15 +1438,12 @@ def open_finance_request():
         # print("Open Finance:", open_fin)
 
         if open_fin:
-            return jsonify({"Open Finance Habilitado", True}), 200
+            return jsonify({"Open Finance Habilitado": True}), 200
 
         else:
-            return jsonify({"Open Finance Habilitado", False}), 200
+            return jsonify({"Open Finance Habilitado": False}), 200
     else:
-        return jsonify({"Open Finance Habilitado", f"Erro na requisicao Open Finance Habilitado"}), 404
-
-
-
+        return jsonify({"Open Finance Habilitado": f"Erro na requisicao Open Finance Habilitado"}), 404
 
 def dt_ultima_transacao(cd_cartao):
     try:
@@ -1516,13 +1513,15 @@ def open_finance_refresh():
     valor_gasto = ""
 
     if cartao:
-        dt_ultima_transacao_cartao = jsonify(mensagem)
+        dt_ultima_transacao_cartao = mensagem
+
+        print(f"mensagem {dt_ultima_transacao_cartao}")
 
         url = "http://localhost:5001/open_finance_refresh"
         dados = {
             "cpf": cpf_usuario,
             "num_cartao": cd_cartao,
-            "dt_atualizacao": dt_ultima_transacao_cartao
+            "dt_atualizacao": str(dt_ultima_transacao_cartao)
         }
 
     # ------------------- teste da função --------------------------------------------
@@ -1626,10 +1625,9 @@ def open_finance_refresh():
                 debito = float(transacao["debito"].replace(",", ".")) if transacao["debito"] else None
                 saldo = float(transacao["saldo"].replace(",", "."))
 
-                if credito != "" and debito == "":
+                if credito is not None and debito is None:
                     valor_gasto = credito
-
-                elif credito == "" and debito != "":
+                elif credito is None and debito is not None:
                     valor_gasto = debito
 
                 # Criar um dicionário representando a operação financeira
@@ -1657,7 +1655,7 @@ def open_finance_refresh():
             return jsonify(lista_gastos), 200
 
         else:
-            return jsonify({"Erro na requisição": response.status_code})
+            return jsonify({"Erro na requisição": response.status_code}), 500
 
     else:
         return jsonify({"message": mensagem}), 404  # Código 404 para erro

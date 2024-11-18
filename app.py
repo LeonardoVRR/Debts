@@ -1510,7 +1510,7 @@ def open_finance_refresh():
     cartao, mensagem = dt_ultima_transacao(cd_cartao)
 
     lista_gastos = []
-    valor_gasto = ""
+    valor_gasto = 0
 
     if cartao:
         dt_ultima_transacao_cartao = mensagem
@@ -1524,7 +1524,57 @@ def open_finance_refresh():
             "dt_atualizacao": str(dt_ultima_transacao_cartao)
         }
 
-    # ------------------- teste da função --------------------------------------------
+        # Realizar a requisição POST e enviar os dados como JSON
+        response = requests.post(url, json=dados)
+
+        # Verificar o status da resposta e o conteúdo
+        if response.status_code == 200:
+            # Obter a resposta JSON como um dicionário
+            resposta_json = response.json()
+
+            # Acessar o campo 'error'
+            erro = resposta_json["error"]
+            print("Erro:", erro)
+
+            # Acessar o objeto 'dados'
+            dados = resposta_json["dados"]
+
+            # Percorrer cada transação usando o número do documento como chave
+            for doc_id, transacao in dados.items():
+                dt_transacao = transacao["dt_transacao"]
+                tp_transacao = transacao["tp_transacao"]
+                ds_transacao = transacao["ds_transacao"]
+
+                dt_formatada = str(dt_transacao).split(" ")[0]
+
+                # Convertendo valores de débito para float, ou atribuindo 0 caso esteja vazio
+                debito = float(transacao["debito"].replace(",", ".")) if transacao["debito"] else 0.0
+
+                # Criar um dicionário representando a operação financeira
+                item_gasto = {
+                    'id': doc_id,
+                    'descricao': ds_transacao,
+                    'tipo_movimento': tp_transacao,
+                    'valor': debito,
+                    'data': dt_formatada
+                }
+
+                # Adicionar o item à lista
+                lista_gastos.append(item_gasto)
+
+            # Ordenar a lista por data (formato ISO yyyy-mm-dd garante ordenação correta)
+            lista_gastos_ordenada = sorted(lista_gastos, key=lambda x: x['data'])
+
+            return jsonify(lista_gastos_ordenada), 200
+
+        else:
+            return jsonify({"Erro na requisição": response.status_code}), 500
+
+    else:
+        return jsonify({"message": mensagem}), 404  # Código 404 para erro
+
+
+# ------------------- teste da função --------------------------------------------
     #     response_test = {
     #         "error": "0",
     #         "dados": {
@@ -1596,70 +1646,6 @@ def open_finance_refresh():
     # else:
     #     return jsonify({"message": "Lista vazia"}), 404
     # ------------------- fim do teste da função --------------------------------------------
-
-        # Realizar a requisição POST e enviar os dados como JSON
-        response = requests.post(url, json=dados)
-
-        # Verificar o status da resposta e o conteúdo
-        if response.status_code == 200:
-            # Obter a resposta JSON como um dicionário
-            resposta_json = response.json()
-
-            # Acessar o campo 'error'
-            erro = resposta_json["error"]
-            print("Erro:", erro)
-
-            # Acessar o objeto 'dados'
-            dados = resposta_json["dados"]
-
-            # Percorrer cada transação usando o número do documento como chave
-            for doc_id, transacao in dados.items():
-                dt_transacao = transacao["dt_transacao"]
-                tp_transacao = transacao["tp_transacao"]
-                ds_transacao = transacao["ds_transacao"]
-
-                dt_formatada = str(dt_transacao).split(" ")[0]
-
-                # Convertendo valores de crédito e débito para float, ou atribuindo None caso estejam vazios
-                credito = float(transacao["credito"].replace(",", ".")) if transacao["credito"] else None
-                debito = float(transacao["debito"].replace(",", ".")) if transacao["debito"] else None
-                saldo = float(transacao["saldo"].replace(",", "."))
-
-                if credito != "" and debito == "":
-                    valor_gasto = credito
-
-                elif credito == "" and debito != "":
-                    valor_gasto = debito
-
-                # Criar um dicionário representando a operação financeira
-                item_gasto = {
-                    'id': doc_id,
-                    'descricao': ds_transacao,
-                    'tipo_movimento': tp_transacao,
-                    'valor': valor_gasto,
-                    'data': dt_formatada
-                }
-
-                # Adicionar o item à lista
-                lista_gastos.append(item_gasto)
-
-                # Exibir os dados da transação
-                # print(f"Documento: {doc_id}")
-                # print("Data da Transação:", dt_transacao)
-                # print("Tipo de Transação:", tp_transacao)
-                # print("Descrição:", ds_transacao)
-                # print("Crédito:", credito)
-                # print("Débito:", debito)
-                # print("Saldo:", saldo)
-                # print("----")
-
-            return jsonify(lista_gastos), 200
-
-        else:
-            return jsonify({"Erro na requisição": response.status_code}), 500
-
-    else:
-        return jsonify({"message": mensagem}), 404  # Código 404 para erro
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=36366)

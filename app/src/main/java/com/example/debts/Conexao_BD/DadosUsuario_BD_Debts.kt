@@ -25,7 +25,7 @@ class DadosUsuario_BD_Debts(private val context: Context) {
     }
 
     object cartaoSelecionado {
-        var numeroCartao: Int = 0
+        var numeroCartao: String = ""
     }
 
     var usuarioLogado: String = recuperarUsuarioLogado()

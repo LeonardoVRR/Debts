@@ -883,7 +883,7 @@ class Flask_Consultar_MySQL(private val context: Context) {
         return listaCartoes.toList()
     }
 
-    fun habilitado_open_finance(cpf_usuario: String, num_cartao: Int): Boolean {
+    fun habilitado_open_finance(cpf_usuario: String, num_cartao: String): Boolean {
         val jsonRequest = """
         {
             "cpf": $cpf_usuario,
@@ -928,7 +928,7 @@ class Flask_Consultar_MySQL(private val context: Context) {
         return open_finance_habilitado
     }
 
-    fun extratoCartao(num_cartao: Int, cpf: String): List<OperacaoFinanceira> {
+    fun extratoCartao(num_cartao: String, cpf: String): List<OperacaoFinanceira> {
         val listaOpFinanc = mutableListOf<OperacaoFinanceira>()
 
         val jsonRequest = """

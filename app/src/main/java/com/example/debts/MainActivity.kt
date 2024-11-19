@@ -258,38 +258,6 @@ class MainActivity : AppCompatActivity() {
         val btn_confimar_ip: Button = dialogView.findViewById(R.id.btn_confirmarIP)
         val txt_ip_rede: EditText = dialogView.findViewById(R.id.ipv4_redeLocal)
 
-        txt_ip_rede.addTextChangedListener(object : TextWatcher {
-            private var isUpdating = false
-            private val mask = "###.###.#.##"
-
-            override fun afterTextChanged(s: Editable?) {
-                if (isUpdating) return
-
-                isUpdating = true
-                val cleanString = s.toString().replace(".", "").replace("-", "")
-                val maskedString = StringBuilder()
-
-                var index = 0
-                for (char in mask) {
-                    if (index >= cleanString.length) break
-
-                    if (char == '#') {
-                        maskedString.append(cleanString[index])
-                        index++
-                    } else {
-                        maskedString.append(char)
-                    }
-                }
-
-                txt_ip_rede.setText(maskedString)
-                txt_ip_rede.setSelection(maskedString.length)
-                isUpdating = false
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
-
         val ip_atual: String = DadosUsuario_BD_Debts(this).recuperarIpRede()
 
         btn_confimar_ip.setOnClickListener {

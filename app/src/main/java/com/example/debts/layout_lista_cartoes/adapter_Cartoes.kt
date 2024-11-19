@@ -45,7 +45,7 @@ class adapter_Cartoes(private val items: List<dados_listaCartao>, private val co
         val item = items[position]
         holder.txt_dsOperadora.text = item.ds_operadora
         holder.txt_tpCartao.text = item.tp_cartao
-        holder.cd_cartao.id = item.cd_cartao
+        holder.cd_cartao.text = item.cd_cartao
 
         holder.btn_extratoCartao.setOnClickListener {
             var cartaoHabilitado: Boolean = false
@@ -60,7 +60,7 @@ class adapter_Cartoes(private val items: List<dados_listaCartao>, private val co
             executorService.execute {
                 try {
 
-                    val numeroCartao = holder.cd_cartao.id
+                    val numeroCartao = holder.cd_cartao.text.toString()
 
                     DadosUsuario_BD_Debts.cartaoSelecionado.numeroCartao = numeroCartao
 
@@ -70,7 +70,7 @@ class adapter_Cartoes(private val items: List<dados_listaCartao>, private val co
                     val cartaoHabilitado_Op_fin =
                         Flask_Consultar_MySQL(context).habilitado_open_finance(cpf_usuario, numeroCartao)
 
-                    Log.d("Open Finance Verificar", "CPF: $cpf_usuario, Num. Cartao: ${holder.cd_cartao.id}, Habilitado Open Finance: $cartaoHabilitado_Op_fin")
+                    Log.d("Open Finance Verificar", "CPF: $cpf_usuario, Num. Cartao: ${numeroCartao}, Habilitado Open Finance: $cartaoHabilitado_Op_fin")
 
                     // Verifica se há novas metas no BD MySQL
                     if (cartaoHabilitado_Op_fin) {

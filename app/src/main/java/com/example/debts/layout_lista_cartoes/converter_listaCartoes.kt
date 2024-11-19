@@ -12,7 +12,7 @@ class converter_listaCartoes {
                 dados_listaCartao(
                     cartao.descricao,
                     cartao.tipo_movimento,
-                    cartao.id
+                    cartao.id.toString()
                 )
             )
         }

@@ -1445,57 +1445,38 @@ def open_finance_request():
     else:
         return jsonify({"Open Finance Habilitado": f"Erro na requisicao Open Finance Habilitado"}), 404
 
+
 def dt_ultima_transacao(cd_cartao):
     try:
         # Conexão com o banco de dados
         with pymysql.connect(**db_config) as conn:
             with conn.cursor(pymysql.cursors.DictCursor) as cursor:
 
-                tipoCartao = "SELECT tp_credito, tp_debito FROM cartoes WHERE cd_cartao = %s"
-                cursor.execute(tipoCartao, (cd_cartao,))
+                # Consulta SQL para obter a última transação com base no código do cartão
+                ultima_transacao_query = """
+                    SELECT dt_transacao 
+                    FROM trans_conta 
+                    WHERE cd_cartao = %s 
+                    ORDER BY id_trans DESC 
+                    LIMIT 1
+                """
+                cursor.execute(ultima_transacao_query, (cd_cartao,))
+                resultadoDt_Transacao = cursor.fetchone()
 
-                resultadoCartao = cursor.fetchone()
-
-                if resultadoCartao:
-
-                    if resultadoCartao['tp_credito'] > 0 and resultadoCartao['tp_debito'] <= 0:
-
-                        ultima_transacao = "SELECT dt_transacao FROM trans_credito WHERE cd_cartao = %s ORDER BY dt_transacao DESC LIMIT 1"
-                        cursor.execute(ultima_transacao, (cd_cartao,))  # Executa a consulta para obter o CPF
-                        resultadoDt_Transacao = cursor.fetchone()  # Recupera o CPF do usuário
-
-                        if resultadoDt_Transacao:
-
-                            dt_transacao = resultadoDt_Transacao['dt_transacao']
-
-                            # Formatando a data no formato yyyy-mm-dd
-                            formatted_date = dt_transacao.strftime("%Y-%m-%d")
-
-                            return True, formatted_date
-
-                        else:
-                            return False, "erro ao obter a ultima data de transacao de credito"
-
-                    elif resultadoCartao['tp_debito'] > 0 and resultadoCartao['tp_credito'] <= 0:
-
-                        ultima_transacao = "SELECT dt_transacao FROM trans_conta WHERE cd_cartao = %s ORDER BY id_trans DESC LIMIT 1"
-                        cursor.execute(ultima_transacao, (cd_cartao,))  # Executa a consulta para obter o CPF
-                        resultadoDt_Transacao = cursor.fetchone()  # Recupera o CPF do usuário
-
-                        if resultadoDt_Transacao:
-                            dt_transacao = resultadoDt_Transacao['dt_transacao']
-
-                            return True, dt_transacao
-
-                        else:
-                            return False, "erro ao obter a ultima data de transacao de debito"
-
+                if resultadoDt_Transacao:
+                    dt_transacao = resultadoDt_Transacao['dt_transacao']
+                    print(f"Data da última transação: {dt_transacao}")
+                    return True, dt_transacao
                 else:
-                    return False, "Erro ao listar cartao"  # Caso algo não tenha sido encontrado
+                    return False, "Erro: Nenhuma transação encontrada para o cartão informado."
 
+    except pymysql.MySQLError as e:
+        # Captura erros específicos do MySQL
+        return False, f"Erro de banco de dados - dt_ultima_transacao: {str(e)}"
     except Exception as e:
-        # Em caso de erro, retorna uma mensagem com a exceção
-        return False, f"Erro ao acessar o banco de dados: {str(e)}"
+        # Captura qualquer outro erro inesperado
+        return False, f"Erro inesperado dt_ultima_transacao: {str(e)}"
+
 
 @app.route('/extrato_cartao', methods=['POST'])
 def open_finance_refresh():
@@ -1515,7 +1496,7 @@ def open_finance_refresh():
     if cartao:
         dt_ultima_transacao_cartao = mensagem
 
-        print(f"mensagem {dt_ultima_transacao_cartao}")
+    #print(f"mensagem {dt_ultima_transacao_cartao}")
 
         url = "http://localhost:5001/open_finance_refresh"
         dados = {

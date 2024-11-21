@@ -823,18 +823,26 @@ def salvar_Gasto(numCartao, dt_transacao, cnpj_transacao, parc_pgto, vlr_total):
         with pymysql.connect(**db_config) as conn:
             # Abre um cursor também com gerenciador de contexto
             with conn.cursor() as cursor:
-                # Formatar a data recebida (dd/MM/yyyy) para o formato (yyyy-MM-dd)
-                dia, mes, ano = dt_transacao.split("/")
-                dia = dia.strip()
-                mes = int(mes.strip())
-                ano = ano.strip()
+
+                if "/" in dt_transacao:
+
+                    # Formatar a data recebida (dd/MM/yyyy) para o formato (yyyy-MM-dd)
+                    dia, mes, ano = dt_transacao.split("/")
+                    dia = dia.strip()
+                    mes = int(mes.strip())
+                    ano = ano.strip()
+
+                    # Formatar a data para o formato yyyy-MM-dd
+                    mes_formatado = f"{mes:02d}"
+                    data_formatada = f"{ano}-{mes_formatado}-{dia}"
+
+                elif "-" in dt_transacao:
+                    data_formatada = dt_transacao
 
                 # Obter o nome do mês usando a biblioteca calendar
                 # nomeMes = pegar_nome_mes(mes)  # Pega o nome completo do mês (ex: Janeiro)
 
-                # Formatar a data para o formato yyyy-MM-dd
-                mes_formatado = f"{mes:02d}"
-                data_formatada = f"{ano}-{mes_formatado}-{dia}"
+
 
                 # Query para salvar um novo rendimento do usuário
                 sql = """
@@ -973,88 +981,84 @@ def listar_rendimentos():
 
 #----------------- Rota p/ listar os Gastos do Usuário ----------------------------
 
-#----------- Rota desativada -----------------------------
-# Função para listar todos os gastos de um usuário
-def lista_gastos(IDusuario):
+
+# Função para listar todos os gastos do cartão de credito de um usuário
+def lista_gastos(cd_cartao, mes, ano):
     lista_gastos = []
 
     try:
-        # Inicializa a conexão com o banco de dados
-        conn = pymysql.connect(**db_config)
+        # Inicializa a conexão com o banco de dados usando o gerenciador de contexto
+        with pymysql.connect(**db_config) as conn:
+            # Abre um cursor também com gerenciador de contexto
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
 
-        if conn.is_connected():
-            # Query para buscar os gastos do usuário
-            sql = "SELECT * FROM gastos WHERE id_user_gasto = %s ORDER BY dt_gasto ASC"
+                # Query para buscar os gastos do usuário
+                sql = "SELECT * FROM trans_credito WHERE cd_cartao = %s AND MONTH(dt_transacao) = %s AND YEAR(dt_transacao) = %s ORDER BY dt_transacao ASC"
 
-            # Preparar a instrução SQL e executar a consulta
-            cursor = conn.cursor()
-            cursor.execute(sql, (IDusuario,))
+                # Preparar a instrução SQL e executar a consulta
+                cursor.execute(sql, (cd_cartao, mes, ano))
 
-            # Obter todos os resultados da consulta
-            resultados = cursor.fetchall()
+                # Obter todos os resultados da consulta
+                resultados = cursor.fetchall()
 
-            if resultados:
+                if resultados:
 
-                # Processar os resultados da consulta
-                for row in resultados:
-                    id_gasto = row[0]
-                    nome_gasto = row[1]
-                    tipo_movimento = row[2]
-                    valor_gasto = float(row[3])
-                    data_gasto = row[4]
+                    # Processar os resultados da consulta
+                    for row in resultados:
+                        id_gasto = row["id_trans"]
+                        parcelas_pagas = row["parc_pgto"]
+                        tipo_movimento = "crédito"
+                        valor_gasto = float(row["vlr_total"])
+                        data_gasto = row["dt_transacao"]
 
-                    # Formatar o nome do gasto (você pode criar uma função similar ao FormatarNome se necessário)
-                    nome_gasto_formatado = nome_gasto.capitalize()
+                        # Formatar o nome do gasto (você pode criar uma função similar ao FormatarNome se necessário)
+                        #nome_gasto_formatado = nome_gasto.capitalize()
 
-                    # Formatar o tipo de movimento
-                    forma_pagamento_formatada = tipo_movimento.capitalize()
+                        # Formatar o tipo de movimento
+                        forma_pagamento_formatada = tipo_movimento.capitalize()
 
-                    # Formatar a data (yyyy-MM-dd) para "dia de mês de ano"
-                    dia = data_gasto.day
-                    mes = data_gasto.month
-                    ano = data_gasto.year
+                        # Formatar a data (yyyy-MM-dd) para "dia de mês de ano"
+                        dia = data_gasto.day
+                        mes = data_gasto.month
+                        ano = data_gasto.year
 
-                    # Obter o nome do mês usando a biblioteca calendar
-                    nomeMes = pegar_nome_mes(mes)  # Pega o nome completo do mês (ex: Janeiro)
+                        # Obter o nome do mês usando a biblioteca calendar
+                        nomeMes = pegar_nome_mes(mes)  # Pega o nome completo do mês (ex: Janeiro)
 
-                    # Formatar a data para "dia de mês de ano"
-                    #data_formatada = f"{ano}-{mes}-{dia}"
-                    data_formatada = data_gasto.strftime('%Y-%m-%d')
+                        # Formatar a data para "dia de mês de ano"
+                        #data_formatada = f"{ano}-{mes}-{dia}"
+                        data_formatada = data_gasto.strftime('%d/%m/%Y')
 
-                    # Formatar o valor como moeda brasileira
-                    try:
-                        valor_gasto_formatado = locale.currency(float(valor_gasto), grouping=True)
-                    except ValueError:
-                        valor_gasto_formatado = "Valor inválido"
+                        # Formatar o valor como moeda brasileira
+                        try:
+                            valor_gasto_formatado = locale.currency(float(valor_gasto), grouping=True)
+                        except ValueError:
+                            valor_gasto_formatado = "Valor inválido"
 
-                    # Criar um dicionário representando a operação financeira
-                    item_gasto = {
-                        'id': id_gasto,
-                        'descricao': nome_gasto_formatado,
-                        'tipo_movimento': forma_pagamento_formatada,
-                        'valor': valor_gasto,
-                        'data': data_formatada
-                    }
+                        # Criar um dicionário representando a operação financeira
+                        item_gasto = {
+                            'id': id_gasto,
+                            'descricao': f"Parcelas do pagamento: {parcelas_pagas}",
+                            'tipo_movimento': forma_pagamento_formatada,
+                            'valor': valor_gasto,
+                            'data': data_formatada
+                        }
 
-                    # Adicionar o item à lista
-                    lista_gastos.append(item_gasto)
+                        # Adicionar o item à lista
+                        lista_gastos.append(item_gasto)
 
-                return True, lista_gastos
+                    return True, lista_gastos
 
-            else:
-                return False, "Lista de gastos vazia. Verifique se o ID do usuário está correto."
-
-            cursor.close()
-
+                else:
+                    return False, "Lista de gastos vazia."
 
     except pymysql.MySQLError as e:
-        print(f"Erro ao realizar a consulta listar gastos: {e}")
-        return False, f"Erro ao realizar a consulta listar gastos: {e}"
+        # Captura erros específicos do MySQL
+        return False, f"Erro de banco de dados Listar Gastos: {str(e)}"
 
-    finally:
-        # Fechar a conexão
-        if conn.is_connected():
-            conn.close()
+    except Exception as e:
+        # Captura outros erros inesperados
+        return False, f"Erro inesperado Listar Gastos: {str(e)}"
 
 @app.route('/listar_gastos', methods=['POST'])
 def listar_gastos():
@@ -1062,13 +1066,15 @@ def listar_gastos():
     data = request.json
 
     # Verificar se os campos obrigatórios estão presentes
-    IDusuario = data.get('id')
+    num_cartao = data.get('cd_cartao')
+    mes = data.get('mes')
+    ano = data.get('ano')
 
-    if not IDusuario:
-        return jsonify({"message": "ID do usuário é obrigatório!"}), 400
+    if not num_cartao:
+        return jsonify({"message": "Numero do cartao e obrigatorio!"}), 400
 
     # Chamar a função para salvar o rendimento
-    listaGastos, mensagem = lista_gastos(IDusuario)
+    listaGastos, mensagem = lista_gastos(num_cartao, mes, ano)
 
     if listaGastos:
         return jsonify(mensagem), 200  # Código 200 para sucesso

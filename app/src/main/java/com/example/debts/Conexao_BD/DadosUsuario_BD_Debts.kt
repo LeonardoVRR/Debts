@@ -20,9 +20,9 @@ class DadosUsuario_BD_Debts(private val context: Context) {
         var cartoesUsuario: List<OperacaoFinanceira> = listOf()
     }
 
-    object listaMetaEstados {
-        var estados: MutableList<Boolean> = mutableListOf()
-    }
+//    object listaMetaEstados {
+//        var estados: MutableList<Boolean> = mutableListOf()
+//    }
 
     object cartaoSelecionado {
         var numeroCartao: String = ""

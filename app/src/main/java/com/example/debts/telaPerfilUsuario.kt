@@ -165,7 +165,7 @@ class telaPerfilUsuario : AppCompatActivity() {
                     //salvando a lista de cartoes
                     DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario = Flask_Consultar_MySQL(this).listCartoes(IDusuario)
 
-                    Log.d("Lista Cartoes SQLite", "${BancoDados(this).listarCartoes(IDusuario)}")
+                    Log.d("Lista Cartoes SQLite", "${BancoDados(this).listarCartoes(IDusuario, "todos")}")
                     Log.d("Lista Cartoes MySQL", "${DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario}")
 
 
@@ -183,7 +183,7 @@ class telaPerfilUsuario : AppCompatActivity() {
 
                         listaCartoesSalvos.clear()
 
-                        CompararListas_MySQL_SQLite(this).adicionarNovosCartoes(DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario, BancoDados(this).listarCartoes(IDusuario))
+                        CompararListas_MySQL_SQLite(this).adicionarNovosCartoes(DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario, BancoDados(this).listarCartoes(IDusuario, "todos"))
 
                         val novaListaCartoes = DadosFinanceiros_Usuario_BD_Debts(this, IDusuario).pegarListaCartoes().toMutableList()
 

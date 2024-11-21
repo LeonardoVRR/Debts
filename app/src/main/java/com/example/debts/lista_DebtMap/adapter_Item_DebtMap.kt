@@ -1,23 +1,23 @@
 package com.example.debts.lista_DebtMap
 
-import android.content.Context
-import android.graphics.Color
-import android.graphics.Paint
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.ImageButton
-import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.recyclerview.widget.RecyclerView
-import com.example.debts.BD_SQLite_App.BancoDados
-import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
-import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts.listaMetaEstados
-import com.example.debts.R
-import com.mikhaellopez.circularprogressbar.CircularProgressBar
+//import android.content.Context
+//import android.graphics.Color
+//import android.graphics.Paint
+//import android.util.Log
+//import android.view.LayoutInflater
+//import android.view.View
+//import android.view.ViewGroup
+//import android.widget.Button
+//import android.widget.CheckBox
+//import android.widget.ImageButton
+//import android.widget.TextView
+//import androidx.constraintlayout.widget.ConstraintLayout
+//import androidx.recyclerview.widget.RecyclerView
+//import com.example.debts.BD_SQLite_App.BancoDados
+//import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
+//import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts.listaMetaEstados
+//import com.example.debts.R
+//import com.mikhaellopez.circularprogressbar.CircularProgressBar
 
 //class adapter_Item_DebtMap(private val items: List<dados_listaMeta_Item_DebtMap> = emptyList(), var indicadorProgresso: CircularProgressBar, var txt_IndicadorProgresso: TextView, val context: Context, val lista_Meta_ID:String, val btn_ExcluirMeta: ImageButton): RecyclerView.Adapter<adapter_Item_DebtMap.MyViewHolder>() {
 //

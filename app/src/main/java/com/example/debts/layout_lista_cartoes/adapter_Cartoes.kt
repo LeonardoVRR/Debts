@@ -24,10 +24,11 @@ import com.example.debts.lista_DebtMap.adapter_DebtMap
 import com.example.debts.lista_DebtMap.adapter_DebtMap.MyViewHolder
 import com.example.debts.tela_RelatorioGastos
 import org.threeten.bp.LocalDateTime
+import java.util.Calendar
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class adapter_Cartoes(private val items: List<dados_listaCartao>, private val context: Context): RecyclerView.Adapter<adapter_Cartoes.MyViewHolder>() {
+class adapter_Cartoes(private val items: List<dados_listaCartao>, private val context: Context, private val tp_cartao_selecionado: String): RecyclerView.Adapter<adapter_Cartoes.MyViewHolder>() {
 
     private val IDusuario = DadosUsuario_BD_Debts(context).pegarIdUsuario()
 
@@ -62,6 +63,10 @@ class adapter_Cartoes(private val items: List<dados_listaCartao>, private val co
 
                     val numeroCartao = holder.cd_cartao.text.toString()
 
+                    val calendar = Calendar.getInstance() // Cria uma instância de Calendar
+                    val anoAtual = calendar.get(Calendar.YEAR) // Pegando o ano atual
+                    val mesAtual = calendar.get(Calendar.MONTH) + 1 // Pegando o mês atual (adiciona 1 pois Calendar.MONTH começa do zero)
+
                     DadosUsuario_BD_Debts.cartaoSelecionado.numeroCartao = numeroCartao
 
                     val cpf_usuario = DadosUsuario_BD_Debts(context).pegarCPFUsuario()
@@ -72,12 +77,20 @@ class adapter_Cartoes(private val items: List<dados_listaCartao>, private val co
 
                     Log.d("Open Finance Verificar", "CPF: $cpf_usuario, Num. Cartao: ${numeroCartao}, Habilitado Open Finance: $cartaoHabilitado_Op_fin")
 
-                    // Verifica se há novas metas no BD MySQL
-                    if (cartaoHabilitado_Op_fin) {
+
+                    if (cartaoHabilitado_Op_fin && tp_cartao_selecionado == "debito") {
                         cartaoHabilitado = true
 
                         DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario = Flask_Consultar_MySQL(context).extratoCartao(numeroCartao, DadosUsuario_BD_Debts(context).pegarCPFUsuario())
-                    } else {
+                    }
+
+                    else if (cartaoHabilitado_Op_fin && tp_cartao_selecionado == "credito") {
+                        cartaoHabilitado = true
+
+                        DadosUsuario_BD_Debts.listas_MySQL.gastosUsuario = Flask_Consultar_MySQL(context).extratoCartaoCredito(numeroCartao, mesAtual, anoAtual)
+                    }
+
+                    else {
                         cartaoHabilitado = false
 
                         resposta = "Cartão não habilitado no Open Finance!"

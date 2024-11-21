@@ -938,17 +938,17 @@ class Flask_Consultar_MySQL(private val context: Context) {
         }
     """.trimIndent()
 
-        Log.d("Extrato Cartao", jsonRequest)
+        Log.d("Extrato Cartao Debito", jsonRequest)
 
         try {
 
             val jsonResponse = consultarMySQL(jsonRequest, "extrato_cartao", "POST")
-            Log.d("RESPOSTA BRUTA Extrato Cartao", jsonResponse)  // Log da resposta bruta
+            Log.d("RESPOSTA BRUTA Extrato Cartao Debito", jsonResponse)  // Log da resposta bruta
 
             val json = object : TypeToken<List<OpFinanc>>() {}.type
             val OpFinancList: List<OpFinanc> = Gson().fromJson(jsonResponse, json)
 
-            Log.d("RESPOSTA BRUTA Extrato Cartao", "${OpFinancList}")  // Log da resposta bruta
+            Log.d("RESPOSTA BRUTA Extrato Cartao Debito", "${OpFinancList}")  // Log da resposta bruta
 
             OpFinancList.forEach { item ->
                 val id: Int = item.id
@@ -975,11 +975,73 @@ class Flask_Consultar_MySQL(private val context: Context) {
             }
 
         } catch (e: IOException) {
-            Log.e("ERRO Extrato Cartao", "IOException: ${e.message}")
+            Log.e("ERRO Extrato Cartao Debito", "IOException: ${e.message}")
         } catch (e: JsonSyntaxException) {
-            Log.e("ERRO Extrato Cartao", "Erro ao analisar o JSON: ${e.message}")
+            Log.e("ERRO Extrato Cartao Debito", "Erro ao analisar o JSON: ${e.message}")
         } catch (e: Exception) {
-            Log.e("ERRO Extrato Cartao", "Erro inesperado: ${e.message}")
+            Log.e("ERRO Extrato Cartao Debito", "Erro inesperado: ${e.message}")
+        }
+
+        listaOpFinanc.forEach { item ->
+            Log.d("Extrato Cartao", "${item}")
+        }
+
+        return listaOpFinanc.toList()
+    }
+
+    fun extratoCartaoCredito(num_cartao: String, mes:Int, ano:Int): List<OperacaoFinanceira> {
+        val listaOpFinanc = mutableListOf<OperacaoFinanceira>()
+
+        val jsonRequest = """
+        {
+            "cd_cartao": $num_cartao,
+            "mes": $mes,
+            "ano": $ano
+        }
+    """.trimIndent()
+
+        Log.d("Extrato Cartao Credito", jsonRequest)
+
+        try {
+
+            val jsonResponse = consultarMySQL(jsonRequest, "listar_gastos", "POST")
+            Log.d("RESPOSTA BRUTA Extrato Cartao Credito", jsonResponse)  // Log da resposta bruta
+
+            val json = object : TypeToken<List<OpFinanc>>() {}.type
+            val OpFinancList: List<OpFinanc> = Gson().fromJson(jsonResponse, json)
+
+            Log.d("RESPOSTA BRUTA Extrato Cartao Credito", "${OpFinancList}")  // Log da resposta bruta
+
+            OpFinancList.forEach { item ->
+                val id: Int = item.id
+                val descricao: String = item.descricao
+                val tipoMovimento: String = item.tipo_movimento
+                val valor = item.valor
+                val data = item.data
+
+                //formatando o nome do gasto
+                val nomeGastoFormatado = FormatarNome().formatar(descricao)
+
+                //formatando o a forma de pagamento
+                val forma_pagamento_formatada = FormatarNome().formatar(tipoMovimento)
+
+                // formatando o valor da Operação Financeira
+                val formatacaoReal = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+
+                val valorOpFinanc_Formatado = (formatacaoReal.format(valor)).toString()
+
+                val itemOpFinanc = OperacaoFinanceira(id, descricao, tipoMovimento, valorOpFinanc_Formatado, data)
+
+                listaOpFinanc += itemOpFinanc
+
+            }
+
+        } catch (e: IOException) {
+            Log.e("ERRO Extrato Cartao Credito", "IOException: ${e.message}")
+        } catch (e: JsonSyntaxException) {
+            Log.e("ERRO Extrato Cartao Credito", "Erro ao analisar o JSON: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("ERRO Extrato Cartao Credito", "Erro inesperado: ${e.message}")
         }
 
         listaOpFinanc.forEach { item ->

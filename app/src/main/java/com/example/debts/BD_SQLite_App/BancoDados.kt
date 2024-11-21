@@ -901,7 +901,11 @@ class BancoDados(private var context: Context) {
         return listaGastosMes.toList()
     }
 
-    fun listarCartoes(IdUsuario: Int): List<OperacaoFinanceira> {
+    fun listarCartoes(IdUsuario: Int, tp_cartao_selecionado: String): List<OperacaoFinanceira> {
+
+        var listaCartoesDebito: MutableList<OperacaoFinanceira> = mutableListOf()
+
+        var listaCartoesCredito: MutableList<OperacaoFinanceira> = mutableListOf()
 
         var listaCartoes: MutableList<OperacaoFinanceira> = mutableListOf()
 
@@ -938,11 +942,22 @@ class BancoDados(private var context: Context) {
                         //valor = formatarReal().formatarParaReal(saldo)
                     }
 
-
                     val itemGasto = OperacaoFinanceira(id_cartao, nomeFormatado, tp_cartao, valor, "")
 
-                    // Adiciona o item à lista de itens
                     listaCartoes += itemGasto
+
+                    // Adiciona o item à lista correspondente
+                    when {
+                        tp_cartao_selecionado.equals("credito", ignoreCase = true) && tp_cartao == "Crédito" -> {
+                            listaCartoesCredito += itemGasto
+                        }
+                        tp_cartao_selecionado.equals("debito", ignoreCase = true) && tp_cartao == "Débito" -> {
+                            listaCartoesDebito += itemGasto
+                        }
+                    }
+
+                    Log.d("CartaoProcessado", "ID: $id_cartao, Operadora: $nomeFormatado, Tipo: $tp_cartao, Valor: $valor")
+
                 } while (regatarCartoes.moveToNext()) // Continua para o próximo item
             }
 
@@ -958,7 +973,21 @@ class BancoDados(private var context: Context) {
             }
         }
 
-        return listaCartoes.toList()
+        // Retorna a lista correspondente
+        return when {
+            tp_cartao_selecionado.equals("credito", ignoreCase = true) -> {
+                Log.d("Lista Cartao Credito", "$listaCartoesCredito")
+                listaCartoesCredito
+            }
+            tp_cartao_selecionado.equals("debito", ignoreCase = true) -> {
+                Log.d("Lista Cartao Debito", "$listaCartoesDebito")
+                listaCartoesDebito
+            }
+            else -> {
+                Log.d("Lista Cartao Todos", "$listaCartoes")
+                listaCartoes
+            }
+        }
     }
 
     //função para salvar uma nova meta

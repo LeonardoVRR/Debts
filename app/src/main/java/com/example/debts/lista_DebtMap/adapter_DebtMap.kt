@@ -20,7 +20,7 @@ import androidx.transition.Visibility
 import com.example.debts.API_Flask.Flask_Consultar_MySQL
 import com.example.debts.BD_SQLite_App.BancoDados
 import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts
-import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts.listaMetaEstados
+//import com.example.debts.Conexao_BD.DadosUsuario_BD_Debts.listaMetaEstados
 import com.example.debts.ConsultaBD_MySQL.CompararListas_MySQL_SQLite
 import com.example.debts.CustomToast
 import com.example.debts.FormatarMoeda.formatarReal

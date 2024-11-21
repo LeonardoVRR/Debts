@@ -52,7 +52,7 @@ class DadosFinanceiros_Usuario_BD_Debts(private val context: Context, private va
     }
 
     fun pegarListaCartoes(): List<OperacaoFinanceira> {
-        val listaCartoes = BancoDados(context).listarCartoes(IDusuario)
+        val listaCartoes = BancoDados(context).listarCartoes(IDusuario, "todos")
 
         return listaCartoes
     }

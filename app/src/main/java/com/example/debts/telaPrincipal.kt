@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
@@ -120,7 +122,7 @@ class telaPrincipal : AppCompatActivity() {
                     Log.d("Lista Rendimentos SQLite", "${BancoDados(this).listaRendimentosMes(IDusuario)}")
                     Log.d("Lista Rendimentos MySQL", "${DadosUsuario_BD_Debts.listas_MySQL.rendimentosUsuario}")
 
-                    Log.d("Lista Cartoes SQLite", "${BancoDados(this).listarCartoes(IDusuario)}")
+                    Log.d("Lista Cartoes SQLite", "${BancoDados(this).listarCartoes(IDusuario, "todos")}")
                     Log.d("Lista Cartoes MySQL", "${DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario}")
 
 
@@ -155,7 +157,7 @@ class telaPrincipal : AppCompatActivity() {
                         //lista Rendimentos
                         CompararListas_MySQL_SQLite(this).adicionarNovosRendimentos(DadosUsuario_BD_Debts.listas_MySQL.rendimentosUsuario, BancoDados(this).listaRendimentosMes(IDusuario))
 
-                        CompararListas_MySQL_SQLite(this).adicionarNovosCartoes(DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario, BancoDados(this).listarCartoes(IDusuario))
+                        CompararListas_MySQL_SQLite(this).adicionarNovosCartoes(DadosUsuario_BD_Debts.listas_MySQL.cartoesUsuario, BancoDados(this).listarCartoes(IDusuario,"todos"))
 
                         //CustomToast().showCustomToast(this, resultado)
 
@@ -184,7 +186,7 @@ class telaPrincipal : AppCompatActivity() {
 
         val btn_RelatorioGastos: Button = findViewById(R.id.btn_RelatorioGastos)
 
-        btn_RelatorioGastos.setOnClickListener { selecionarCartao() }
+        btn_RelatorioGastos.setOnClickListener { selecionarTp_Cartao() }
 
 //        btn_RelatorioGastos.setOnClickListener {
 //            // Cria um Intent para disparar o BroadcastReceiver
@@ -235,7 +237,51 @@ class telaPrincipal : AppCompatActivity() {
     }
 
     @SuppressLint("MissingInflatedId")
-    fun selecionarCartao() {
+    fun selecionarTp_Cartao() {
+        // Inflar o layout personalizado
+        val inflater: LayoutInflater = layoutInflater
+        val dialogView = inflater.inflate(R.layout.selecionar_tipo_cartao, null)
+
+        // Constroi o dialog/pop-up com tema fullscreen
+        val builder = AlertDialog.Builder(this, R.style.TransparentDialog)
+        builder.setView(dialogView)
+
+        // Criar o dialog/pop-up
+        val dialog: AlertDialog = builder.create()
+
+        val btn_credito: ImageButton = dialogView.findViewById(R.id.btn_cartaoCredito)
+        val btn_debito: ImageButton = dialogView.findViewById(R.id.btn_cartaoDebito)
+
+        var tp_cartao_selecionado = ""
+
+        btn_debito.setOnClickListener {
+            tp_cartao_selecionado = "debito"
+            selecionarCartao(tp_cartao_selecionado)
+            dialog.dismiss()
+        }
+
+        btn_credito.setOnClickListener {
+            tp_cartao_selecionado = "credito"
+            selecionarCartao(tp_cartao_selecionado)
+            dialog.dismiss()
+        }
+
+        val btn_sairSelecioTpCartao: ImageButton = dialogView.findViewById(R.id.btn_sairSelecioTpCartao)
+
+        btn_sairSelecioTpCartao.setOnClickListener { dialog.dismiss() }
+
+        dialog.show()
+
+        // Ajustar dimensões programaticamente
+        dialog.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.9).toInt(), // Largura: 90% da tela
+            WindowManager.LayoutParams.WRAP_CONTENT               // Altura: ajusta ao conteúdo
+        )
+    }
+
+
+    @SuppressLint("MissingInflatedId")
+    fun selecionarCartao(tp_cartao_selecionado: String) {
         // Inflar o layout personalizado
         val inflater: LayoutInflater = layoutInflater
         val dialogView = inflater.inflate(R.layout.selecionar_cartao_extrato, null)
@@ -248,7 +294,7 @@ class telaPrincipal : AppCompatActivity() {
         val dialog: AlertDialog = builder.create()
 
         val IDusuario = DadosUsuario_BD_Debts(this).pegarIdUsuario()
-        val listaCartoes: List<OperacaoFinanceira> = BancoDados(this).listarCartoes(IDusuario)
+        val listaCartoes: List<OperacaoFinanceira> = BancoDados(this).listarCartoes(IDusuario, tp_cartao_selecionado)
         val listaCartao_convertida: List<dados_listaCartao> = converter_listaCartoes().listaConvertida(listaCartoes)
 
         Log.d("Lista Cartao", "$listaCartoes")
@@ -262,7 +308,7 @@ class telaPrincipal : AppCompatActivity() {
         //configurando o espaçamento entre os itens
         listaSelecionarCartoes.addItemDecoration(ItemSpacingDecoration())
 
-        val adapterListaCartoes = adapter_Cartoes(listaCartao_convertida, this)
+        val adapterListaCartoes = adapter_Cartoes(listaCartao_convertida, this, tp_cartao_selecionado)
 
         listaSelecionarCartoes.adapter = adapterListaCartoes
 

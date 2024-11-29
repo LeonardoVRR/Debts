@@ -942,7 +942,9 @@ class BancoDados(private var context: Context) {
                         //valor = formatarReal().formatarParaReal(saldo)
                     }
 
-                    val itemGasto = OperacaoFinanceira(id_cartao, nomeFormatado, tp_cartao, valor, "")
+                    val num_cartao = "Numero cartão:\n${id_cartao}"
+
+                    val itemGasto = OperacaoFinanceira(id_cartao, nomeFormatado, tp_cartao, num_cartao, "")
 
                     listaCartoes += itemGasto
 

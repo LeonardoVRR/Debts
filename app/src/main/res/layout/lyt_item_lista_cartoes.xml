@@ -22,13 +22,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:layout_marginBottom="20dp"
         android:text="TextView"
         android:textColor="#99717171"
-        android:textSize="14sp"
+        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/ds_operadora"
-        app:layout_constraintTop_toBottomOf="@+id/ds_operadora" />
+        app:layout_constraintTop_toBottomOf="@+id/cd_cartao" />
 
     <Button
         android:id="@+id/btn_extratoCartao"
@@ -46,11 +45,11 @@
         android:id="@+id/cd_cartao"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
         android:layout_marginTop="5dp"
         android:text="TextView"
-        android:textColor="#00000000"
-        android:textSize="8sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:textColor="#80000000"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@+id/ds_operadora"
+        app:layout_constraintTop_toBottomOf="@+id/ds_operadora" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

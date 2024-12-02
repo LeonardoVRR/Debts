@@ -18,8 +18,8 @@ db_config = {
     'database': 'debts2024'
 }
 
-conn = None
-cursor = None
+# conn = None
+# cursor = None
 
 #----------------- Função p/ Validar a existencia do Usuário -----------------------------------------------------------
 
@@ -154,7 +154,7 @@ def cadastraConta(nome, email, cpf, senha):
                 else:
                     # Se o email e o CPF não existirem, inserimos a nova conta
                     insert = "INSERT INTO usuario (nome_usuario, senha_usuario, email_usuario, cpf_usuario) VALUES (%s, %s, %s, %s)"
-                    cursor.execute(insert, (nomeFormatado, emailFormatado, cpf, senha))
+                    cursor.execute(insert, (nomeFormatado, senha, emailFormatado, cpf))
                     conn.commit()  # Confirmar a transação
 
                     return False, "Conta criada com sucesso"
